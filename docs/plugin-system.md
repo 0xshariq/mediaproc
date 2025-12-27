@@ -712,8 +712,8 @@ describe('Integration', () => {
 ### Support & Resources
 
 - **Documentation**: https://docs.mediaproc.dev (coming soon)
-- **Examples**: https://github.com/mediaproc/examples (coming soon)
-- **Plugin Template**: https://github.com/mediaproc/plugin-template (coming soon)
+- **Examples**: https://github.com/0xshariq/mediaproc-examples (coming soon)
+- **Plugin Template**: https://github.com/0xshariq/mediaproc-plugin-template (coming soon)
 - **Discord**: Join our community (coming soon)
 - **GitHub Discussions**: Ask questions
 
@@ -729,4 +729,4 @@ We're building a plugin marketplace where users can:
 
 ---
 
-**Ready to build your plugin?** Start with our [Plugin Template](https://github.com/mediaproc/plugin-template) (coming soon) or check out [Example Plugins](https://github.com/mediaproc/examples) (coming soon).
+**Ready to build your plugin?** Start with our [Plugin Template](https://github.com/0xshariq/mediaproc-plugin-template) (coming soon) or check out [Example Plugins](https://github.com/0xshariq/mediaproc-examples) (coming soon).

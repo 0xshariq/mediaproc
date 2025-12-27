@@ -325,6 +325,11 @@ mediaproc list
 
 Third-party plugins are welcome! See [Creating Plugins](#-creating-your-own-plugins) below.
 
+**Plugin Development Resources:**
+- 📖 [Plugin Integration Guide](docs/plugin-integration-guide.md) - Complete tutorial
+- 🏗️ [Plugin Template](https://github.com/0xshariq/mediaproc-plugin-template) - Starter template (coming soon)
+- 📚 [Example Plugins](https://github.com/0xshariq/mediaproc-examples) - Real examples (coming soon)
+
 *Coming soon: Browse community plugins at https://plugins.mediaproc.dev*
 
 ---
@@ -387,6 +392,7 @@ Comprehensive documentation is available in the [docs/](docs/) folder:
 - 📖 Full Docs: https://docs.mediaproc.dev
 - 🎓 Tutorials: https://tutorials.mediaproc.dev
 - 📦 Plugin Marketplace: https://plugins.mediaproc.dev
+- 💻 GitHub: https://github.com/0xshariq/mediaproc
 
 ---
 
@@ -827,3 +833,37 @@ It helps us grow and shows appreciation for the work!
 [⬆ Back to Top](#mediaproc)
 
 </div>
+
+---
+
+## 📖 Plugin Development
+
+### Creating Third-Party Plugins
+
+Want to extend MediaProc with your own functionality? Follow our comprehensive guide:
+
+**\ud83d\udcd8 [Plugin Integration Guide](docs/plugin-integration-guide.md)** - Complete step-by-step tutorial covering:
+- Quick start (5-minute plugin)
+- Plugin architecture explained
+- Step-by-step tutorial with real example
+- Plugin standards and requirements
+- Testing and debugging
+- Publishing to npm
+- Getting your plugin featured
+
+**Additional Resources:**
+- \ud83d\udcd6 [Plugin System Architecture](docs/plugin-system.md) - Deep dive into how plugins work
+- \ud83c\udfd7\ufe0f [Plugin Template](https://github.com/0xshariq/mediaproc-plugin-template) - Starter template (coming soon)
+- \ud83d\udcda [Example Plugins](https://github.com/0xshariq/mediaproc-examples) - Real-world examples (coming soon)
+
+### Plugin Ideas
+
+Need inspiration? Here are some plugin ideas:
+- **Filters** - Instagram-style filters, artistic effects
+- **Converters** - Specialized format conversions
+- **Social Media** - Platform-specific optimizations (Twitter, Facebook, Instagram)
+- **Analysis** - Media analysis, quality checking, metadata extraction
+- **Cloud Integration** - S3, Cloudinary, Imgur upload
+- **AI/ML** - Face detection, object recognition, style transfer
+- **Automation** - Batch processing, workflow templates
+
