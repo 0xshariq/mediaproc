@@ -1,0 +1,20 @@
+{
+  "name": "@mediaproc/metadata",
+  "version": "1.0.0",
+  "description": "Metadata processing - EXIF, GPS, codec inspection, compliance",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": { "mediaproc-metadata": "./bin/cli.js" },
+  "keywords": ["metadata", "exif", "inspection"],
+  "scripts": { "build": "tsc", "dev": "tsx src/cli.ts" },
+  "dependencies": {
+    "mediaproc": "workspace:*",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.0"
+  }
+}

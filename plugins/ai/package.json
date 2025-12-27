@@ -1,0 +1,20 @@
+{
+  "name": "@mediaproc/ai",
+  "version": "1.0.0",
+  "description": "AI-assisted media - auto-captioning, scene detection, face blur, background removal",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": { "mediaproc-ai": "./bin/cli.js" },
+  "keywords": ["ai", "ml", "computer-vision"],
+  "scripts": { "build": "tsc", "dev": "tsx src/cli.ts" },
+  "dependencies": {
+    "mediaproc": "workspace:*",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.0"
+  }
+}

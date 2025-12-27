@@ -1,0 +1,44 @@
+{
+  "name": "@mediaproc/cli",
+  "version": "0.1.0",
+  "description": "Universal media processing CLI with plugin architecture",
+  "type": "module",
+  "main": "./src/cli.js",
+  "bin": {
+    "mediaproc": "./bin/mediaproc.js"
+  },
+  "scripts": {
+    "build": "tsc && pnpm --filter '@mediaproc/*' build",
+    "clean": "rm -rf dist && pnpm --filter '@mediaproc/*' clean",
+    "dev": "tsc --watch",
+    "test": "echo \"Tests not implemented yet\"",
+    "prepare": "tsc"
+  },
+  "keywords": [
+    "media",
+    "processor",
+    "cli",
+    "image",
+    "video",
+    "audio",
+    "document",
+    "ffmpeg",
+    "sharp",
+    "plugin"
+  ],
+  "author": "0xshariq",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "execa": "^8.0.1",
+    "ora": "^7.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@mediaproc/stream",
+  "version": "1.0.0",
+  "description": "Streaming & packaging - HLS, DASH, chunking, encryption",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": { "mediaproc-stream": "./bin/cli.js" },
+  "keywords": ["hls", "dash", "streaming"],
+  "scripts": { "build": "tsc", "dev": "tsx src/cli.ts" },
+  "dependencies": {
+    "mediaproc": "workspace:*",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "fluent-ffmpeg": "^2.1.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.0"
+  }
+}

@@ -1,0 +1,51 @@
+import { Command } from 'commander';
+import chalk from 'chalk';
+import { PluginManager } from './plugin-manager.js';
+import { addCommand } from './commands/add.js';
+import { removeCommand } from './commands/remove.js';
+import { listCommand } from './commands/list.js';
+import { helpCommand } from './commands/help.js';
+import { initCommand } from './commands/init.js';
+import { configCommand } from './commands/config.js';
+import { runCommand } from './commands/run.js';
+import { validateCommand } from './commands/validate.js';
+
+const program = new Command();
+const pluginManager = new PluginManager();
+
+export async function cli(): Promise<void> {
+  program
+    .name('mediaproc')
+    .description('Modern, plugin-based media processing CLI')
+    .version('1.0.0');
+
+  // Plugin management commands
+  addCommand(program, pluginManager);
+  removeCommand(program, pluginManager);
+  listCommand(program, pluginManager);
+  helpCommand(program);
+  
+  // Project management commands
+  initCommand(program);
+  configCommand(program);
+  
+  // Utility commands
+  runCommand(program);
+  validateCommand(program);
+
+  // Load and register all installed plugins
+  try {
+    await pluginManager.loadPlugins(program);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error(chalk.red('Error loading plugins:'), errorMessage);
+  }
+
+  // Parse arguments
+  program.parse(process.argv);
+
+  // Show help if no command provided
+  if (!process.argv.slice(2).length) {
+    program.outputHelp();
+  }
+}
