@@ -19,6 +19,12 @@ export function removeCommand(program: Command, pluginManager: PluginManager): v
           ? plugin 
           : `@mediaproc/${plugin}`;
 
+        // Check if plugin is currently loaded
+        const wasLoaded = pluginManager.isPluginLoaded(pluginName);
+        if (wasLoaded) {
+          spinner.info(chalk.dim(`Plugin ${pluginName} is currently loaded`));
+        }
+
         // Uninstall using pnpm
         const removeCmd = options.global ? 'uninstall' : 'remove';
         const globalFlag = options.global ? '-g' : '';

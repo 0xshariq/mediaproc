@@ -7,7 +7,7 @@ export function validateCommand(program: Command): void {
     .description('Validate media file (check codec, format, integrity)')
     .option('--strict', 'Enable strict validation')
     .option('--format <format>', 'Expected format')
-    .action((file: string, options: { strict?: boolean; format?: string }) => {
+    .action((file: string, _options: { strict?: boolean; format?: string }) => {
       console.log(chalk.blue('✓ Validate command'));
       console.log(chalk.dim(`File: ${file}`));
       console.log(chalk.yellow('\n⚠️  Validation requires @mediaproc/metadata plugin'));

@@ -3,16 +3,25 @@
   "version": "0.1.0",
   "description": "Universal media processing CLI with plugin architecture",
   "type": "module",
-  "main": "./src/cli.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "bin": {
-    "mediaproc": "./bin/mediaproc.js"
+    "mediaproc": "./dist/cli.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "build": "tsc && pnpm --filter '@mediaproc/*' build",
-    "clean": "rm -rf dist && pnpm --filter '@mediaproc/*' clean",
+    "build": "tsc",
+    "build:all": "pnpm build && pnpm --filter '@mediaproc/*' build",
+    "clean": "rm -rf dist",
+    "clean:all": "pnpm clean && pnpm --filter '@mediaproc/*' clean",
     "dev": "tsc --watch",
     "test": "echo \"Tests not implemented yet\"",
-    "prepare": "tsc"
+    "prepublishOnly": "pnpm clean && pnpm build",
+    "prepare": "pnpm build"
   },
   "keywords": [
     "media",

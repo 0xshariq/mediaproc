@@ -2,10 +2,9 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import { execa } from 'execa';
-import { existsSync } from 'fs';
 import { join } from 'path';
-import type { PluginManager } from '../plugin-manager.js';
 import { resolvePluginPackage, PLUGIN_REGISTRY } from '../plugin-registry.js';
+import type { PluginManager } from '../plugin-manager.js';
 
 /**
  * Detect if mediaproc core is installed globally or locally
@@ -100,6 +99,23 @@ export function addCommand(program: Command, pluginManager: PluginManager): void
         
         const scope = installGlobally ? 'globally' : 'locally';
         console.log(chalk.dim(`\nInstalled ${scope} using ${packageManager}`));
+        
+        // Try to load the plugin immediately if installed locally
+        if (!installGlobally) {
+          try {
+            const loadSpinner = ora('Loading plugin...').start();
+            const loaded = await pluginManager.loadPlugin(pluginName, program);
+            if (loaded) {
+              loadSpinner.succeed(chalk.green('Plugin loaded and ready to use'));
+            } else {
+              loadSpinner.info(chalk.yellow('Plugin installed but requires restart to use'));
+            }
+          } catch (loadError) {
+            // Not critical if loading fails - user can restart CLI
+            console.log(chalk.yellow('Note: Restart the CLI to use the new plugin'));
+          }
+        }
+        
         console.log(chalk.dim(`You can now use: ${chalk.white(`mediaproc ${plugin.replace('@mediaproc/', '')} <command>`)}`));
         
         // Show example commands

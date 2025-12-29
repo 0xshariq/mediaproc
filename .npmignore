@@ -1,0 +1,33 @@
+# Documentation
+docs/
+*.md
+!README.md
+
+# Source files (we publish dist/)
+src/
+tsconfig*.json
+pnpm-workspace.yaml
+
+# Development files
+.git/
+.gitignore
+.vscode/
+node_modules/
+plugins/
+
+# Build artifacts
+*.log
+*.tsbuildinfo
+
+# Test files
+test/
+tests/
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml

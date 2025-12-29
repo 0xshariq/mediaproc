@@ -7,7 +7,7 @@ export function runCommand(program: Command): void {
     .description('Run a media processing pipeline (YAML/JSON)')
     .option('--dry-run', 'Preview pipeline without executing')
     .option('-v, --verbose', 'Verbose output')
-    .action((pipeline: string, options: { dryRun?: boolean; verbose?: boolean }) => {
+    .action((pipeline: string, _options: { dryRun?: boolean; verbose?: boolean }) => {
       console.log(chalk.blue('🔄 Run pipeline command'));
       console.log(chalk.dim(`Pipeline: ${pipeline}`));
       console.log(chalk.yellow('\n⚠️  Pipeline execution requires @mediaproc/pipeline plugin'));

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { PluginManager } from './plugin-manager.js';
@@ -49,3 +51,9 @@ export async function cli(): Promise<void> {
     program.outputHelp();
   }
 }
+
+// Run CLI if this is the main module
+cli().catch((error) => {
+  console.error(chalk.red('Fatal error:'), error);
+  process.exit(1);
+});
