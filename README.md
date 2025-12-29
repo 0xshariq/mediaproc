@@ -36,26 +36,30 @@ Media processing in modern development workflows is **fragmented and complex**:
 
 ### Current Pain Points
 
-1. **Too Many Tools** 
+1. **Too Many Tools**
+
    - FFmpeg for videos
-   - ImageMagick for images  
+   - ImageMagick for images
    - SoX for audio
    - Ghostscript for PDFs
    - Different tools for each media type
 
 2. **Inconsistent Interfaces**
+
    - Each tool has different command syntax
    - Different parameter names and formats
    - Steep learning curve for each tool
    - Hard to remember all the commands
 
 3. **Complex Workflows**
+
    - Chaining multiple tools together
    - Writing custom shell scripts
    - Managing dependencies across tools
    - Debugging is painful
 
 4. **Lack of Flexibility**
+
    - Hard to extend with custom processing
    - No plugin ecosystem
    - Difficult to integrate into CI/CD
@@ -94,15 +98,15 @@ Media processing in modern development workflows is **fragmented and complex**:
 
 ### What Makes MediaProc Different
 
-| Feature | Traditional Tools | MediaProc |
-|---------|------------------|-----------|
-| **Interface** | Different for each tool | Unified, consistent CLI |
-| **Installation** | Install 5+ separate tools | One tool, add plugins as needed |
-| **Learning Curve** | Learn each tool separately | Learn once, use everywhere |
-| **Extensibility** | Limited or none | Built-in plugin system |
-| **Performance** | Manual optimization | Auto-parallelization, streaming |
-| **Automation** | Write custom scripts | Built-in pipeline workflows |
-| **Community** | Separate ecosystems | Unified plugin marketplace |
+| Feature            | Traditional Tools          | MediaProc                       |
+| ------------------ | -------------------------- | ------------------------------- |
+| **Interface**      | Different for each tool    | Unified, consistent CLI         |
+| **Installation**   | Install 5+ separate tools  | One tool, add plugins as needed |
+| **Learning Curve** | Learn each tool separately | Learn once, use everywhere      |
+| **Extensibility**  | Limited or none            | Built-in plugin system          |
+| **Performance**    | Manual optimization        | Auto-parallelization, streaming |
+| **Automation**     | Write custom scripts       | Built-in pipeline workflows     |
+| **Community**      | Separate ecosystems        | Unified plugin marketplace      |
 
 ### How It Works
 
@@ -161,6 +165,7 @@ See [Upcoming Features](docs/upcoming-features.md) for detailed roadmap.
 ### Current Features (v0.1.0)
 
 #### Core CLI
+
 - ✅ Plugin discovery and loading
 - ✅ Smart installation (auto-detects global/local)
 - ✅ Plugin registry with short names
@@ -169,6 +174,7 @@ See [Upcoming Features](docs/upcoming-features.md) for detailed roadmap.
 - ✅ Cross-platform support
 
 #### Plugin Management
+
 - `mediaproc add <plugin>` - Install plugins
 - `mediaproc remove <plugin>` - Uninstall plugins
 - `mediaproc list` - List installed plugins
@@ -179,6 +185,7 @@ See [Upcoming Features](docs/upcoming-features.md) for detailed roadmap.
 ### Planned Features
 
 #### Image Processing (Q1 2026)
+
 - Resize, crop, rotate, flip
 - Format conversion (JPEG, PNG, WebP, AVIF, HEIF)
 - Optimization and compression
@@ -187,6 +194,7 @@ See [Upcoming Features](docs/upcoming-features.md) for detailed roadmap.
 - Batch processing
 
 #### Video Processing (Q1 2026)
+
 - Format transcoding (MP4, WebM, AVI, MKV)
 - Codec conversion (H.264, H.265, VP9, AV1)
 - Quality presets (web, mobile, high-quality)
@@ -196,6 +204,7 @@ See [Upcoming Features](docs/upcoming-features.md) for detailed roadmap.
 - Audio track management
 
 #### Audio Processing (Q1 2026)
+
 - Format conversion (MP3, AAC, FLAC, WAV, OGG)
 - Normalization and loudness adjustment
 - Trimming and splitting
@@ -204,6 +213,7 @@ See [Upcoming Features](docs/upcoming-features.md) for detailed roadmap.
 - Bitrate control
 
 #### Document Processing (Q2 2026)
+
 - PDF compression
 - Page extraction and splitting
 - OCR text extraction
@@ -212,6 +222,7 @@ See [Upcoming Features](docs/upcoming-features.md) for detailed roadmap.
 - Watermarking
 
 #### Advanced Features (Q3-Q4 2026)
+
 - Animation optimization (GIF, WebP, Lottie)
 - 3D model optimization
 - Metadata management
@@ -306,31 +317,32 @@ mediaproc list
 
 ### Official Plugins
 
-| Plugin | Commands | Status | Description |
-|--------|----------|--------|-------------|
-| **[image](plugins/image)** | 10 | 🚧 In Progress | Resize, convert, optimize, filter images |
-| **[video](plugins/video)** | 6 | 🚧 In Progress | Transcode, compress, trim, merge videos |
-| **[audio](plugins/audio)** | 5 | 🚧 In Progress | Convert, normalize, trim, merge audio |
-| **[document](plugins/document)** | 5 | 📋 Planned | Process PDFs and documents |
-| **[animation](plugins/animation)** | 2 | 📋 Planned | Optimize GIFs and animations |
-| **[3d](plugins/3d)** | 4 | 📋 Planned | Optimize 3D models |
-| **[metadata](plugins/metadata)** | 4 | 📋 Planned | Manage media metadata |
-| **[stream](plugins/stream)** | 3 | 📋 Planned | HLS/DASH packaging |
-| **[ai](plugins/ai)** | 4 | 💡 Concept | AI-powered processing |
-| **[pipeline](plugins/pipeline)** | 2 | 📋 Planned | Workflow automation |
+| Plugin                             | Commands | Status         | Description                              |
+| ---------------------------------- | -------- | -------------- | ---------------------------------------- |
+| **[image](plugins/image)**         | 10       | 🚧 In Progress | Resize, convert, optimize, filter images |
+| **[video](plugins/video)**         | 6        | 🚧 In Progress | Transcode, compress, trim, merge videos  |
+| **[audio](plugins/audio)**         | 5        | 🚧 In Progress | Convert, normalize, trim, merge audio    |
+| **[document](plugins/document)**   | 5        | 📋 Planned     | Process PDFs and documents               |
+| **[animation](plugins/animation)** | 2        | 📋 Planned     | Optimize GIFs and animations             |
+| **[3d](plugins/3d)**               | 4        | 📋 Planned     | Optimize 3D models                       |
+| **[metadata](plugins/metadata)**   | 4        | 📋 Planned     | Manage media metadata                    |
+| **[stream](plugins/stream)**       | 3        | 📋 Planned     | HLS/DASH packaging                       |
+| **[ai](plugins/ai)**               | 4        | 💡 Concept     | AI-powered processing                    |
+| **[pipeline](plugins/pipeline)**   | 2        | 📋 Planned     | Workflow automation                      |
 
-**Legend:**  ✅ Complete | 🚧 In Progress | 📋 Planned | 💡 Concept
+**Legend:** ✅ Complete | 🚧 In Progress | 📋 Planned | 💡 Concept
 
 ### Community Plugins
 
 Third-party plugins are welcome! See [Creating Plugins](#-creating-your-own-plugins) below.
 
 **Plugin Development Resources:**
+
 - 📖 [Plugin Integration Guide](docs/plugin-integration-guide.md) - Complete tutorial
 - 🏗️ [Plugin Template](https://github.com/0xshariq/mediaproc-plugin-template) - Starter template (coming soon)
 - 📚 [Example Plugins](https://github.com/0xshariq/mediaproc-examples) - Real examples (coming soon)
 
-*Coming soon: Browse community plugins at https://plugins.mediaproc.dev*
+_Coming soon: Browse community plugins at https://plugins.mediaproc.dev_
 
 ---
 
@@ -341,6 +353,7 @@ Comprehensive documentation is available in the [docs/](docs/) folder:
 ### Core Documentation
 
 - **[Plugin System](docs/plugin-system.md)** - Complete guide to the plugin architecture
+
   - How plugins work
   - Plugin discovery and loading
   - Creating plugins
@@ -350,6 +363,7 @@ Comprehensive documentation is available in the [docs/](docs/) folder:
   - Testing and publishing
 
 - **[Configuration](docs/configuration.md)** - Configure MediaProc for your workflow
+
   - Configuration file format
   - Global and project-level settings
   - Plugin-specific options
@@ -365,6 +379,7 @@ Comprehensive documentation is available in the [docs/](docs/) folder:
 ### Community Guides
 
 - **[Contributing](CONTRIBUTING.md)** - How to contribute to MediaProc
+
   - Reporting bugs
   - Suggesting features
   - Pull request guidelines
@@ -372,12 +387,14 @@ Comprehensive documentation is available in the [docs/](docs/) folder:
   - Plugin development
 
 - **[Security](SECURITY.md)** - Security policy and vulnerability reporting
+
   - Supported versions
   - Reporting vulnerabilities
   - Security best practices
   - Disclosure policy
 
 - **[Code of Conduct](CODE_OF_CONDUCT.md)** - Community guidelines
+
   - Our pledge
   - Standards and expectations
   - Enforcement
@@ -468,13 +485,13 @@ steps:
       width: 1920
       height: 1080
       fit: contain
-  
+
   - plugin: image
     command: convert
     options:
       format: webp
       quality: 85
-  
+
   - plugin: image
     command: optimize
     options:
@@ -486,7 +503,7 @@ steps:
 mediaproc run workflow.yaml --input images/ --output optimized/
 ```
 
-*Note: Most commands shown above are planned for implementation. See [Current Status](#-current-status) for what's available now.*
+_Note: Most commands shown above are planned for implementation. See [Current Status](#-current-status) for what's available now._
 
 ---
 
@@ -596,24 +613,22 @@ npm install chalk commander ora
 
 ```typescript
 // src/index.ts
-import { Command } from 'commander';
+import { Command } from "commander";
 
-export const name = 'myprocessor';
-export const version = '1.0.0';
-export const description = 'My custom processor';
+export const name = "myprocessor";
+export const version = "1.0.0";
+export const description = "My custom processor";
 
 export function register(program: Command): void {
-  const cmd = program
-    .command(name)
-    .description(description);
-  
+  const cmd = program.command(name).description(description);
+
   cmd
-    .command('process <input>')
-    .description('Process a file')
-    .option('-o, --output <path>', 'Output path')
+    .command("process <input>")
+    .description("Process a file")
+    .option("-o, --output <path>", "Output path")
     .action(async (input, options) => {
       // Your processing logic
-      console.log('Processing:', input);
+      console.log("Processing:", input);
     });
 }
 ```
@@ -635,11 +650,13 @@ npm publish
 ### Getting Listed
 
 Submit your plugin to be featured in the plugin directory:
+
 1. Publish to npm
 2. Open an issue with [Plugin Submission] tag
 3. We'll review and list it!
 
 **Full Guide:** See [docs/plugin-system.md](docs/plugin-system.md) for complete plugin development guide, including:
+
 - Naming conventions
 - Required exports and structure
 - Quality standards
@@ -651,6 +668,7 @@ Submit your plugin to be featured in the plugin directory:
 ## 🗺️ Roadmap
 
 ### Q1 2026 - Core Plugins
+
 - ✅ Complete image plugin implementation
 - ✅ Complete video plugin implementation
 - ✅ Complete audio plugin implementation
@@ -659,6 +677,7 @@ Submit your plugin to be featured in the plugin directory:
 - ✅ Beta release
 
 ### Q2 2026 - Advanced Features
+
 - ✅ Document plugin (PDF processing)
 - ✅ Animation plugin (GIF optimization)
 - ✅ Metadata plugin
@@ -666,18 +685,21 @@ Submit your plugin to be featured in the plugin directory:
 - ✅ Plugin marketplace launch
 
 ### Q3 2026 - Specialized Plugins
+
 - ✅ 3D model optimization
 - ✅ Streaming (HLS/DASH)
 - ✅ GUI wrapper (Electron)
 - ✅ VS Code extension
 
 ### Q4 2026 - AI & Future-Proof
+
 - ✅ AI-assisted features
 - ✅ Background removal
 - ✅ Auto-captioning
 - ✅ v1.0 stable release
 
 ### 2027+ - Long-Term Vision
+
 - Cloud integration (S3, CDN)
 - Serverless function support
 - Enterprise features
@@ -751,6 +773,7 @@ git push origin feature/my-feature
 ### Recognition
 
 Contributors are recognized in:
+
 - [CHANGELOG.md](CHANGELOG.md) - Release contributions
 - [GitHub Contributors](https://github.com/0xshariq/mediaproc/graphs/contributors) - Code contributions
 - Social media shoutouts
@@ -781,6 +804,7 @@ See [LICENSE](LICENSE) for full license text.
 MediaProc is built on top of amazing open-source projects:
 
 ### Core Technologies
+
 - **[Sharp](https://sharp.pixelplumbing.com/)** - High-performance image processing (libvips)
 - **[FFmpeg](https://ffmpeg.org/)** - Complete multimedia framework
 - **[Commander.js](https://github.com/tj/commander.js)** - Node.js CLI framework
@@ -789,6 +813,7 @@ MediaProc is built on top of amazing open-source projects:
 - **[Execa](https://github.com/sindresorhus/execa)** - Better child_process
 
 ### Inspiration
+
 - **FFmpeg** - The gold standard for media processing
 - **Sharp** - Blazing fast image processing
 - **ImageMagick** - Comprehensive image manipulation
@@ -843,6 +868,7 @@ It helps us grow and shows appreciation for the work!
 Want to extend MediaProc with your own functionality? Follow our comprehensive guide:
 
 **\ud83d\udcd8 [Plugin Integration Guide](docs/plugin-integration-guide.md)** - Complete step-by-step tutorial covering:
+
 - Quick start (5-minute plugin)
 - Plugin architecture explained
 - Step-by-step tutorial with real example
@@ -852,6 +878,7 @@ Want to extend MediaProc with your own functionality? Follow our comprehensive g
 - Getting your plugin featured
 
 **Additional Resources:**
+
 - \ud83d\udcd6 [Plugin System Architecture](docs/plugin-system.md) - Deep dive into how plugins work
 - \ud83c\udfd7\ufe0f [Plugin Template](https://github.com/0xshariq/mediaproc-plugin-template) - Starter template (coming soon)
 - \ud83d\udcda [Example Plugins](https://github.com/0xshariq/mediaproc-examples) - Real-world examples (coming soon)
@@ -859,6 +886,7 @@ Want to extend MediaProc with your own functionality? Follow our comprehensive g
 ### Plugin Ideas
 
 Need inspiration? Here are some plugin ideas:
+
 - **Filters** - Instagram-style filters, artistic effects
 - **Converters** - Specialized format conversions
 - **Social Media** - Platform-specific optimizations (Twitter, Facebook, Instagram)
@@ -867,3 +895,53 @@ Need inspiration? Here are some plugin ideas:
 - **AI/ML** - Face detection, object recognition, style transfer
 - **Automation** - Batch processing, workflow templates
 
+---
+
+## 📄 License
+
+MediaProc is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+### What This Means
+
+✅ **You CAN:**
+
+- Use MediaProc commercially
+- Modify the source code
+- Distribute your modifications
+- Use it privately
+- Contribute to the project
+
+⚠️ **You MUST:**
+
+- Include the original copyright notice
+- Include the license text
+- Give credit to **[@0xshariq](https://github.com/0xshariq)** (original author)
+
+❌ **We're NOT LIABLE:**
+
+- No warranty is provided
+- Authors are not liable for any damages
+
+### Attribution
+
+If you use MediaProc in your project, a mention would be appreciated:
+
+```
+Powered by MediaProc - https://github.com/0xshariq/mediaproc-cli
+Created by @0xshariq
+```
+
+---
+
+## 👥 Credits
+
+**Created and maintained by:**
+
+- **[@0xshariq](https://github.com/0xshariq)** - Original Author & Lead Developer
+
+**Contributors:**
+See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the list of amazing people who have contributed to this project.
+
+Want to be listed here? Check out our [Contributing Guide](CONTRIBUTING.md)!
+
+---

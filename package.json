@@ -35,8 +35,19 @@
     "sharp",
     "plugin"
   ],
-  "author": "0xshariq",
+  "author": {
+    "name": "0xshariq",
+    "url": "https://github.com/0xshariq"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/0xshariq/mediaproc-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/0xshariq/mediaproc-cli/issues"
+  },
+  "homepage": "https://github.com/0xshariq/mediaproc-cli#readme",
   "engines": {
     "node": ">=18.0.0"
   },
