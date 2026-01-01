@@ -350,33 +350,34 @@ All **49 commands** organized by category:
 - **dilate** - Morphological dilation (expand bright regions)
 - **erode** - Morphological erosion (expand dark regions)
 
-### 🎯 Advanced Operations
+### 🎯 Advanced Operations (6 commands)
 
-- **composite** - Layer images with blending
-- **extract** - Extract channels or regions
-- **border** - Add decorative frames
-- **clahe** - Contrast enhancement (medical imaging)
-- **convolve** - Custom kernel filters
+- **composite** - Layer images with blend modes (overlay, multiply, screen)
+- **extract** - Extract color channels (R, G, B, alpha) or regions
+- **border** - Add decorative frames with custom colors
+- **clahe** - Contrast-limited adaptive histogram equalization
+- **convolve** - Apply custom convolution kernels (sharpen, emboss, edge)
+- **boolean** - Perform boolean operations between images (AND, OR, XOR)
 
-### 🤖 Smart/AI Operations
+### 🤖 Smart/AI Operations (6 commands)
 
-- **smart-crop** - Intelligent content-aware cropping
-- **auto-enhance** - Automatic image enhancement
-- **palette** - Extract dominant color palette
+- **smart-crop** - Intelligent content-aware cropping (attention/entropy)
+- **auto-enhance** - Automatic color and contrast enhancement
+- **palette** - Extract dominant color palettes (2-256 colors)
 - **dominant-color** - Quick dominant color extraction
 - **grid** - Combine images into collage layouts
-- **batch** - Process multiple images at once
+- **batch** - Process multiple images at once with any operation
 
-### 🔧 Utility
+### 🔧 Utility (8 commands)
 
-- **convert** - Format conversion
-- **optimize** - Size optimization
-- **watermark** - Add watermarks
-- **stats** - Detailed image information
-- **split** - Split image into tiles
+- **convert** - Format conversion (JPG, PNG, WebP, AVIF, TIFF, GIF)
+- **optimize** - Size optimization (up to 70% reduction)
+- **watermark** - Add watermarks with positioning and opacity
+- **stats** - Detailed technical image statistics
+- **split** - Split image into grid tiles
 - **stack** - Stack images horizontally/vertically
-- **mirror** - Create mirror/kaleidoscope effects
-- **metadata** - View/export/remove EXIF data
+- **mirror** - Create mirror/kaleidoscope effects (horizontal, vertical, quad)
+- **metadata** - View, export, or remove EXIF data
 
 ---
 
