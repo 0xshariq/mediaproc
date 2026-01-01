@@ -42,6 +42,7 @@ output/
 .mediaproc/
 info.md
 PLUGIN_API_ANALYSIS.md
+FUTURE_IMAGE_COMMANDS.md
 
 # Website docs
 web/
