@@ -1437,7 +1437,6 @@ packages:
 
   shaka-player@4.16.12:
     resolution: {integrity: sha512-bUne2YBbpMId8tU9kPSeZWSJHKbt2t5XyH3all6OsReRrfFYP9apOgohInbaDXNd0T/S8hUgWQT+wqLKH41XJg==}
-    engines: {node: '>=18'}
 
   sharp@0.33.5:
     resolution: {integrity: sha512-haPVm1EkS9pgvHrQ/F3Xy+hgcuMV0Wm9vfIBSiwZ05k+xgb0PkBQpGsAA/oWdDobNaZTH5ppvHtzCFbnSEwHVw==}

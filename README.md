@@ -1,6 +1,6 @@
 # MediaProc
 
-> 🚧 **Under Active Development** - Planning & Architecture Phase
+> ✨ **Image Plugin Released!** - Professional image processing with 19 commands available now
 
 Universal media processing CLI with an extensible plugin architecture. One tool to process all your media - images, videos, audio, documents, and more.
 
@@ -128,33 +128,41 @@ mediaproc document compress input.pdf --quality high
 
 ## 📊 Current Status
 
-**Version**: 0.1.0 (Alpha - Planning & Development Phase)  
-**Status**: 🚧 Architecture Complete, Implementation In Progress  
-**Expected Beta**: Q2 2026  
-**Expected v1.0**: Q4 2026
+**Version**: 0.1.0 (Alpha - First Plugin Released!)  
+**Status**: ✅ Image plugin ready for production use  
+**Next Release**: Video & Audio plugins (Q1 2026)  
+**Expected v1.0**: Q2 2026
 
-### What's Ready
+### 🎉 Released & Ready to Use
+
+✅ **@mediaproc/image Plugin** - 19 professional image processing commands  
+  - Transform: resize, crop, rotate, flip, trim, extend, thumbnail  
+  - Color: modulate, gamma, tint, grayscale, negate, normalize  
+  - Effects: blur, sharpen, median  
+  - Utility: convert, optimize, watermark  
+  - Full documentation with examples
 
 ✅ **Architecture** - Plugin system designed and implemented  
 ✅ **Core CLI** - Command framework with plugin discovery  
+✅ **Built-in Plugin System** - Image plugin ships with CLI  
 ✅ **Plugin Registry** - Smart plugin management  
 ✅ **Documentation** - Comprehensive guides and standards  
-✅ **Community Guidelines** - Contributing, security, code of conduct  
-✅ **Third-Party Support** - Standards for community plugins
+✅ **Community Guidelines** - Contributing, security, code of conduct
 
-### What's In Progress
+### 🚧 In Development
 
-🚧 **Core Plugins** - Implementing image, video, audio processing  
-🚧 **Testing** - Unit and integration tests  
-🚧 **Performance** - Optimization and benchmarking  
+🚧 **Video Plugin** - Format conversion, transcoding, frame extraction  
+🚧 **Audio Plugin** - Format conversion, normalization, trimming  
+🚧 **Testing** - Comprehensive test coverage  
 🚧 **Examples** - Real-world usage examples
 
 ### What's Next
 
-📋 **Beta Release** - Feature-complete core plugins (Q2 2026)  
-📋 **Advanced Plugins** - 3D, streaming, AI features (Q3 2026)  
-📋 **Plugin Marketplace** - Community plugin directory (Q4 2026)  
-📋 **v1.0 Release** - Production-ready stable version (Q4 2026)
+📋 **Video Plugin** - Format conversion, transcoding (Q1 2026)  
+📋 **Audio Plugin** - Format conversion, normalization (Q1 2026)  
+📋 **Document Plugin** - PDF processing, OCR (Q2 2026)  
+📋 **Advanced Plugins** - 3D, streaming, AI features (Q2-Q3 2026)  
+📋 **Plugin Marketplace** - Community plugin directory (Q3 2026)
 
 See [Upcoming Features](docs/upcoming-features.md) for detailed roadmap.
 
@@ -162,11 +170,67 @@ See [Upcoming Features](docs/upcoming-features.md) for detailed roadmap.
 
 ## ✨ Features
 
+### Core Architecture
+
+#### 🎁 **Built-in Plugins** (Out of the Box)
+
+MediaProc ships with essential plugins pre-installed, giving you immediate productivity:
+
+- **@mediaproc/image** - Professional image processing (19 commands)
+  - Resize, crop, rotate, flip, convert formats
+  - Filters: blur, sharpen, tint, grayscale, median
+  - Color adjustments: modulate, gamma, normalize
+  - Utilities: thumbnail, watermark, optimize, trim, extend
+
+*More built-in plugins coming soon: video, audio, document*
+
+#### 🔌 **Add-on Plugins** (Install as Needed)
+
+Extend functionality by installing additional plugins from npm:
+
+```bash
+# Add more plugins from npm
+mediaproc add animation  # GIF, WebP, Lottie optimization
+mediaproc add 3d         # glTF, OBJ, FBX processing
+mediaproc add stream     # HLS/DASH streaming
+mediaproc add ai         # AI-powered enhancements
+```
+
+#### 💡 **Why This Architecture?**
+
+**Universal CLI Benefits:**
+- ✅ Get started instantly with built-in plugins
+- ✅ Consistent command syntax across all plugins
+- ✅ Unified plugin management (`add`, `remove`, `list`)
+- ✅ Shared configuration and settings
+- ✅ Better integration between different media types
+- ✅ One tool to learn instead of many
+
+**Standalone Plugin Benefits:**
+- ✅ Each plugin can also run independently
+- ✅ Lightweight installs (only what you need)
+- ✅ Faster startup for single-purpose usage
+- ✅ Easy to distribute and share
+
+**Example: Two Ways to Use**
+
+```bash
+# Option 1: Use with universal CLI (recommended)
+npm install -g @mediaproc/cli  # Includes @mediaproc/image built-in
+mediaproc image resize photo.jpg -w 1920
+
+# Option 2: Use plugin standalone (if you only need images)
+npm install -g @mediaproc/image
+mediaproc-image resize photo.jpg -w 1920
+```
+
 ### Current Features (v0.1.0)
 
 #### Core CLI
 
 - ✅ Plugin discovery and loading
+- ✅ Built-in plugins (ship with CLI)
+- ✅ Add-on plugins (install from npm)
 - ✅ Smart installation (auto-detects global/local)
 - ✅ Plugin registry with short names
 - ✅ Configuration management
@@ -175,25 +239,62 @@ See [Upcoming Features](docs/upcoming-features.md) for detailed roadmap.
 
 #### Plugin Management
 
-- `mediaproc add <plugin>` - Install plugins
-- `mediaproc remove <plugin>` - Uninstall plugins
-- `mediaproc list` - List installed plugins
+- `mediaproc list` - List all plugins (built-in and installed)
+- `mediaproc add <plugin>` - Install add-on plugins from npm
+- `mediaproc remove <plugin>` - Uninstall add-on plugins
 - `mediaproc plugins` - Show available plugins
 - `mediaproc init` - Initialize configuration
 - `mediaproc config` - Manage settings
 
-### Planned Features
+#### Image Processing (@mediaproc/image) ★ BUILT-IN
 
-#### Image Processing (Q1 2026)
+**19 Professional Commands Ready to Use:**
 
-- Resize, crop, rotate, flip
-- Format conversion (JPEG, PNG, WebP, AVIF, HEIF)
-- Optimization and compression
-- Filters (blur, sharpen, grayscale, sepia)
-- Watermarking with positioning
-- Batch processing
+**Transform & Resize** (7 commands)
+- `resize` - Resize with fit modes, aspect ratio control
+- `crop` - Extract rectangular regions
+- `rotate` - Any angle rotation with background control
+- `flip` - Horizontal/vertical/both mirroring
+- `trim` - Auto-remove borders
+- `extend` - Add padding/borders
+- `thumbnail` - Generate thumbnails (64px to 512px)
 
-#### Video Processing (Q1 2026)
+**Color & Tone** (6 commands)
+- `modulate` - Adjust brightness, saturation, hue
+- `gamma` - Gamma correction for midtones
+- `tint` - Apply color tint overlays
+- `grayscale` - Convert to black & white
+- `negate` - Create negative/inverted images
+- `normalize` - Auto-enhance contrast
+
+**Effects & Filters** (3 commands)
+- `blur` - Gaussian blur (0.3-1000 sigma)
+- `sharpen` - Enhance details and edges
+- `median` - Noise reduction filter
+
+**Utility** (3 commands)
+- `convert` - Format conversion (JPG, PNG, WebP, AVIF, TIFF, GIF)
+- `optimize` - Size optimization (up to 70% reduction)
+- `watermark` - Add watermarks with positioning
+
+**Format Support:**
+- Input: JPG, PNG, WebP, AVIF, TIFF, GIF, SVG, HEIF
+- Output: JPG, PNG, WebP, AVIF, TIFF, GIF
+- Modern formats: WebP (25-35% smaller), AVIF (50% smaller)
+
+**Professional Features:**
+- Quality control (1-100)
+- Dry-run mode (preview before executing)
+- Verbose logging
+- Built-in help for every command
+- Comprehensive error handling
+- File size reporting
+
+See [plugins/image/README.md](plugins/image/README.md) for complete image plugin documentation.
+
+### Planned Features (Add-on Plugins)
+
+#### Video Processing (@mediaproc/video) - Q1 2026
 
 - Format transcoding (MP4, WebM, AVI, MKV)
 - Codec conversion (H.264, H.265, VP9, AV1)
@@ -203,13 +304,16 @@ See [Upcoming Features](docs/upcoming-features.md) for detailed roadmap.
 - Video merging
 - Audio track management
 
-#### Audio Processing (Q1 2026)
+#### Audio Processing (@mediaproc/audio) - Q1 2026
 
 - Format conversion (MP3, AAC, FLAC, WAV, OGG)
 - Normalization and loudness adjustment
 - Trimming and splitting
 - Audio extraction from video
 - Multi-track merging
+- Bitrate control
+
+#### Document Processing (@mediaproc/document) - Q2 2026
 - Bitrate control
 
 #### Document Processing (Q2 2026)
@@ -250,11 +354,16 @@ See [docs/upcoming-features.md](docs/upcoming-features.md) for complete feature 
 #### From npm (when published)
 
 ```bash
-# Install globally
+# Install the universal CLI (includes built-in plugins)
 npm install -g @mediaproc/cli
 
-# Verify installation
+# Start using immediately - image plugin is built-in!
+mediaproc image resize photo.jpg -w 1920
+mediaproc image convert photo.jpg -f webp
+
+# Check version and list plugins
 mediaproc --version
+mediaproc list
 ```
 
 #### From Source (current)
@@ -267,45 +376,51 @@ cd mediaproc
 # Install dependencies
 pnpm install
 
-# Build all packages
-pnpm build
+# Build all packages (including built-in plugins)
+pnpm build:all
 
 # Link globally
-pnpm link --global
+cd plugins/image && pnpm link --global
+cd ../.. && pnpm link --global
 
 # Verify
 mediaproc --version
+mediaproc list  # Should show @mediaproc/image as built-in
 ```
 
 ### Basic Usage
 
 ```bash
-# Install your first plugin
-mediaproc add image
-
-# Process an image (when implemented)
+# Image processing (built-in - works immediately!)
 mediaproc image resize photo.jpg --width 1920 --height 1080
+mediaproc image convert photo.jpg -f webp -q 85
+mediaproc image thumbnail photo.jpg -s 300
 
-# Get help
+# Get help anytime
 mediaproc --help
 mediaproc image --help
 mediaproc image resize --help
 ```
 
-### Installing More Plugins
+### Adding More Plugins
 
 ```bash
-# Install official plugins
-mediaproc add video
-mediaproc add audio
-mediaproc add document
+# Install additional plugins from npm
+mediaproc add video    # Video processing
+mediaproc add audio    # Audio processing
+mediaproc add document # PDF processing
 
-# Install third-party plugins
-npm install -g mediaproc-plugin-instagram
-mediaproc instagram filter photo.jpg --style vintage
+# View all plugins (built-in + installed)
+mediaproc list
 
-# View all available plugins
-mediaproc plugins
+# Example output:
+# 📦 Built-in Plugins:
+# ✓ image ★ BUILT-IN
+#
+# 🔌 User-Installed:
+# ✓ video
+# ✓ audio
+```
 
 # View installed plugins
 mediaproc list
@@ -375,6 +490,16 @@ Comprehensive documentation is available in the [docs/](docs/) folder:
   - Phase 2: Advanced plugins (Q3 2026)
   - Phase 3: AI & future-proof (Q4 2026)
   - Long-term vision (2027+)
+
+### Plugin Documentation
+
+- **[Image Plugin Documentation](docs/image-plugin-documentation.md)** - Complete reference for the Image Plugin
+  - All 40 commands documented
+  - Usage examples and workflows
+  - Best practices and tips
+  - Social media presets
+  - Real-world use cases
+  - Troubleshooting guide
 
 ### Community Guides
 
@@ -503,7 +628,7 @@ steps:
 mediaproc run workflow.yaml --input images/ --output optimized/
 ```
 
-_Note: Most commands shown above are planned for implementation. See [Current Status](#-current-status) for what's available now._
+_Note: Image processing commands are **fully implemented and ready to use**! Video, audio, and other commands are planned for Q1-Q2 2026. See [Current Status](#-current-status) for details._
 
 ---
 

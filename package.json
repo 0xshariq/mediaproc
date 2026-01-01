@@ -56,17 +56,17 @@
     "@gltf-transform/core": "^4.2.1",
     "@lottiefiles/dotlottie-web": "^0.60.0",
     "chalk": "^5.3.0",
-    "commander": "^11.1.0",
-    "execa": "^8.0.1",
+    "commander": "^14.0.2",
+    "execa": "^9.6.1",
     "ghostscript4js": "^3.2.3",
     "node-poppler": "^9.0.1",
-    "ora": "^7.0.1",
+    "ora": "^9.0.0",
     "shaka-player": "^4.16.12",
-    "sharp": "^0.33.5",
+    "sharp": "^0.34.5",
     "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.10.4",
+    "@types/node": "^25.0.3",
     "typescript": "^5.3.3"
   }
 }

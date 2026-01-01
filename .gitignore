@@ -42,3 +42,6 @@ output/
 .mediaproc/
 info.md
 PLUGIN_API_ANALYSIS.md
+
+# Website docs
+web/
