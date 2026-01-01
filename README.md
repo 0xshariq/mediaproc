@@ -1,6 +1,6 @@
 # MediaProc
 
-> ✨ **Image Plugin Released!** - Professional image processing with 19 commands available now
+> ✨ **v0.2.0 Released!** - Image Plugin with 40 commands + Universal convert/info/optimize commands
 
 Universal media processing CLI with an extensible plugin architecture. One tool to process all your media - images, videos, audio, documents, and more.
 
@@ -128,19 +128,26 @@ mediaproc document compress input.pdf --quality high
 
 ## 📊 Current Status
 
-**Version**: 0.1.0 (Alpha - First Plugin Released!)  
-**Status**: ✅ Image plugin ready for production use  
+**Version**: 0.2.0 (Alpha - Feature Complete Image Plugin!)  
+**Status**: ✅ Image plugin with 40 commands + Universal CLI commands  
 **Next Release**: Video & Audio plugins (Q1 2026)  
 **Expected v1.0**: Q2 2026
 
-### 🎉 Released & Ready to Use
+### 🎉 Released & Ready to Use (v0.2.0)
 
-✅ **@mediaproc/image Plugin** - 19 professional image processing commands  
-  - Transform: resize, crop, rotate, flip, trim, extend, thumbnail  
-  - Color: modulate, gamma, tint, grayscale, negate, normalize  
-  - Effects: blur, sharpen, median  
-  - Utility: convert, optimize, watermark  
-  - Full documentation with examples
+✅ **Universal CLI Commands** - Work out-of-the-box without plugins
+  - `convert` - Auto-detect file type and suggest conversion
+  - `info` - Show file details for any media type  
+  - `optimize` - Auto-optimize with intelligent strategy suggestions
+
+✅ **@mediaproc/image Plugin** - 40 professional image processing commands
+  - **Transform** (7): resize, crop, rotate, flip, trim, extend, thumbnail
+  - **Color & Tone** (6): modulate, gamma, tint, grayscale, negate, normalize
+  - **Effects & Filters** (6): blur, sharpen, median, sepia, vignette, pixelate
+  - **Advanced Operations** (5): composite, extract, border, clahe, convolve
+  - **Smart/AI Operations** (6): smart-crop, auto-enhance, palette, dominant-color, grid, batch
+  - **Utility** (10): convert, optimize, compress, watermark, info, stats, split, stack, mirror, metadata
+  - Full documentation with 200+ examples and 10 real-world workflows
 
 ✅ **Architecture** - Plugin system designed and implemented  
 ✅ **Core CLI** - Command framework with plugin discovery  
@@ -182,7 +189,7 @@ MediaProc ships with essential plugins pre-installed, giving you immediate produ
   - Color adjustments: modulate, gamma, normalize
   - Utilities: thumbnail, watermark, optimize, trim, extend
 
-*More built-in plugins coming soon: video, audio, document*
+_More built-in plugins coming soon: video, audio, document_
 
 #### 🔌 **Add-on Plugins** (Install as Needed)
 
@@ -199,6 +206,7 @@ mediaproc add ai         # AI-powered enhancements
 #### 💡 **Why This Architecture?**
 
 **Universal CLI Benefits:**
+
 - ✅ Get started instantly with built-in plugins
 - ✅ Consistent command syntax across all plugins
 - ✅ Unified plugin management (`add`, `remove`, `list`)
@@ -207,6 +215,7 @@ mediaproc add ai         # AI-powered enhancements
 - ✅ One tool to learn instead of many
 
 **Standalone Plugin Benefits:**
+
 - ✅ Each plugin can also run independently
 - ✅ Lightweight installs (only what you need)
 - ✅ Faster startup for single-purpose usage
@@ -246,43 +255,82 @@ mediaproc-image resize photo.jpg -w 1920
 - `mediaproc init` - Initialize configuration
 - `mediaproc config` - Manage settings
 
+#### Universal Commands (Work Without Plugins)
+
+- `mediaproc convert <input> <output>` - Auto-detect and convert any media file
+- `mediaproc info <file>` - Show file information for any media type
+- `mediaproc optimize <file>` - Suggest optimization strategy based on file type
+
 #### Image Processing (@mediaproc/image) ★ BUILT-IN
 
-**19 Professional Commands Ready to Use:**
+**40 Professional Commands Ready to Use:**
 
 **Transform & Resize** (7 commands)
-- `resize` - Resize with fit modes, aspect ratio control
-- `crop` - Extract rectangular regions
+
+- `resize` - Resize with fit modes (cover, contain, fill, inside, outside)
+- `crop` - Extract rectangular regions with positioning
 - `rotate` - Any angle rotation with background control
 - `flip` - Horizontal/vertical/both mirroring
-- `trim` - Auto-remove borders
-- `extend` - Add padding/borders
+- `trim` - Auto-remove uniform borders
+- `extend` - Add padding/borders with custom colors
 - `thumbnail` - Generate thumbnails (64px to 512px)
 
 **Color & Tone** (6 commands)
+
 - `modulate` - Adjust brightness, saturation, hue
-- `gamma` - Gamma correction for midtones
-- `tint` - Apply color tint overlays
+- `gamma` - Gamma correction for midtones (0.1-3.0)
+- `tint` - Apply color tint overlays (RGB hex)
 - `grayscale` - Convert to black & white
 - `negate` - Create negative/inverted images
-- `normalize` - Auto-enhance contrast
+- `normalize` - Auto-enhance contrast and brightness
 
-**Effects & Filters** (3 commands)
+**Effects & Filters** (6 commands)
+
 - `blur` - Gaussian blur (0.3-1000 sigma)
-- `sharpen` - Enhance details and edges
-- `median` - Noise reduction filter
+- `sharpen` - Enhance details and edges (flat/jagged modes)
+- `median` - Noise reduction filter (1-50 size)
+- `sepia` - Vintage sepia tone effect
+- `vignette` - Darken edges for artistic focus
+- `pixelate` - Retro pixel art effect (custom pixel size)
 
-**Utility** (3 commands)
+**Advanced Operations** (5 commands)
+
+- `composite` - Layer images with blend modes (overlay, multiply, screen)
+- `extract` - Extract color channels (red, green, blue, alpha)
+- `border` - Add decorative frames with custom colors
+- `clahe` - Contrast-limited adaptive histogram equalization
+- `convolve` - Apply custom convolution kernels (sharpen, emboss, edge)
+
+**Smart/AI Operations** (6 commands)
+
+- `smart-crop` - Intelligent content-aware cropping (attention/entropy)
+- `auto-enhance` - Automatic color and contrast enhancement
+- `palette` - Extract dominant color palettes (2-256 colors)
+- `dominant-color` - Quick dominant color extraction
+- `grid` - Combine images into collage layouts
+- `batch` - Process multiple images at once with any operation
+
+**Utility** (10 commands)
+
 - `convert` - Format conversion (JPG, PNG, WebP, AVIF, TIFF, GIF)
-- `optimize` - Size optimization (up to 70% reduction)
-- `watermark` - Add watermarks with positioning
+- `optimize` - Size optimization (up to 70% reduction, lossless/lossy)
+- `compress` - Advanced compression with quality control
+- `watermark` - Add watermarks with positioning and opacity
+- `info` - Display detailed image metadata
+- `stats` - Technical image statistics (channels, depth, color space)
+- `split` - Split image into grid tiles
+- `stack` - Stack images horizontally/vertically
+- `mirror` - Create mirror/kaleidoscope effects
+- `metadata` - View, export, or remove EXIF data
 
 **Format Support:**
+
 - Input: JPG, PNG, WebP, AVIF, TIFF, GIF, SVG, HEIF
 - Output: JPG, PNG, WebP, AVIF, TIFF, GIF
 - Modern formats: WebP (25-35% smaller), AVIF (50% smaller)
 
 **Professional Features:**
+
 - Quality control (1-100)
 - Dry-run mode (preview before executing)
 - Verbose logging
@@ -314,6 +362,7 @@ See [plugins/image/README.md](plugins/image/README.md) for complete image plugin
 - Bitrate control
 
 #### Document Processing (@mediaproc/document) - Q2 2026
+
 - Bitrate control
 
 #### Document Processing (Q2 2026)
@@ -423,8 +472,10 @@ mediaproc list
 ```
 
 # View installed plugins
+
 mediaproc list
-```
+
+````
 
 ---
 
@@ -559,7 +610,7 @@ mediaproc image watermark photo.jpg --text "© 2025" --position bottom-right
 for img in photos/*.jpg; do
   mediaproc image convert "$img" --format webp --quality 85
 done
-```
+````
 
 ### Video Processing
 

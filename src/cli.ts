@@ -2,6 +2,9 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
+import { readFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { PluginManager } from './plugin-manager.js';
 import { addCommand } from './commands/add.js';
 import { removeCommand } from './commands/remove.js';
@@ -11,15 +14,23 @@ import { initCommand } from './commands/init.js';
 import { configCommand } from './commands/config.js';
 import { runCommand } from './commands/run.js';
 import { validateCommand } from './commands/validate.js';
+import { convertCommand } from './commands/convert.js';
+import { infoCommand } from './commands/info.js';
+import { optimizeCommand } from './commands/optimize.js';
 
 const program = new Command();
 const pluginManager = new PluginManager();
+
+// Get version from package.json
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
 
 export async function cli(): Promise<void> {
   program
     .name('mediaproc')
     .description('Modern, plugin-based media processing CLI')
-    .version('1.0.0');
+    .version(packageJson.version);
 
   // Plugin management commands
   addCommand(program, pluginManager);
@@ -30,6 +41,11 @@ export async function cli(): Promise<void> {
   // Project management commands
   initCommand(program);
   configCommand(program);
+  
+  // Universal commands (work without plugins)
+  convertCommand(program);
+  infoCommand(program);
+  optimizeCommand(program);
   
   // Utility commands
   runCommand(program);

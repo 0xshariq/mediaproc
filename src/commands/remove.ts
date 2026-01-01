@@ -25,11 +25,26 @@ export function removeCommand(program: Command, pluginManager: PluginManager): v
           spinner.info(chalk.dim(`Plugin ${pluginName} is currently loaded`));
         }
 
-        // Uninstall using pnpm
-        const removeCmd = options.global ? 'uninstall' : 'remove';
-        const globalFlag = options.global ? '-g' : '';
+        // Determine package manager (prefer pnpm, fallback to npm)
+        let packageManager = 'pnpm';
+        try {
+          await execa('pnpm', ['--version'], { stdio: 'pipe' });
+        } catch {
+          packageManager = 'npm';
+        }
+
+        // Build uninstall command
+        const args: string[] = [];
+        if (packageManager === 'pnpm') {
+          args.push(options.global ? 'uninstall' : 'remove');
+          if (options.global) args.push('-g');
+        } else {
+          args.push('uninstall');
+          if (options.global) args.push('-g');
+        }
+        args.push(pluginName);
         
-        await execa('pnpm', [removeCmd, globalFlag, pluginName].filter(Boolean), {
+        await execa(packageManager, args, {
           stdio: 'pipe'
         });
 
