@@ -183,7 +183,7 @@ See [Upcoming Features](docs/upcoming-features.md) for detailed roadmap.
 
 MediaProc ships with essential plugins pre-installed, giving you immediate productivity:
 
-- **@mediaproc/image** - Professional image processing (19 commands)
+- **@mediaproc/image** - Professional image processing (40 commands)
   - Resize, crop, rotate, flip, convert formats
   - Filters: blur, sharpen, tint, grayscale, median
   - Color adjustments: modulate, gamma, normalize
