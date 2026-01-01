@@ -1,6 +1,7 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
 import type { ResizeOptions } from '../types.js';
+import { sharpInstance } from '../utils/sharp.js';
 
 export function resizeCommand(imageCmd: Command): void {
   imageCmd
@@ -26,3 +27,6 @@ export function resizeCommand(imageCmd: Command): void {
       // await sharp(input).resize(options.width, options.height).toFile(output);
     });
 }
+sharpInstance.resize({
+  
+})

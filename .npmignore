@@ -13,6 +13,8 @@ pnpm-workspace.yaml
 .gitignore
 .vscode/
 node_modules/
+
+# Plugins directory (will publish separately)
 plugins/
 
 # Build artifacts
