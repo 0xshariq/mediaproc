@@ -20,6 +20,7 @@ Universal media processing CLI with an extensible plugin architecture. One tool 
 - [Features](#-features)
 - [Quick Start](#-quick-start)
 - [Available Plugins](#-available-plugins)
+- [Plugin Terminology](#-plugin-terminology)
 - [Documentation](#-documentation)
 - [Examples](#-examples)
 - [Development](#-development)
@@ -148,9 +149,11 @@ mediaproc document compress input.pdf --quality high
 - `mediaproc info <file>` - Show file information for any media type
 - `mediaproc optimize <file>` - Suggest optimization strategy based on file type
 
-### Image Processing (@mediaproc/image) ★ BUILT-IN
+### Image Processing (@mediaproc/image)
 
-**49 Professional Commands Ready to Use:**
+**Install:** `mediaproc add image`
+
+**49 Professional Commands Available:**
 
 **Transform & Resize** (10 commands)
 
@@ -599,11 +602,72 @@ _Coming soon: Browse community plugins at https://plugins.mediaproc.dev_
 
 ---
 
-## 📚 Documentation
+## � Plugin Terminology
+
+### Important: No Plugins Are Pre-Installed!
+
+MediaProc CLI is lightweight and contains **NO plugin code**. All plugins must be explicitly installed.
+
+### Plugin Types
+
+1. **Official Plugins** (`@mediaproc/*`) - Maintained by MediaProc team
+   - Example: `@mediaproc/image`, `@mediaproc/video`
+   - High quality, regularly updated
+   - Install: `mediaproc add image`
+
+2. **Community Plugins** (`mediaproc-*`) - Community-maintained
+   - Example: `mediaproc-custom-filter`
+   - Follow community standards
+   - Install: `mediaproc add mediaproc-custom-filter`
+
+3. **Third-Party Plugins** - Any compatible npm package
+   - No naming convention required
+   - Must implement MediaProc plugin interface
+   - Install: `mediaproc add package-name`
+
+### Quick Reference
+
+```bash
+# Install CLI (no plugins included)
+npm install -g @mediaproc/cli
+
+# Browse available plugins
+mediaproc plugins
+
+# Install official plugins
+mediaproc add image    # Image processing
+mediaproc add video    # Video processing
+
+# Check what's installed
+mediaproc list
+
+# Use installed plugins
+mediaproc image resize photo.jpg -w 800
+```
+
+**📘 Full Guide:** See [Plugin Terminology Guide](docs/plugin-terminology.md) for detailed explanations.
+
+---
+
+## �📚 Documentation
 
 Comprehensive documentation is available in the [docs/](docs/) folder:
 
 ### Core Documentation
+
+- **[Plugin Terminology](docs/plugin-terminology.md)** - **START HERE!** Clear definitions and common misconceptions
+
+  - Official vs Community vs Third-Party plugins
+  - No plugins are pre-installed (explained)
+  - Installation workflow and plugin states
+  - Best practices and FAQ
+
+- **[Plugin Architecture](docs/plugin-architecture.md)** - How the plugin system works
+
+  - On-demand loading architecture
+  - Plugin discovery and lifecycle
+  - Why no auto-loading
+  - Technical implementation
 
 - **[Plugin System](docs/plugin-system.md)** - Complete guide to the plugin architecture
 

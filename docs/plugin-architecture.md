@@ -1,97 +1,142 @@
-# Plugin Architecture: Built-in vs Add-on
+# Plugin Architecture
 
 ## Overview
 
-MediaProc uses a hybrid plugin architecture that provides the best of both worlds: **immediate functionality** with built-in plugins and **extensibility** through add-on plugins.
+MediaProc uses an **on-demand plugin architecture** that gives users complete control over which plugins they install. No plugins are pre-installed or bundled with the CLI.
 
 ## Architecture Summary
 
 ```
 @mediaproc/cli (Universal CLI)
-├── Built-in Plugins (ship with CLI)
-│   └── @mediaproc/image ★ (19 image processing commands)
+├── Core Commands (always available)
+│   ├── convert - Universal file conversion
+│   ├── info - File information
+│   └── optimize - Optimization suggestions
 │
-└── Add-on Plugins (install as needed)
-    ├── @mediaproc/video (install: mediaproc add video)
-    ├── @mediaproc/audio (install: mediaproc add audio)
-    ├── @mediaproc/document (install: mediaproc add document)
-    └── Third-party plugins (community-developed)
+└── Plugins (install on-demand)
+    ├── Official Plugins (@mediaproc/*)
+    │   ├── @mediaproc/image (mediaproc add image)
+    │   ├── @mediaproc/video (mediaproc add video)
+    │   ├── @mediaproc/audio (mediaproc add audio)
+    │   └── ... 7 more official plugins
+    │
+    ├── Community Plugins (mediaproc-*)
+    │   └── Any npm package starting with mediaproc-
+    │
+    └── Third-Party Plugins
+        └── Any compatible npm package
 ```
 
-## Built-in Plugins
+## Official Plugins
 
-### What Are Built-in Plugins?
+### What Are Official Plugins?
 
-Built-in plugins are **pre-installed** with the universal CLI. When users install `@mediaproc/cli`, they automatically get these plugins without any additional installation.
+Official plugins are **maintained by the MediaProc team** and published under the `@mediaproc/*` namespace. They provide professional-grade media processing capabilities.
 
-### Currently Built-in:
+### Available Official Plugins:
 
-- **@mediaproc/image** - Professional image processing with 19 commands
+- **@mediaproc/image** - Image processing (49 commands)
+- **@mediaproc/video** - Video processing
+- **@mediaproc/audio** - Audio processing
+- **@mediaproc/document** - PDF/DOCX processing
+- **@mediaproc/animation** - GIF/APNG/WebP animations
+- **@mediaproc/3d** - 3D model processing
+- **@mediaproc/stream** - HLS/DASH streaming
+- **@mediaproc/ai** - AI-powered media processing
+- **@mediaproc/metadata** - Metadata management
+- **@mediaproc/pipeline** - Workflow automation
 
-### Why Built-in?
+### Why Official Plugins?
 
-1. **Immediate Value** - Users can start working right away
-2. **Zero Configuration** - No setup required
-3. **Compelling Reason** - Makes users choose universal CLI over standalone plugins
-4. **Common Use Cases** - Image processing is universally needed
+1. **Quality Assurance** - Professionally maintained and tested
+2. **Consistent API** - Follow MediaProc standards
+3. **Regular Updates** - Active development and bug fixes
+4. **Documentation** - Comprehensive guides and examples
+5. **Community Trust** - Backed by the core team
 
-### How It Works:
+### How to Install:
 
 ```bash
-# User installs CLI
+# Install CLI (no plugins included)
 npm install -g @mediaproc/cli
 
-# Image plugin is already available!
-mediaproc image resize photo.jpg -w 1920
-mediaproc image convert photo.jpg -f webp
-mediaproc list  # Shows @mediaproc/image ★ BUILT-IN
-```
+# Browse available plugins
+mediaproc plugins
 
-## Add-on Plugins
-
-### What Are Add-on Plugins?
-
-Add-on plugins are **installed on demand** from npm using the `mediaproc add` command. They extend the CLI with additional functionality.
-
-### How to Add Plugins:
-
-```bash
-# Install video processing
+# Install the plugins you need
+mediaproc add image
 mediaproc add video
-
-# Install audio processing
 mediaproc add audio
 
-# Install document processing
-mediaproc add document
-
 # Now use them
-mediaproc video transcode input.mp4 -o output.mp4
-mediaproc audio convert input.wav -o output.mp3
+mediaproc image resize photo.jpg -w 1920
+mediaproc video transcode movie.mp4
+mediaproc list  # Shows installed plugins
 ```
 
-### Why Add-on?
+## Community & Third-Party Plugins
 
-1. **Lightweight** - Users only install what they need
-2. **Extensibility** - Easy to add new capabilities
-3. **Community** - Third-party developers can publish plugins
-4. **Separation of Concerns** - Each plugin has its own dependencies
+### What Are Community Plugins?
+
+Community plugins are **developed by the community** and follow the naming convention `mediaproc-*`. They extend MediaProc with custom functionality.
+
+### Third-Party Plugins
+
+Any npm package that exports a compatible plugin interface can be used with MediaProc.
+
+### How to Install:
+
+```bash
+# Install community plugin
+mediaproc add mediaproc-custom-filter
+
+# Install third-party plugin (full package name)
+mediaproc add any-compatible-package
+
+# Use them like official plugins
+mediaproc custom-filter process input.jpg
+```
+
+### Plugin Types:
+
+1. **Official** (@mediaproc/*) - Maintained by core team
+2. **Community** (mediaproc-*) - Community-maintained
+3. **Third-Party** (any npm package) - Independent packages
+
+### Benefits of On-Demand Architecture:
+
+1. **Lightweight CLI** - Core CLI is minimal (<5MB)
+2. **User Control** - Install only what you need
+3. **Faster Installation** - No unused dependencies
+4. **Extensibility** - Easy to add new plugins
+5. **Flexibility** - Mix official, community, and third-party plugins
 
 ## Package Dependencies
 
-### Main CLI (packages.json)
+### Main CLI (package.json)
 
 ```json
 {
   "name": "@mediaproc/cli",
+  "version": "0.2.0",
   "dependencies": {
-    "@mediaproc/image": "workspace:*",  // Built-in plugin
     "chalk": "^5.3.0",
-    "commander": "^11.1.0",
-    "ora": "^7.0.1"
+    "commander": "^14.0.2",
+    "ora": "^8.1.1",
+    "execa": "^9.5.2"
+  },
+  "peerDependencies": {
+    "@mediaproc/image": "^1.0.0",
+    "@mediaproc/video": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@mediaproc/image": { "optional": true },
+    "@mediaproc/video": { "optional": true }
   }
 }
 ```
+
+**Note:** Plugins are peer dependencies (optional), not direct dependencies. This keeps the CLI lightweight.
 
 ### Plugin (plugins/image/package.json)
 
@@ -149,93 +194,109 @@ mediaproc-image resize photo.jpg -w 1920
 
 ```typescript
 class PluginManager {
-  // Built-in plugins list
-  private builtInPlugins = [
+  // Official plugins registry (for discovery and validation)
+  private officialPlugins = [
     '@mediaproc/image',
-    // Add more as developed
+    '@mediaproc/video',
+    '@mediaproc/audio',
+    // ... all 10 official plugins
   ];
 
-  async loadPlugins(program: Command) {
-    // 1. Load built-in plugins first
-    for (const plugin of this.builtInPlugins) {
-      await this.loadPlugin(plugin, program, true);
-    }
-
-    // 2. Discover user-installed plugins from package.json
-    const installed = this.discoverPlugins();
-
-    // 3. Load user-installed plugins (skip if already loaded)
-    for (const plugin of installed) {
-      if (!this.builtInPlugins.includes(plugin)) {
-        await this.loadPlugin(plugin, program, false);
-      }
-    }
+  // NO auto-loading at startup
+  // Plugins are loaded on-demand when user runs 'add' command
+  
+  async loadPlugin(pluginName: string, program: Command) {
+    // Dynamically import and register plugin
+    const plugin = await import(pluginName);
+    await plugin.register(program);
+    this.plugins.set(pluginName, plugin);
   }
 }
 ```
 
 ### Discovery Process
 
-1. **Built-in Plugins**: Loaded from `node_modules/@mediaproc/*` (already installed with CLI)
-2. **User Plugins**: Discovered from local `package.json` dependencies
-3. **Deduplication**: Skip plugins already loaded as built-in
+1. **Installation Detection**: Scan `package.json` for installed plugins
+2. **On-Demand Loading**: Load plugins only when `mediaproc add <plugin>` is run
+3. **No Auto-Loading**: CLI starts instantly without loading any plugins
+4. **Lazy Registration**: Plugin commands registered only when needed
+
+### Why No Auto-Loading?
+
+1. **Fast Startup** - CLI loads in <100ms
+2. **User Control** - Users decide what to load
+3. **Clean State** - No unnecessary memory usage
+4. **Explicit** - Clear what's installed vs. what's loaded
 
 ## User Experience
 
 ### First-Time User Journey
 
 ```bash
-# Step 1: Install CLI
+# Step 1: Install CLI (no plugins included)
 npm install -g @mediaproc/cli
 
-# Step 2: Immediate use (image plugin built-in)
-mediaproc list
-# 📦 Built-in Plugins (included with CLI):
-# ✓ image (@mediaproc/image) ★ BUILT-IN
-#   Version: 1.0.0
+# Step 2: Browse available plugins
+mediaproc plugins
+# 📦 Available MediaProc Plugins
+# 🎯 Core Media Plugins:
+# image        Not installed
+# video        Not installed
+# audio        Not installed
 
-# Step 3: Use image processing immediately
+# Step 3: Install the plugins you need
+mediaproc add image
+# ✓ Successfully installed @mediaproc/image
+# ✓ Plugin configured and ready to use
+# ✓ Registered 49 commands
+
+# Step 4: Use installed plugins
 mediaproc image resize photo.jpg -w 1920
 mediaproc image convert photo.jpg -f webp
-mediaproc image thumbnail photo.jpg -s 300
 
-# Step 4: Add more plugins as needed
+# Step 5: Check what's installed
+mediaproc list
+# 📦 Installed Plugins (1 total, 1 loaded)
+# ✨ Official Plugins:
+# ✓ image (@mediaproc/image) ★ OFFICIAL
+#   Version: 1.0.0
+
+# Step 6: Add more plugins as needed
 mediaproc add video
 mediaproc add audio
 
-# Step 5: All plugins work together
+# Step 7: All plugins work together
 mediaproc list
-# 📦 Built-in Plugins:
-# ✓ image ★ BUILT-IN
-#
-# 🔌 User-Installed Plugins:
-# ✓ video
-# ✓ audio
+# 📦 Installed Plugins (3 total, 3 loaded)
+# ✨ Official Plugins:
+# ✓ image (@mediaproc/image) ★ OFFICIAL
+# ✓ video (@mediaproc/video) ★ OFFICIAL
+# ✓ audio (@mediaproc/audio) ★ OFFICIAL
 ```
 
 ## Value Proposition
 
 ### Universal CLI Benefits
 
-✅ **Immediate Productivity**
-- Get started with image processing right away
-- No plugin installation needed initially
-- Pre-configured and tested
+✅ **Zero Bloat**
+- Install only what you need
+- Fast CLI startup (<100ms)
+- Minimal disk space usage
 
 ✅ **Unified Experience**
-- Consistent command syntax
-- Shared configuration
+- Consistent command syntax across all plugins
+- Shared configuration and settings
 - Integrated documentation
 
 ✅ **Easy Extension**
-- Add plugins with one command
-- Centralized management
-- No conflicts
+- Add plugins with one command: `mediaproc add <plugin>`
+- Centralized management with `mediaproc list`
+- No version conflicts
 
 ✅ **Professional Workflow**
 - Pipeline workflows across plugins
-- Batch processing
-- Automation ready
+- Batch processing capabilities
+- CI/CD automation ready
 
 ### Why Users Choose Universal CLI
 
@@ -254,10 +315,15 @@ sox input.wav output.mp3
 
 Users get:
 ```bash
-# Modern: One CLI, consistent syntax
+# Modern: One CLI, on-demand plugins, consistent syntax
 npm install -g @mediaproc/cli
 
-# Works immediately + consistent commands
+# Install what you need
+mediaproc add image
+mediaproc add video
+mediaproc add audio
+
+# Consistent commands across all media types
 mediaproc image resize input.jpg -w 1920 -h 1080
 mediaproc video transcode input.mp4 --codec h264
 mediaproc audio convert input.wav --format mp3
@@ -265,28 +331,33 @@ mediaproc audio convert input.wav --format mp3
 
 ## Future Expansion
 
-### Planned Built-in Plugins
+### Official Plugin Roadmap
 
 ```javascript
-// Phase 1: Essential tools (Q1 2026)
-builtInPlugins = [
-  '@mediaproc/image',  // ✅ Currently built-in
-  '@mediaproc/video',  // Coming Q1 2026
+// Q1 2026: Core Media Processing
+Available: [
+  '@mediaproc/image',     // ✅ Released v1.0.0
+  '@mediaproc/video',     // 🚧 In Development
+  '@mediaproc/audio',     // 🚧 In Development
 ];
 
-// Phase 2: Professional tools (Q2 2026)
-builtInPlugins = [
-  '@mediaproc/image',
-  '@mediaproc/video',
-  '@mediaproc/audio',  // Added Q2 2026
+// Q2 2026: Document & Animation
+Available: [
+  '@mediaproc/document',  // PDF, DOCX, OCR
+  '@mediaproc/animation', // GIF, APNG, WebP, Lottie
 ];
 
-// Phase 3: Complete suite (Q3 2026)
-builtInPlugins = [
-  '@mediaproc/image',
-  '@mediaproc/video',
-  '@mediaproc/audio',
-  '@mediaproc/document',  // Added Q3 2026
+// Q3 2026: Advanced Features
+Available: [
+  '@mediaproc/3d',        // 3D models, GLTF, textures
+  '@mediaproc/stream',    // HLS/DASH streaming
+  '@mediaproc/metadata',  // EXIF, cleanup
+];
+
+// Q4 2026: AI & Automation
+Available: [
+  '@mediaproc/ai',        // AI enhancements
+  '@mediaproc/pipeline',  // Workflow automation
 ];
 ```
 
@@ -325,30 +396,30 @@ mediaproc add mediaproc-plugin-social-media
 
 ### For CLI Maintainers
 
-✅ **Controlled Bundling**
-- Choose which plugins ship built-in
-- Easy to add/remove from built-in list
-- Version control
+✅ **Lightweight Distribution**
+- Core CLI is minimal (<5MB)
+- No forced plugin installations
+- User controls what gets installed
 
 ✅ **Plugin Management**
-- Discover both built-in and user-installed
-- Prevent duplicates
-- Clear ownership
+- Discover installed plugins from package.json
+- Track loaded vs. installed state
+- Clear plugin lifecycle (install → load → use → unload → remove)
 
-✅ **Upgrade Path**
-- Built-in plugins update with CLI
-- User plugins update independently
-- No version conflicts
+✅ **Flexible Updates**
+- Official plugins update independently
+- Users choose when to update plugins
+- No breaking changes in core CLI
 
 ## Summary
 
-The MediaProc architecture provides:
+The MediaProc on-demand plugin architecture provides:
 
-1. **📦 Built-in Plugins** - Immediate value (image processing ready)
-2. **🔌 Add-on Plugins** - Extensibility (add video, audio, etc.)
-3. **🔄 Dual-Mode** - Works standalone or unified
-4. **🎯 Best UX** - Compelling reason to use universal CLI
-5. **⚡ Performance** - Only load what you need
-6. **🌍 Ecosystem** - Community can contribute plugins
+1. **⚡ Fast Startup** - CLI loads instantly, no plugin overhead
+2. **🎯 User Control** - Install only what you need
+3. **✨ Official Quality** - 10 professionally-maintained plugins
+4. **🌍 Open Ecosystem** - Support for community and third-party plugins
+5. **📦 Easy Management** - Simple add/remove/list commands
+6. **🔄 Clean Updates** - Independent plugin versioning
 
-This makes MediaProc both **immediately useful** and **infinitely extensible**!
+**No plugins are pre-installed. You get a lightweight CLI and install the capabilities you need!**

@@ -44,10 +44,10 @@ export async function cli(): Promise<void> {
   initCommand(program);
   configCommand(program);
   
-  // Universal commands (work without plugins)
-  convertCommand(program);
-  infoCommand(program);
-  optimizeCommand(program);
+  // Universal commands (auto-install plugins if needed)
+  convertCommand(program, pluginManager);
+  infoCommand(program, pluginManager);
+  optimizeCommand(program, pluginManager);
   
   // Utility commands
   runCommand(program);
