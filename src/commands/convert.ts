@@ -27,7 +27,8 @@ function detectPlugin(ext: string): { plugin: string; type: string } | null {
 }
 
 /**
- * Ensure plugin is installed and loaded by calling add command logic
+ * Ensure plugin is installed and loaded
+ * Uses ora for spinners and execa for package installation
  */
 async function ensurePlugin(pluginName: string, pluginManager: PluginManager, program: Command): Promise<boolean> {
   const pluginPackage = resolvePluginPackage(pluginName);
@@ -37,21 +38,52 @@ async function ensurePlugin(pluginName: string, pluginManager: PluginManager, pr
     return true;
   }
   
-  // Call add command logic (mimics: mediaproc add <plugin>)
-  console.log(chalk.dim(`Plugin ${chalk.cyan(pluginName)} not found, installing...`));
+  const spinner = ora(`Checking ${chalk.cyan(pluginName)} plugin...`).start();
   
-  const addCmd = program.commands.find(cmd => cmd.name() === 'add');
-  if (!addCmd) {
-    console.error(chalk.red('Add command not found'));
-    return false;
+  // Check if installed but not loaded
+  if (pluginManager.isPluginInstalled(pluginPackage)) {
+    spinner.text = `Loading ${chalk.cyan(pluginPackage)}...`;
+    try {
+      await pluginManager.loadPlugin(pluginPackage, program);
+      spinner.succeed(chalk.green(`✓ Loaded ${pluginName} plugin`));
+      return true;
+    } catch (error) {
+      spinner.fail(chalk.red(`Failed to load ${pluginName} plugin`));
+      console.error(chalk.dim(error instanceof Error ? error.message : String(error)));
+      return false;
+    }
   }
   
+  // Not installed - need to install it
+  spinner.text = `Installing ${chalk.cyan(pluginPackage)}...`;
+  
   try {
-    // Execute add command programmatically
-    await addCmd.parseAsync([pluginName], { from: 'user' });
-    return pluginManager.isPluginLoaded(pluginPackage);
+    // Determine package manager
+    let packageManager = 'pnpm';
+    try {
+      await execa('pnpm', ['--version'], { stdio: 'pipe' });
+    } catch {
+      packageManager = 'npm';
+    }
+    
+    // Install the plugin
+    const args = [packageManager === 'pnpm' ? 'add' : 'install', pluginPackage];
+    await execa(packageManager, args, { 
+      stdio: 'pipe',
+      cwd: process.cwd()
+    });
+    
+    spinner.text = `Loading ${chalk.cyan(pluginPackage)}...`;
+    
+    // Load the plugin
+    await pluginManager.loadPlugin(pluginPackage, program);
+    
+    spinner.succeed(chalk.green(`✓ Installed and loaded ${pluginName} plugin`));
+    return true;
   } catch (error) {
-    console.error(chalk.red(`Failed to install ${pluginName}`));
+    spinner.fail(chalk.red(`Failed to install ${pluginName} plugin`));
+    console.error(chalk.dim(error instanceof Error ? error.message : String(error)));
+    console.log(chalk.yellow(`\n💡 Try manually: ${chalk.white(`mediaproc add ${pluginName}`)}`));
     return false;
   }
 }

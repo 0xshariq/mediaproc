@@ -1,12 +1,83 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
+import ora from 'ora';
 import { existsSync } from 'fs';
 import { extname } from 'path';
+import { execa } from 'execa';
+import type { PluginManager } from '../plugin-manager.js';
+import { resolvePluginPackage } from '../plugin-registry.js';
 
 /**
- * Universal optimize command - detects file type and suggests optimization strategy
+ * Detect which plugin can handle optimization for a file type
  */
-export function optimizeCommand(program: Command): void {
+function detectOptimizePlugin(ext: string): { plugin: string; type: string } | null {
+  const imageExts = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'tiff', 'avif', 'heif'];
+  const videoExts = ['mp4', 'webm', 'mkv', 'avi', 'mov', 'flv', 'wmv', 'm4v'];
+  const audioExts = ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a', 'wma', 'opus'];
+  const documentExts = ['pdf', 'docx', 'pptx'];
+  const modelExts = ['gltf', 'glb', 'obj'];
+
+  if (imageExts.includes(ext)) return { plugin: 'image', type: 'Image' };
+  if (videoExts.includes(ext)) return { plugin: 'video', type: 'Video' };
+  if (audioExts.includes(ext)) return { plugin: 'audio', type: 'Audio' };
+  if (documentExts.includes(ext)) return { plugin: 'document', type: 'Document' };
+  if (modelExts.includes(ext)) return { plugin: '3d', type: '3D Model' };
+  
+  return null;
+}
+
+/**
+ * Ensure plugin is installed and loaded
+ */
+async function ensurePlugin(pluginName: string, pluginManager: PluginManager, program: Command): Promise<boolean> {
+  const pluginPackage = resolvePluginPackage(pluginName);
+  
+  if (pluginManager.isPluginLoaded(pluginPackage)) {
+    return true;
+  }
+  
+  const spinner = ora(`Checking ${chalk.cyan(pluginName)} plugin...`).start();
+  
+  if (pluginManager.isPluginInstalled(pluginPackage)) {
+    spinner.text = `Loading ${chalk.cyan(pluginPackage)}...`;
+    try {
+      await pluginManager.loadPlugin(pluginPackage, program);
+      spinner.succeed(chalk.green(`✓ Loaded ${pluginName} plugin`));
+      return true;
+    } catch (error) {
+      spinner.fail(chalk.red(`Failed to load ${pluginName}`));
+      return false;
+    }
+  }
+  
+  spinner.text = `Installing ${chalk.cyan(pluginPackage)}...`;
+  
+  try {
+    let packageManager = 'pnpm';
+    try {
+      await execa('pnpm', ['--version'], { stdio: 'pipe' });
+    } catch {
+      packageManager = 'npm';
+    }
+    
+    const args = [packageManager === 'pnpm' ? 'add' : 'install', pluginPackage];
+    await execa(packageManager, args, { stdio: 'pipe', cwd: process.cwd() });
+    
+    spinner.text = `Loading ${chalk.cyan(pluginPackage)}...`;
+    await pluginManager.loadPlugin(pluginPackage, program);
+    
+    spinner.succeed(chalk.green(`✓ Installed and loaded ${pluginName} plugin`));
+    return true;
+  } catch (error) {
+    spinner.fail(chalk.red(`Failed to install ${pluginName}`));
+    return false;
+  }
+}
+
+/**
+ * Universal optimize command - detects file type and optimizes
+ */
+export function optimizeCommand(program: Command, pluginManager?: PluginManager): void {
   program
     .command('optimize <file>')
     .description('Auto-optimize any media file')
