@@ -53,13 +53,9 @@ export async function cli(): Promise<void> {
   runCommand(program);
   validateCommand(program);
 
-  // Load and register all installed plugins
-  try {
-    await pluginManager.loadPlugins(program);
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error(chalk.red('Error loading plugins:'), errorMessage);
-  }
+  // Plugins are NOT loaded at startup
+  // Users must explicitly install plugins using: mediaproc add <plugin>
+  // This gives users full control over which plugins they want
 
   // Parse arguments
   program.parse(process.argv);

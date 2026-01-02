@@ -1,7 +1,6 @@
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { Command } from 'commander';
-import chalk from 'chalk';
 import type { MediaProcPlugin } from './types.js';
 
 export class PluginManager {
@@ -23,60 +22,10 @@ export class PluginManager {
   ];
 
   /**
-   * Discover and load all installed plugins dynamically
+   * Check if a plugin is official (@mediaproc/* package)
    */
-  async loadPlugins(program: Command): Promise<void> {
-    const installedPlugins = this.discoverPlugins();
-
-    // Load built-in plugins first (from plugins/ folder)
-    await this.loadBuiltInPlugins(program);
-
-    // Then load externally installed plugins
-    for (const pluginName of installedPlugins) {
-      // Skip if already loaded as built-in
-      if (this.plugins.has(pluginName)) {
-        continue;
-      }
-
-      try {
-        const isOfficial = this.officialPlugins.includes(pluginName);
-        await this.loadPlugin(pluginName, program, isOfficial);
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error(chalk.yellow(`Warning: Failed to load plugin ${pluginName}:`), errorMessage);
-      }
-    }
-  }
-
-  /**
-   * Load built-in plugins from the plugins/ folder
-   */
-  private async loadBuiltInPlugins(program: Command): Promise<void> {
-    const builtInPlugins = ['@mediaproc/image']; // Add more as they become built-in
-
-    for (const pluginName of builtInPlugins) {
-      try {
-        // Try to load from local plugins folder first
-        const localPath = join(process.cwd(), 'plugins', pluginName.replace('@mediaproc/', ''), 'dist', 'index.js');
-
-        if (existsSync(localPath)) {
-          const plugin = await import(localPath) as MediaProcPlugin;
-
-          if (typeof plugin.register === 'function') {
-            await plugin.register(program);
-            this.plugins.set(pluginName, {
-              ...plugin,
-              isBuiltIn: true
-            });
-          }
-        } else {
-          // Try standard node_modules import
-          await this.loadPlugin(pluginName, program, true);
-        }
-      } catch (error) {
-        // Built-in plugin not available - this is OK
-      }
-    }
+  isOfficialPlugin(pluginName: string): boolean {
+    return this.officialPlugins.includes(pluginName);
   }
 
   /**
@@ -149,19 +98,27 @@ export class PluginManager {
     return Array.from(this.plugins.keys());
   }
 
-/**
- * Get official plugins list
- */
-getOfficialPlugins(): string[] {
-  return [...this.officialPlugins];
-}
+  /**
+   * Get list of installed plugins from package.json (not necessarily loaded)
+   */
+  getInstalledPlugins(): string[] {
+    return this.discoverPlugins();
+  }
 
-/**
- * Check if a plugin is official
- */
-isOfficialPlugin(pluginName: string): boolean {
-  return this.officialPlugins.includes(pluginName);
-}
+  /**
+   * Check if a plugin is installed (exists in package.json or node_modules)
+   */
+  isPluginInstalled(pluginName: string): boolean {
+    const installedPlugins = this.discoverPlugins();
+    return installedPlugins.includes(pluginName);
+  }
+
+  /**
+   * Get official plugins list
+   */
+  getOfficialPlugins(): string[] {
+    return [...this.officialPlugins];
+  }
 
   /**
    * Check if a plugin is loaded

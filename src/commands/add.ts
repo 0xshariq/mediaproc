@@ -2,33 +2,45 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import { execa } from 'execa';
-import { join } from 'path';
 import { resolvePluginPackage, PLUGIN_REGISTRY, detectPluginType } from '../plugin-registry.js';
 import type { PluginManager } from '../plugin-manager.js';
 
 /**
  * Detect if mediaproc core is installed globally or locally
  */
-function isGlobalInstall(): boolean {
-  // Check if we're running from global node_modules
-  const globalPaths = process.env.NODE_PATH?.split(':') || [];
+async function isGlobalInstall(): Promise<boolean> {
   const execPath = process.argv[1];
-  
-  for (const globalPath of globalPaths) {
-    if (execPath.includes(globalPath)) {
-      return true;
+
+  // Check if we're running from global node_modules
+  if (execPath.includes('/node_modules/@mediaproc/cli') ||
+    execPath.includes('\\node_modules\\@mediaproc\\cli')) {
+    // Check if it's under a project's node_modules (local) or global
+    const hasLocalPackageJson = execPath.includes('/node_modules/') &&
+      !execPath.includes('/usr/') &&
+      !execPath.includes('/.nvm/') &&
+      !execPath.includes('/.npm-global/');
+
+    if (!hasLocalPackageJson) {
+      return true; // Global install
     }
   }
-  
-  // Check common global installation paths
-  const globalDirs = [
-    '/usr/local/lib/node_modules',
-    '/usr/lib/node_modules',
-    join(process.env.HOME || '', '.nvm'),
-    join(process.env.HOME || '', '.npm-global'),
-  ];
-  
-  return globalDirs.some(dir => execPath.includes(dir));
+
+  // Check npm/pnpm global root
+  try {
+    const { stdout: npmRoot } = await execa('npm', ['root', '-g'], { stdio: 'pipe' });
+    if (execPath.includes(npmRoot.trim())) {
+      return true;
+    }
+  } catch { }
+
+  try {
+    const { stdout: pnpmRoot } = await execa('pnpm', ['root', '-g'], { stdio: 'pipe' });
+    if (execPath.includes(pnpmRoot.trim())) {
+      return true;
+    }
+  } catch { }
+
+  return false;
 }
 
 export function addCommand(program: Command, pluginManager: PluginManager): void {
@@ -40,25 +52,41 @@ export function addCommand(program: Command, pluginManager: PluginManager): void
     .option('--save-dev', 'Save as dev dependency (local only)')
     .action(async (plugin: string, options: { global?: boolean; local?: boolean; saveDev?: boolean }) => {
       try {
-        // Resolve plugin name using registry
+        // Resolve plugin name using registry (official or third-party)
         const pluginName = resolvePluginPackage(plugin);
         const registryEntry = Object.values(PLUGIN_REGISTRY).find(e => e.package === pluginName);
         
-        // Check if plugin is already loaded (built-in)
-        if (pluginManager.isPluginLoaded(pluginName)) {
-          ora().info(chalk.blue(`Plugin ${chalk.cyan(pluginName)} is already available (built-in)`));
-          console.log(chalk.dim(`You can use: ${chalk.white(`mediaproc ${plugin.replace('@mediaproc/', '')} <command>`)}`));
-          return;
+        // Check if plugin is already installed in package.json
+        if (pluginManager.isPluginInstalled(pluginName)) {
+          // Check if it's also loaded
+          if (pluginManager.isPluginLoaded(pluginName)) {
+            ora().info(chalk.blue(`Plugin ${chalk.cyan(pluginName)} is already installed and loaded`));
+            console.log(chalk.dim(`You can use: ${chalk.white(`mediaproc ${plugin.replace('@mediaproc/', '')} <command>`)}`));
+            return;
+          } else {
+            // Installed but not loaded - load it
+            ora().info(chalk.blue(`Plugin ${chalk.cyan(pluginName)} is already installed, loading...`));
+            try {
+              const loaded = await pluginManager.loadPlugin(pluginName, program);
+              if (loaded) {
+                ora().succeed(chalk.green(`✓ Plugin ${pluginName} loaded successfully`));
+                console.log(chalk.dim(`You can now use: ${chalk.white(`mediaproc ${plugin.replace('@mediaproc/', '')} <command>`)}`));
+              }
+            } catch (loadError) {
+              ora().fail(chalk.yellow(`Plugin installed but failed to load. Try restarting the CLI.`));
+            }
+            return;
+          }
         }
-        
+
         const spinner = ora(`Installing ${chalk.cyan(pluginName)}...`).start();
-        
+
         // Detect plugin type
         const pluginType = detectPluginType(pluginName);
-        const typeLabel = pluginType === 'official' ? chalk.blue('★ OFFICIAL') 
+        const typeLabel = pluginType === 'official' ? chalk.blue('★ OFFICIAL')
           : pluginType === 'community' ? chalk.green('🌐 COMMUNITY')
-          : chalk.yellow('📦 THIRD-PARTY');
-        
+            : chalk.yellow('📦 THIRD-PARTY');
+
         // Show plugin info
         if (registryEntry) {
           spinner.info(chalk.dim(`Type: ${typeLabel}`));
@@ -74,7 +102,7 @@ export function addCommand(program: Command, pluginManager: PluginManager): void
           }
         }
         spinner.start(`Installing ${chalk.cyan(pluginName)}...`);
-        
+
         // Determine installation scope
         let installGlobally = false;
         if (options.global) {
@@ -83,9 +111,9 @@ export function addCommand(program: Command, pluginManager: PluginManager): void
           installGlobally = false;
         } else {
           // Auto-detect based on how core was installed
-          installGlobally = isGlobalInstall();
+          installGlobally = await isGlobalInstall();
         }
-        
+
         // Determine package manager (prefer pnpm, fallback to npm)
         let packageManager = 'pnpm';
         try {
@@ -93,74 +121,82 @@ export function addCommand(program: Command, pluginManager: PluginManager): void
         } catch {
           packageManager = 'npm';
         }
-        
+
         // Build install command
         const args: string[] = [];
-        
-        if (packageManager === 'pnpm') {
-          args.push(installGlobally ? 'add' : 'add');
-          if (installGlobally) args.push('-g');
-          if (options.saveDev) args.push('-D');
-        } else {
-          args.push('install');
-          if (installGlobally) args.push('-g');
-          if (options.saveDev) args.push('--save-dev');
-        }
-        
-        args.push(pluginName);
-        
-        // Execute installation
-        await execa(packageManager, args, {
-          stdio: 'pipe',
-          cwd: installGlobally ? undefined : process.cwd(),
-        });
 
-        spinner.succeed(chalk.green(`✓ Successfully installed ${pluginName}`));
-        
-        const scope = installGlobally ? 'globally' : 'locally';
-        console.log(chalk.dim(`\nInstalled ${scope} using ${packageManager}`));
-        
-        // Configure and load the plugin
-        if (!installGlobally) {
-          try {
-            const loadSpinner = ora('Configuring plugin...').start();
-            
-            // Try to load the plugin to verify it works
-            const loaded = await pluginManager.loadPlugin(pluginName, program);
-            
-            if (loaded) {
-              loadSpinner.succeed(chalk.green('✓ Plugin configured and ready to use'));
-              
-              // Verify plugin commands are available
-              const pluginInstance = pluginManager.getPlugin(pluginName);
-              if (pluginInstance) {
-                const commandCount = program.commands.filter(cmd => 
-                  cmd.name().startsWith(plugin.replace('@mediaproc/', ''))
-                ).length;
-                if (commandCount > 0) {
-                  console.log(chalk.green(`✓ Registered ${commandCount} commands`));
-                }
-              }
-            } else {
-              loadSpinner.warn(chalk.yellow('Plugin installed but requires CLI restart to use'));
-              console.log(chalk.dim('Run your command again to use the plugin'));
-            }
-          } catch (loadError) {
-            const errorMsg = loadError instanceof Error ? loadError.message : String(loadError);
-            console.log(chalk.yellow(`⚠ Plugin installed but configuration failed: ${errorMsg}`));
-            console.log(chalk.dim('Restart the CLI to use the plugin'));
+        if (packageManager === 'pnpm') {
+          args.push('add');
+          if (installGlobally) {
+            args.push('-g');
+          } else if (options.saveDev) {
+            args.push('-D');
           }
         } else {
-          console.log(chalk.dim('Global plugins require CLI restart to take effect'));
+          args.push('install');
+          if (installGlobally) {
+            args.push('-g');
+          } else if (options.saveDev) {
+            args.push('--save-dev');
+          }
         }
-        
+
+        args.push(pluginName);
+
+        // Execute installation
+        const installOptions: any = {
+          stdio: 'pipe',
+        };
+
+        // Only set cwd for local installs
+        if (!installGlobally) {
+          installOptions.cwd = process.cwd();
+        }
+
+        await execa(packageManager, args, installOptions);
+
+        spinner.succeed(chalk.green(`✓ Successfully installed ${pluginName}`));
+
+        const scope = installGlobally ? 'globally' : 'locally';
+        console.log(chalk.dim(`\nInstalled ${scope} using ${packageManager}`));
+
+        // Configure and load the plugin
+        try {
+          const loadSpinner = ora('Configuring plugin...').start();
+
+          // Try to load the plugin to verify it works
+          const loaded = await pluginManager.loadPlugin(pluginName, program);
+
+          if (loaded) {
+            loadSpinner.succeed(chalk.green('✓ Plugin configured and ready to use'));
+
+            // Verify plugin commands are available
+            const pluginInstance = pluginManager.getPlugin(pluginName);
+            if (pluginInstance) {
+              const commandCount = program.commands.filter(cmd =>
+                cmd.name().startsWith(plugin.replace('@mediaproc/', ''))
+              ).length;
+              if (commandCount > 0) {
+                console.log(chalk.green(`✓ Registered ${commandCount} commands`));
+              }
+            }
+          } else {
+            loadSpinner.warn(chalk.yellow('Plugin installed but requires CLI restart to use'));
+            console.log(chalk.dim('Run your command again to use the plugin'));
+          }
+        } catch (loadError) {
+          const errorMsg = loadError instanceof Error ? loadError.message : String(loadError);
+          console.log(chalk.yellow(`⚠ Plugin installed but configuration failed: ${errorMsg}`));
+          console.log(chalk.dim(`Restart the CLI to use the plugin ${installGlobally ? '(global install)' : '(local install)'}`));
+        }
+
         console.log(chalk.dim(`You can now use: ${chalk.white(`mediaproc ${plugin.replace('@mediaproc/', '')} <command>`)}`));
-        
+
         // Show example commands
         if (registryEntry) {
           console.log(chalk.dim('\nExample commands:'));
           const shortName = registryEntry.name;
-          
+
           // Show category-specific examples
           switch (registryEntry.package) {
             case '@mediaproc/image':

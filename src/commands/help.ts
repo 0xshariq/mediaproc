@@ -4,8 +4,8 @@ import { getPluginsByCategory } from '../plugin-registry.js';
 
 export function helpCommand(program: Command): void {
   program
-    .command('plugins')
-    .description('Show available plugins and their descriptions')
+    .command('help')
+    .description('Show plugin registry and installation guide')
     .action(() => {
       console.log(chalk.bold('\n📦 MediaProc Plugin Registry\n'));
       

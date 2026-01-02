@@ -9,24 +9,13 @@ export function listCommand(program: Command, pluginManager: PluginManager): voi
     .alias('ls')
     .description('List installed mediaproc plugins')
     .action(() => {
-      const plugins = pluginManager.getLoadedPlugins();
+      const loadedPlugins = pluginManager.getLoadedPlugins();
+      const installedPlugins = pluginManager.getInstalledPlugins();
+      
+      // Find plugins that are installed but not loaded
+      const notLoaded = installedPlugins.filter(p => !loadedPlugins.includes(p));
 
-      // Filter out built-in plugins that weren't explicitly installed
-      const installedPlugins = plugins.filter(p => {
-        const plugin = pluginManager.getPlugin(p);
-        // Show if: not built-in OR built-in but also exists in package.json
-        return plugin?.isBuiltIn !== true;
-      });
-
-      // Also show built-in plugins
-      const builtInPlugins = plugins.filter(p => {
-        const plugin = pluginManager.getPlugin(p);
-        return plugin?.isBuiltIn === true;
-      });
-
-      const totalInstalled = installedPlugins.length;
-
-      if (totalInstalled === 0 && builtInPlugins.length === 0) {
+      if (loadedPlugins.length === 0 && installedPlugins.length === 0) {
         console.log(chalk.yellow('No plugins installed yet'));
         console.log(chalk.dim('\n💡 Get started by installing a plugin:'));
         console.log(chalk.cyan('  mediaproc add image') + chalk.dim('    # Image processing'));
@@ -36,48 +25,25 @@ export function listCommand(program: Command, pluginManager: PluginManager): voi
         return;
       }
 
-      console.log(chalk.bold(`\n📦 Installed Plugins (${totalInstalled + builtInPlugins.length} total)\n`));
+      console.log(chalk.bold(`\n📦 Installed Plugins (${installedPlugins.length} total, ${loadedPlugins.length} loaded)\n`));
 
-      console.log(chalk.bold(`\n📦 Installed Plugins (${totalInstalled + builtInPlugins.length} total)\n`));
-
-      // Separate built-in, official, community, and third-party plugins
-      const builtIn = builtInPlugins;
-      const official = installedPlugins.filter(p => {
+      // Separate official, community, and third-party plugins (from loaded list)
+      const official = loadedPlugins.filter(p => {
         const type = detectPluginType(p);
         return type === 'official';
       });
-      const community = installedPlugins.filter(p => {
+      const community = loadedPlugins.filter(p => {
         const type = detectPluginType(p);
         return type === 'community';
       });
-      const thirdParty = installedPlugins.filter(p => {
+      const thirdParty = loadedPlugins.filter(p => {
         const type = detectPluginType(p);
         return type === 'third-party';
       });
 
-      // Show built-in plugins
-      if (builtIn.length > 0) {
-        console.log(chalk.bold('\n🎁 Built-in Plugins:\n'));
-        
-        builtIn.forEach((pluginName, index) => {
-          const shortName = pluginName.replace('@mediaproc/', '');
-          const plugin = pluginManager.getPlugin(pluginName);
-          
-          console.log(`${chalk.green('✓')} ${chalk.cyan(shortName)} ${chalk.dim(`(${pluginName})`)} ${chalk.magenta('★ BUILT-IN')}`);
-          
-          if (plugin) {
-            console.log(chalk.dim(`  Version: ${plugin.version || 'unknown'}`));
-          }
-          
-          if (index < builtIn.length - 1) {
-            console.log('');
-          }
-        });
-      }
-
       // Show official plugins
       if (official.length > 0) {
-        console.log(chalk.bold('\n✨ Official Plugins:\n'));
+        console.log(chalk.bold('\u2728 Official Plugins:\n'));
         
         official.forEach((pluginName, index) => {
           const shortName = pluginName.replace('@mediaproc/', '');
@@ -134,8 +100,23 @@ export function listCommand(program: Command, pluginManager: PluginManager): voi
         });
       }
 
+      // Show plugins that are installed but not loaded
+      if (notLoaded.length > 0) {
+        console.log(chalk.bold('\n⚠️  Installed but Not Loaded:\n'));
+        console.log(chalk.yellow('These plugins are in package.json but not loaded. Restart CLI or run "mediaproc add <plugin>" to load them.\n'));
+        
+        notLoaded.forEach((pluginName, index) => {
+          const shortName = pluginName.replace('@mediaproc/', '').replace('mediaproc-', '');
+          console.log(`${chalk.yellow('○')} ${chalk.dim(shortName)} ${chalk.dim(`(${pluginName})`)}`);
+          console.log(chalk.dim(`  Load: ${chalk.white(`mediaproc add ${shortName}`)}`));
+          
+          if (index < notLoaded.length - 1) {
+            console.log('');
+          }
+        });
+      }
+
       console.log(chalk.dim('\n💡 Plugin types:'));
-      console.log(chalk.dim('   🎁 Built-in: Bundled with CLI (cannot remove)'));
       console.log(chalk.dim('   ✨ Official: @mediaproc/* packages'));
       console.log(chalk.dim('   🌐 Community: mediaproc-* packages'));
       console.log(chalk.dim('   📦 Third-party: Other npm packages'));
