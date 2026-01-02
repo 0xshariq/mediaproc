@@ -156,6 +156,10 @@ export function addCommand(program: Command, pluginManager: PluginManager): void
         await execa(packageManager, args, installOptions);
 
         spinner.succeed(chalk.green(`✓ Successfully installed ${pluginName}`));
+        
+        // Update config to mark as installed
+        const configManager = pluginManager.getConfigManager();
+        configManager.addInstalledPlugin(pluginName);
 
         const scope = installGlobally ? 'globally' : 'locally';
         console.log(chalk.dim(`\nInstalled ${scope} using ${packageManager}`));

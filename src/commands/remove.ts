@@ -108,6 +108,10 @@ export function removeCommand(program: Command, pluginManager: PluginManager): v
         const scope = uninstallGlobally ? 'globally' : 'locally';
         spinner.succeed(chalk.green(`✓ Successfully removed ${pluginName} (${scope})`));
         
+        // Update config to remove from installed and loaded
+        const configManager = pluginManager.getConfigManager();
+        configManager.removeInstalledPlugin(pluginName);
+        
         if (wasLoaded) {
           console.log(chalk.green('✓ Plugin unloaded and cleaned up'));
         }

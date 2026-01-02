@@ -1,62 +1,38 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { writeFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { ConfigManager } from '../config-manager.js';
 
 export function initCommand(program: Command): void {
   program
     .command('init')
-    .description('Initialize a mediaproc project with config file')
-    .option('--pipeline', 'Initialize with pipeline config')
-    .action((options: { pipeline?: boolean }) => {
-      const configPath = join(process.cwd(), 'mediaproc.config.json');
+    .description('Initialize MediaProc configuration in ~/.mediaproc/')
+    .option('--reset', 'Reset existing configuration')
+    .action((options: { reset?: boolean }) => {
+      const configManager = new ConfigManager();
+      const configPath = ConfigManager.getConfigPath();
       
-      if (existsSync(configPath)) {
-        console.log(chalk.yellow('⚠️  mediaproc.config.json already exists'));
+      if (configManager.exists() && !options.reset) {
+        console.log(chalk.yellow('⚠️  Configuration already exists at:'));
+        console.log(chalk.dim(`   ${configPath}`));
+        console.log('');
+        console.log(chalk.dim('Use --reset flag to reset configuration'));
         process.exit(1);
       }
+
+      if (options.reset) {
+        console.log(chalk.yellow('Resetting configuration...'));
+        configManager.reset();
+      } else {
+        // Load will create default config if not exists
+        configManager.load();
+      }
       
-      const config = options.pipeline ? {
-        version: '1.0',
-        plugins: [],
-        pipelines: {
-          example: {
-            name: 'Example Pipeline',
-            steps: [
-              {
-                plugin: 'image',
-                command: 'resize',
-                options: { width: 1920, height: 1080 }
-              },
-              {
-                plugin: 'image',
-                command: 'convert',
-                options: { format: 'webp', quality: 85 }
-              }
-            ]
-          }
-        }
-      } : {
-        version: '1.0',
-        plugins: [],
-        defaults: {
-          image: {
-            quality: 90,
-            format: 'webp'
-          },
-          video: {
-            codec: 'h264',
-            preset: 'medium'
-          }
-        }
-      };
-      
-      writeFileSync(configPath, JSON.stringify(config, null, 2));
-      
-      console.log(chalk.green('✓ Created mediaproc.config.json'));
-      console.log(chalk.dim('\nNext steps:'));
-      console.log(chalk.dim('  1. Install plugins: mediaproc add image'));
-      console.log(chalk.dim('  2. Customize config in mediaproc.config.json'));
-      console.log(chalk.dim('  3. Run commands: mediaproc image resize photo.jpg'));
+      console.log(chalk.green('✓ MediaProc configuration initialized'));
+      console.log(chalk.dim(`  Location: ${configPath}`));
+      console.log('');
+      console.log(chalk.bold('Next steps:'));
+      console.log(chalk.dim('  1. Browse plugins: ') + chalk.cyan('mediaproc plugins'));
+      console.log(chalk.dim('  2. Install plugins: ') + chalk.cyan('mediaproc add image'));
+      console.log(chalk.dim('  3. View config:     ') + chalk.cyan('mediaproc config show'));
     });
 }

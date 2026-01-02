@@ -6,6 +6,7 @@ import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { PluginManager } from './plugin-manager.js';
+import { ConfigManager } from './config-manager.js';
 import { addCommand } from './commands/add.js';
 import { removeCommand } from './commands/remove.js';
 import { listCommand } from './commands/list.js';
@@ -21,6 +22,10 @@ import { optimizeCommand } from './commands/optimize.js';
 
 const program = new Command();
 const pluginManager = new PluginManager();
+
+// Initialize config on startup (creates default if not exists)
+const configManager = new ConfigManager();
+configManager.load();
 
 // Get version from package.json
 const __filename = fileURLToPath(import.meta.url);

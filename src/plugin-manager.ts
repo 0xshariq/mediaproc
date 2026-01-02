@@ -1,11 +1,15 @@
-import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
 import { Command } from 'commander';
 import type { MediaProcPlugin } from './types.js';
+import { ConfigManager } from './config-manager.js';
 
 export class PluginManager {
   private plugins: Map<string, MediaProcPlugin> = new Map();
   private readonly pluginPrefix = '@mediaproc/';
+  private configManager: ConfigManager;
+
+  constructor() {
+    this.configManager = new ConfigManager();
+  }
 
   // Official plugins (recommended, but installed on-demand)
   private readonly officialPlugins = [
@@ -25,38 +29,15 @@ export class PluginManager {
    * Check if a plugin is official (@mediaproc/* package)
    */
   isOfficialPlugin(pluginName: string): boolean {
-    return this.officialPlugins.includes(pluginName);
+    // Check if it's in the official list OR starts with @mediaproc/
+    return this.officialPlugins.includes(pluginName) || pluginName.startsWith(this.pluginPrefix);
   }
 
   /**
-   * Discover installed plugins by scanning node_modules
+   * Get the plugin prefix
    */
-  private discoverPlugins(): string[] {
-    const plugins: string[] = [];
-
-    try {
-      // Try to read package.json to find dependencies
-      const packageJsonPath = join(process.cwd(), 'package.json');
-
-      if (existsSync(packageJsonPath)) {
-        const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-        const allDeps = {
-          ...packageJson.dependencies,
-          ...packageJson.devDependencies,
-        };
-
-        // Find all @mediaproc/* packages
-        for (const dep of Object.keys(allDeps)) {
-          if (dep.startsWith(this.pluginPrefix) && dep !== '@mediaproc/core') {
-            plugins.push(dep);
-          }
-        }
-      }
-    } catch (error) {
-      // Silently fail - no plugins installed yet
-    }
-
-    return plugins;
+  getPluginPrefix(): string {
+    return this.pluginPrefix;
   }
 
   /**
@@ -84,6 +65,9 @@ export class PluginManager {
         isBuiltIn
       });
 
+      // Update config to mark as loaded
+      this.configManager.addLoadedPlugin(pluginName);
+
       return true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -92,25 +76,24 @@ export class PluginManager {
   }
 
   /**
-   * Get list of loaded plugins
+   * Get list of loaded plugins (currently in memory)
    */
   getLoadedPlugins(): string[] {
     return Array.from(this.plugins.keys());
   }
 
   /**
-   * Get list of installed plugins from package.json (not necessarily loaded)
+   * Get list of installed plugins from config
    */
   getInstalledPlugins(): string[] {
-    return this.discoverPlugins();
+    return this.configManager.getInstalledPlugins();
   }
 
   /**
-   * Check if a plugin is installed (exists in package.json or node_modules)
+   * Check if a plugin is installed (from config)
    */
   isPluginInstalled(pluginName: string): boolean {
-    const installedPlugins = this.discoverPlugins();
-    return installedPlugins.includes(pluginName);
+    return this.configManager.isPluginInstalled(pluginName);
   }
 
   /**
@@ -121,10 +104,10 @@ export class PluginManager {
   }
 
   /**
-   * Check if a plugin is loaded
+   * Check if a plugin is loaded (in memory)
    */
   isPluginLoaded(pluginName: string): boolean {
-    return this.plugins.has(pluginName);
+    return this.configManager.isPluginLoaded(pluginName);
   }
 
   /**
@@ -140,8 +123,17 @@ export class PluginManager {
   unloadPlugin(pluginName: string): boolean {
     if (this.plugins.has(pluginName)) {
       this.plugins.delete(pluginName);
+      // Update config to mark as unloaded
+      this.configManager.removeLoadedPlugin(pluginName);
       return true;
     }
     return false;
+  }
+
+  /**
+   * Get the config manager instance
+   */
+  getConfigManager(): ConfigManager {
+    return this.configManager;
   }
 }
