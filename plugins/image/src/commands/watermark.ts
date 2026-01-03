@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, resolveOutputPaths, MediaExtensions, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance, sharp } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
@@ -91,9 +91,8 @@ export function watermarkCommand(imageCmd: Command): void {
         }
 
         // Validate input paths (can be multiple)
-        const { inputFiles, outputDir, errors } = validatePaths(input, options.output, {
-          allowedExtensions: MediaExtensions.IMAGE,
-          recursive: true,
+        const { inputFiles, outputPath, errors } = validatePaths(input, options.output, {
+          allowedExtensions: IMAGE_EXTENSIONS,
         });
 
         if (errors.length > 0) {
@@ -107,9 +106,8 @@ export function watermarkCommand(imageCmd: Command): void {
           process.exit(1);
         }
 
-        const outputPaths = resolveOutputPaths(inputFiles, outputDir, {
+        const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
           suffix: '-watermarked',
-          preserveStructure: inputFiles.length > 1,
         });
 
         let successCount = 0;
@@ -119,7 +117,6 @@ export function watermarkCommand(imageCmd: Command): void {
           spinner.info(chalk.blue('Configuration:'));
           console.log(chalk.dim(`  Found ${inputFiles.length} file(s)`));
           console.log(chalk.dim(`  Watermark: ${watermark}`));
-          console.log(chalk.dim(`  Output directory: ${outputDir}`));
           console.log(chalk.dim(`  Position: ${options.position || 'bottom-right'}`));
           console.log(chalk.dim(`  Opacity: ${options.opacity || 0.5}`));
           console.log(chalk.dim(`  Scale: ${options.scale || 0.2}`));
@@ -203,7 +200,6 @@ export function watermarkCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        console.log(chalk.dim(`  Output directory: ${outputDir}`));
 
       } catch (error) {
         spinner.fail(chalk.red('Processing failed'));

@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, resolveOutputPaths, MediaExtensions, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
 import type { CompositeOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
@@ -102,9 +102,8 @@ export function compositeCommand(imageCmd: Command): void {
         }
 
         // Validate input paths (can be multiple)
-        const { inputFiles, outputDir, errors } = validatePaths(input, options.output, {
-          allowedExtensions: MediaExtensions.IMAGE,
-          recursive: true,
+        const { inputFiles, outputPath, errors } = validatePaths(input, options.output, {
+          allowedExtensions: IMAGE_EXTENSIONS,
         });
 
         if (errors.length > 0) {
@@ -118,9 +117,8 @@ export function compositeCommand(imageCmd: Command): void {
           process.exit(1);
         }
 
-        const outputPaths = resolveOutputPaths(inputFiles, outputDir, {
+        const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
           suffix: '-composite',
-          preserveStructure: inputFiles.length > 1,
         });
 
         let successCount = 0;
@@ -130,7 +128,6 @@ export function compositeCommand(imageCmd: Command): void {
           spinner.info(chalk.blue('Configuration:'));
           console.log(chalk.dim(`  Found ${inputFiles.length} file(s)`));
           console.log(chalk.dim(`  Overlay: ${options.overlay}`));
-          console.log(chalk.dim(`  Output directory: ${outputDir}`));
           console.log(chalk.dim(`  Gravity: ${options.gravity}`));
           console.log(chalk.dim(`  Blend: ${options.blend}`));
           if (options.opacity !== 1) console.log(chalk.dim(`  Opacity: ${options.opacity}`));
@@ -198,7 +195,6 @@ export function compositeCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        console.log(chalk.dim(`  Output directory: ${outputDir}`));
 
       } catch (error) {
         spinner.fail(chalk.red('Processing failed'));

@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, MediaExtensions, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
 import type { FilterOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
@@ -67,9 +67,8 @@ export function negateCommand(imageCmd: Command): void {
       const spinner = ora('Validating inputs...').start();
 
       try {
-        const { inputFiles, outputDir, errors } = validatePaths(input, options.output, {
-          allowedExtensions: MediaExtensions.IMAGE,
-          recursive: true,
+        const { inputFiles, outputPath, errors } = validatePaths(input, options.output, {
+          allowedExtensions: IMAGE_EXTENSIONS,
         });
 
         if (errors.length > 0) {
@@ -83,9 +82,8 @@ export function negateCommand(imageCmd: Command): void {
           process.exit(1);
         }
 
-        const outputPaths = resolveOutputPaths(inputFiles, outputDir, {
+        const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
           suffix: '-negated',
-          preserveStructure: inputFiles.length > 1,
         });
 
         spinner.succeed(chalk.green(`Found ${inputFiles.length} image(s) to process`));
@@ -150,7 +148,6 @@ export function negateCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        console.log(chalk.dim(`  Output directory: ${outputDir}`));
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to negate image'));

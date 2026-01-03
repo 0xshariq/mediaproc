@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs';
-import { validatePaths, MediaExtensions } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, IMAGE_EXTENSIONS } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 
@@ -98,8 +98,7 @@ export function stackCommand(imageCmd: Command): void {
 
         // Validate all input files
         const { inputFiles, errors } = validatePaths(images.join(','), undefined, {
-          allowedExtensions: MediaExtensions.IMAGE,
-          recursive: false,
+          allowedExtensions: IMAGE_EXTENSIONS,
         });
 
         if (errors.length > 0) {

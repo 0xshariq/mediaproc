@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, MediaExtensions, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 
@@ -77,8 +77,7 @@ export function paletteCommand(imageCmd: Command): void {
       try {
         // Validate input paths
         const { inputFiles, errors } = validatePaths(input, undefined, {
-          allowedExtensions: MediaExtensions.IMAGE,
-          recursive: true,
+          allowedExtensions: IMAGE_EXTENSIONS,
         });
 
         if (errors.length > 0) {

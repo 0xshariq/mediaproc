@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, MediaExtensions, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 import path from 'path';
@@ -102,8 +102,7 @@ export function batchCommand(imageCmd: Command): void {
       try {
         // Validate input directory
         const { inputFiles, errors } = validatePaths(directory, undefined, {
-          allowedExtensions: MediaExtensions.IMAGE,
-          recursive: options.recursive || false,
+          allowedExtensions: IMAGE_EXTENSIONS,
         });
 
         if (errors.length > 0) {
@@ -127,7 +126,6 @@ export function batchCommand(imageCmd: Command): void {
         if (options.verbose) {
           spinner.info(chalk.blue(`Configuration:`));
           console.log(chalk.dim(`  Input directory: ${directory}`));
-          console.log(chalk.dim(`  Output directory: ${outputDir}`));
           console.log(chalk.dim(`  Operation: ${options.operation}`));
           console.log(chalk.dim(`  Files found: ${imageFiles.length}`));
           console.log(chalk.dim(`  Recursive: ${options.recursive ? 'Yes' : 'No'}`));
@@ -239,7 +237,6 @@ export function batchCommand(imageCmd: Command): void {
         if (failed > 0) {
           console.log(chalk.yellow(`  Failed: ${failed}`));
         }
-        console.log(chalk.dim(`  Output directory: ${outputDir}`));
 
       } catch (error) {
         spinner.fail(chalk.red('Batch processing failed'));

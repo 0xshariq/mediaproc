@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, MediaExtensions, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 import path from 'path';
@@ -99,9 +99,8 @@ export function splitCommand(imageCmd: Command): void {
 
       try {
         // Validate input paths
-        const { inputFiles, outputDir: baseOutputDir, errors } = validatePaths(input, options.output || './tiles', {
-          allowedExtensions: MediaExtensions.IMAGE,
-          recursive: true,
+        const { inputFiles, outputPath, errors } = validatePaths(input, options.output || './tiles', {
+          allowedExtensions: IMAGE_EXTENSIONS,
         });
 
         if (errors.length > 0) {
@@ -114,6 +113,9 @@ export function splitCommand(imageCmd: Command): void {
           spinner.fail(chalk.red('No valid image files found'));
           process.exit(1);
         }
+
+        // Use outputPath or default to ./tiles
+        const baseOutputDir = outputPath || './tiles';
 
         let successCount = 0;
         let failCount = 0;
@@ -144,7 +146,6 @@ export function splitCommand(imageCmd: Command): void {
           spinner.info(chalk.blue('Configuration:'));
           console.log(chalk.dim(`  Found ${inputFiles.length} file(s)`));
           console.log(chalk.dim(`  Grid: ${rows}x${columns} (${totalTiles} tiles per image)`));
-          console.log(chalk.dim(`  Output directory: ${baseOutputDir}`));
           spinner.start('Processing...');
         }
 
@@ -227,7 +228,6 @@ export function splitCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        console.log(chalk.dim(`  Output directory: ${baseOutputDir}`));
         console.log(chalk.dim(`  Tiles per image: ${totalTiles} (${rows}x${columns})`));
 
       } catch (error) {

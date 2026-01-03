@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, MediaExtensions, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
@@ -88,9 +88,8 @@ export function flattenCommand(imageCmd: Command): void {
         const g = parseInt(bgHex.substring(2, 4), 16);
         const b = parseInt(bgHex.substring(4, 6), 16);
 
-        const { inputFiles, outputDir, errors } = validatePaths(input, options.output, {
-          allowedExtensions: MediaExtensions.IMAGE,
-          recursive: true,
+        const { inputFiles, outputPath, errors } = validatePaths(input, options.output, {
+          allowedExtensions: IMAGE_EXTENSIONS,
         });
 
         if (errors.length > 0) {
@@ -104,9 +103,8 @@ export function flattenCommand(imageCmd: Command): void {
           process.exit(1);
         }
 
-        const outputPaths = resolveOutputPaths(inputFiles, outputDir, {
+        const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
           suffix: '-flat',
-          preserveStructure: inputFiles.length > 1,
         });
 
         spinner.succeed(chalk.green(`Found ${inputFiles.length} image(s) to process`));
@@ -168,7 +166,6 @@ export function flattenCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        console.log(chalk.dim(`  Output directory: ${outputDir}`));
       } catch (error) {
         spinner.fail(chalk.red('Failed to flatten image'));
         const errorMessage = error instanceof Error ? error.message : String(error);

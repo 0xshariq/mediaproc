@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import fs from 'fs';
-import { validatePaths, resolveOutputPaths, MediaExtensions, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 
@@ -99,8 +99,7 @@ export function metadataCommand(imageCmd: Command): void {
       try {
         // Validate input paths
         const { inputFiles, errors } = validatePaths(input, undefined, {
-          allowedExtensions: MediaExtensions.IMAGE,
-          recursive: true,
+          allowedExtensions: IMAGE_EXTENSIONS,
         });
 
         if (errors.length > 0) {
@@ -136,7 +135,6 @@ export function metadataCommand(imageCmd: Command): void {
           // Use resolveOutputPaths for remove mode since it writes files
           const outputPaths = resolveOutputPaths(inputFiles, options.output || '.', {
             suffix: '-clean',
-            preserveStructure: inputFiles.length > 1,
           });
 
           for (let i = 0; i < inputFiles.length; i++) {

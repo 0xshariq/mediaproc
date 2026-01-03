@@ -6,7 +6,7 @@ import type { ConvertOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 // Dependency injection: Import global path validator from core
-import { validatePaths, resolveOutputPaths, MediaExtensions, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
 
 interface ConvertOptionsExtended extends ConvertOptions {
   help?: boolean;
@@ -80,9 +80,8 @@ export function convertCommand(imageCmd: Command): void {
         }
 
         // Use global path validator (dependency injection)
-        const { inputFiles, outputDir, errors } = validatePaths(input, options.output, {
-          allowedExtensions: MediaExtensions.IMAGE,
-          recursive: true,
+        const { inputFiles, outputPath, errors } = validatePaths(input, options.output, {
+          allowedExtensions: IMAGE_EXTENSIONS,
         });
 
         // Check for validation errors
@@ -98,9 +97,8 @@ export function convertCommand(imageCmd: Command): void {
         }
 
         // Resolve output paths for all input files
-        const outputPaths = resolveOutputPaths(inputFiles, outputDir, {
+        const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
           newExtension: `.${options.format}`,
-          preserveStructure: inputFiles.length > 1,
         });
 
         spinner.succeed(chalk.green(`Found ${inputFiles.length} image(s) to process`));
@@ -183,10 +181,8 @@ export function convertCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        console.log(chalk.dim(`  Output directory: ${outputDir}`));
         console.log(chalk.dim(`  Target format: ${options.format.toUpperCase()}`));
 
-        console.log(chalk.dim(`  Output directory: ${outputDir}`));
         console.log(chalk.dim(`  Target format: ${options.format.toUpperCase()}`));
 
       } catch (error) {

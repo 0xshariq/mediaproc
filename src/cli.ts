@@ -16,6 +16,7 @@ import { validateCommand } from './commands/validate.js';
 import { convertCommand } from './commands/convert.js';
 import { infoCommand } from './commands/info.js';
 import { optimizeCommand } from './commands/optimize.js';
+import { updateCommand } from './commands/update.js';
 
 const program = new Command();
 const pluginManager = new PluginManager();
@@ -52,6 +53,7 @@ export async function cli(): Promise<void> {
   removeCommand(program, pluginManager);
   listCommand(program, pluginManager);
   pluginsCommand(program, pluginManager);
+  updateCommand(program);
   helpCommand(program);
   
   // Universal commands (auto-install plugins if needed)

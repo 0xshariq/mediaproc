@@ -4,8 +4,10 @@ import ora from 'ora';
 import type { ResizeOptions } from '../types.js';
 import { createSharpInstance, sharp } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
-import { validatePaths, resolveOutputPaths, MediaExtensions, getFileName } from '../utils/pathValidator.js';import path from 'node:path';
- export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
+import path from 'node:path';
+
+export { getFileName } from '../utils/pathValidator.js';
 
 export function resizeCommand(imageCmd: Command): void {
   imageCmd
@@ -97,10 +99,9 @@ export function resizeCommand(imageCmd: Command): void {
           process.exit(1);
         }
 
-        // Use global path validator (dependency injection)
-        const { inputFiles, outputDir, errors } = validatePaths(input, options.output, {
-          allowedExtensions: MediaExtensions.IMAGE,
-          recursive: true,
+        // Validate input and output paths
+        const { inputFiles, outputPath, errors } = validatePaths(input, options.output, {
+          allowedExtensions: IMAGE_EXTENSIONS,
         });
 
         // Check for validation errors
@@ -110,15 +111,9 @@ export function resizeCommand(imageCmd: Command): void {
           process.exit(1);
         }
 
-        if (inputFiles.length === 0) {
-          spinner.fail(chalk.red('No valid image files found'));
-          process.exit(1);
-        }
-
         // Resolve output paths for all input files
-        const outputPaths = resolveOutputPaths(inputFiles, outputDir, {
+        const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
           suffix: '-resized',
-          preserveStructure: inputFiles.length > 1,
         });
 
         spinner.succeed(chalk.green(`Found ${inputFiles.length} image(s) to process`));
@@ -223,7 +218,6 @@ export function resizeCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        console.log(chalk.dim(`  Output directory: ${outputDir}`));
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to resize images'));
