@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs';
-import { validatePaths, MediaExtensions } from '../utils/pathValidator.js';
+import { validatePaths, MediaExtensions } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 

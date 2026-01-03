@@ -10,13 +10,9 @@ export function listCommand(program: Command, pluginManager: PluginManager): voi
     .description('List installed mediaproc plugins')
     .action(() => {
       const loadedPlugins = pluginManager.getLoadedPlugins();
-      const installedPlugins = pluginManager.getInstalledPlugins();
-      
-      // Find plugins that are installed but not loaded
-      const notLoaded = installedPlugins.filter(p => !loadedPlugins.includes(p));
 
-      if (loadedPlugins.length === 0 && installedPlugins.length === 0) {
-        console.log(chalk.yellow('No plugins installed yet'));
+      if (loadedPlugins.length === 0) {
+        console.log(chalk.yellow('No plugins loaded yet'));
         console.log(chalk.dim('\n💡 Get started by installing a plugin:'));
         console.log(chalk.cyan('  mediaproc add image') + chalk.dim('    # Image processing'));
         console.log(chalk.cyan('  mediaproc add video') + chalk.dim('    # Video processing'));
@@ -25,7 +21,7 @@ export function listCommand(program: Command, pluginManager: PluginManager): voi
         return;
       }
 
-      console.log(chalk.bold(`\n📦 Installed Plugins (${installedPlugins.length} total, ${loadedPlugins.length} loaded)\n`));
+      console.log(chalk.bold(`\n📦 Loaded Plugins (${loadedPlugins.length} total)\n`));
 
       // Separate official, community, and third-party plugins (from loaded list)
       const official = loadedPlugins.filter(p => {
@@ -95,22 +91,6 @@ export function listCommand(program: Command, pluginManager: PluginManager): voi
           }
           
           if (index < thirdParty.length - 1) {
-            console.log('');
-          }
-        });
-      }
-
-      // Show plugins that are installed but not loaded
-      if (notLoaded.length > 0) {
-        console.log(chalk.bold('\n⚠️  Installed but Not Loaded:\n'));
-        console.log(chalk.yellow('These plugins are in package.json but not loaded. Restart CLI or run "mediaproc add <plugin>" to load them.\n'));
-        
-        notLoaded.forEach((pluginName, index) => {
-          const shortName = pluginName.replace('@mediaproc/', '').replace('mediaproc-', '');
-          console.log(`${chalk.yellow('○')} ${chalk.dim(shortName)} ${chalk.dim(`(${pluginName})`)}`);
-          console.log(chalk.dim(`  Load: ${chalk.white(`mediaproc add ${shortName}`)}`));
-          
-          if (index < notLoaded.length - 1) {
             console.log('');
           }
         });

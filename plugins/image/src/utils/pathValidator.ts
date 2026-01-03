@@ -28,6 +28,41 @@ export interface ValidatedPaths {
 }
 
 /**
+ * Helper: Get filename from path
+ */
+export function getFileName(filePath: string): string {
+  return path.basename(filePath);
+}
+
+/**
+ * Helper: Get filename without extension
+ */
+export function getFileNameWithoutExt(filePath: string): string {
+  return path.basename(filePath, path.extname(filePath));
+}
+
+/**
+ * Helper: Get file extension
+ */
+export function getFileExtension(filePath: string): string {
+  return path.extname(filePath);
+}
+
+/**
+ * Helper: Get directory path
+ */
+export function getDirectory(filePath: string): string {
+  return path.dirname(filePath);
+}
+
+/**
+ * Helper: Join paths
+ */
+export function joinPaths(...paths: string[]): string {
+  return path.join(...paths);
+}
+
+/**
  * Parse comma-separated input paths and expand them into individual file paths
  * Supports:
  * - Single file: "photo.jpg"
@@ -126,9 +161,10 @@ function isAllowedExtension(filePath: string, allowedExtensions: string[]): bool
 
 /**
  * Validate and resolve output path
- * - If outputPath is provided and is a directory, use it
- * - If outputPath is provided and doesn't exist, create it as a directory
- * - If outputPath is not provided, use current working directory
+ * - If outputPath has a file extension, return it as-is (it's a file path)
+ * - If outputPath is a directory, use it
+ * - If outputPath doesn't exist and has no extension, create it as a directory
+ * - If no outputPath provided, use current working directory
  */
 export function validateOutputPath(outputPath?: string): string {
   if (!outputPath) {
@@ -138,13 +174,29 @@ export function validateOutputPath(outputPath?: string): string {
   
   const resolvedPath = path.resolve(outputPath);
   
-  // If path exists and is a directory, use it
+  // Check if this looks like a file path (has an extension)
+  const ext = path.extname(resolvedPath);
+  if (ext) {
+    // Has an extension - treat as a file path
+    // Make sure parent directory exists
+    const parentDir = path.dirname(resolvedPath);
+    if (!fs.existsSync(parentDir)) {
+      try {
+        fs.mkdirSync(parentDir, { recursive: true });
+      } catch (error) {
+        console.warn(`Could not create parent directory ${parentDir}`);
+      }
+    }
+    return resolvedPath; // Return the full file path
+  }
+  
+  // No extension - treat as directory
   if (fs.existsSync(resolvedPath)) {
     const stats = fs.statSync(resolvedPath);
     if (stats.isDirectory()) {
       return resolvedPath;
     } else {
-      // If it's a file, use its directory
+      // Shouldn't happen if no extension, but handle it
       return path.dirname(resolvedPath);
     }
   }
@@ -181,6 +233,15 @@ export function resolveOutputPaths(
   
   const outputMap = new Map<string, string>();
   
+  // Check if outputDir is actually a file path (has extension)
+  const outputExt = path.extname(outputDir);
+  if (outputExt && inputFiles.length === 1) {
+    // Single input file with explicit output file path - ignore suffix
+    outputMap.set(inputFiles[0], outputDir);
+    return outputMap;
+  }
+  
+  // outputDir is a directory - treat as usual
   // Find common base path if preserving structure
   let basePath = '';
   if (preserveStructure && inputFiles.length > 1) {

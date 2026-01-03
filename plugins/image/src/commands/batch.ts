@@ -1,11 +1,12 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
-import path from 'path';
+
 import * as fs from 'fs';
-import { validatePaths, MediaExtensions } from '../utils/pathValidator.js';
+import { validatePaths, MediaExtensions, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
+import path from 'path';
 
 interface BatchOptions {
   input: string;
@@ -165,7 +166,7 @@ export function batchCommand(imageCmd: Command): void {
               fs.mkdirSync(outputSubdir, { recursive: true });
             }
 
-            spinner.text = `Processing ${processed + 1}/${imageFiles.length}: ${path.basename(inputFile)}`;
+            spinner.text = `Processing ${processed + 1}/${imageFiles.length}: ${getFileName(inputFile)}`;
 
             let pipeline = createSharpInstance(inputFile);
 

@@ -78,8 +78,8 @@ export function convertCommand(program: Command, pluginManager?: PluginManager):
 
       // Check plugin status
       const pluginPackage = `@mediaproc/${pluginName}`;
-      const isLoaded = pluginManager?.isPluginLoaded(pluginPackage);
-      const isInstalled = pluginManager?.isPluginInstalled(pluginPackage);
+      const isLoaded = pluginManager?.getPlugin(pluginPackage) !== undefined;
+      const isInstalled = isLoaded; // If it can be imported, it's installed
 
       console.log(chalk.yellow('💡 Suggested command:'));
       console.log(chalk.cyan(`   ${suggestedCommand}`));

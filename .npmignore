@@ -43,7 +43,8 @@ tests/
 *.test.js
 *.spec.ts
 *.spec.js
-__tests__/
+src/__tests__/
+plugins/**/__tests__/
 jest.config.js
 
 # CI/CD

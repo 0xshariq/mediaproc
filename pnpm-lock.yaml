@@ -17,6 +17,9 @@ importers:
       '@lottiefiles/dotlottie-web':
         specifier: ^0.60.0
         version: 0.60.0
+      '@mediaproc/image':
+        specifier: ^1.2.1
+        version: 1.2.1
       chalk:
         specifier: ^5.3.0
         version: 5.6.2
@@ -904,6 +907,11 @@ packages:
 
   '@lottiefiles/dotlottie-web@0.60.0':
     resolution: {integrity: sha512-AbQYmyZ8ZihCGPwjdN0e7bJ7W7yVmHG24IXn8kxyFJJNJmSJEaarpOSivu/1KoFGiw86OMmiWcLXrPs1XjT6Qw==}
+
+  '@mediaproc/image@1.2.1':
+    resolution: {integrity: sha512-o7L0tyiGfRyGsh2r2q+8nPlrUwiM3lC1lfYSuVYrB6ZMQY8K6Ir71OTIIOShXNVW7VaLgvHcHc2mXoSPTO2foQ==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
 
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
@@ -2315,6 +2323,7 @@ packages:
 
   shaka-player@4.16.12:
     resolution: {integrity: sha512-bUne2YBbpMId8tU9kPSeZWSJHKbt2t5XyH3all6OsReRrfFYP9apOgohInbaDXNd0T/S8hUgWQT+wqLKH41XJg==}
+    engines: {node: '>=18'}
 
   sharp@0.34.5:
     resolution: {integrity: sha512-Ou9I5Ft9WNcCbXrU9cMgPBcCK8LiwLqcbywW3t4oDV37n1pzpuNLsYiAV8eODnjbtQlSDwZ2cUEeQz4E54Hltg==}
@@ -3376,6 +3385,13 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.5
 
   '@lottiefiles/dotlottie-web@0.60.0': {}
+
+  '@mediaproc/image@1.2.1':
+    dependencies:
+      chalk: 5.6.2
+      commander: 14.0.2
+      ora: 9.0.0
+      sharp: 0.34.5
 
   '@napi-rs/wasm-runtime@0.2.12':
     dependencies:

@@ -1,9 +1,9 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
-import path from 'path';
+
 import fs from 'fs';
-import { validatePaths, MediaExtensions } from '../utils/pathValidator.js';
+import { validatePaths, MediaExtensions, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
 import type { StatsOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
@@ -120,7 +120,7 @@ export function statsCommand(imageCmd: Command): void {
 
           if (totalFiles > 1) {
             console.log(chalk.bold.cyan(`\n${'='.repeat(80)}`));
-            console.log(chalk.bold.cyan(`${fileNum} ${path.basename(inputFile)}`));
+            console.log(chalk.bold.cyan(`${fileNum} ${getFileName(inputFile)}`));
             console.log(chalk.bold.cyan('='.repeat(80)));
           }
 

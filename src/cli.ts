@@ -6,14 +6,11 @@ import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { PluginManager } from './plugin-manager.js';
-import { ConfigManager } from './config-manager.js';
 import { addCommand } from './commands/add.js';
 import { removeCommand } from './commands/remove.js';
 import { listCommand } from './commands/list.js';
 import { pluginsCommand } from './commands/plugins.js';
 import { helpCommand } from './commands/help.js';
-import { initCommand } from './commands/init.js';
-import { configCommand } from './commands/config.js';
 import { runCommand } from './commands/run.js';
 import { validateCommand } from './commands/validate.js';
 import { convertCommand } from './commands/convert.js';
@@ -23,14 +20,26 @@ import { optimizeCommand } from './commands/optimize.js';
 const program = new Command();
 const pluginManager = new PluginManager();
 
-// Initialize config on startup (creates default if not exists)
-const configManager = new ConfigManager();
-configManager.load();
-
 // Get version from package.json
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
+
+/**
+ * Auto-load installed plugins
+ */
+async function autoLoadPlugins(): Promise<void> {
+  const officialPlugins = pluginManager.getOfficialPlugins();
+  
+  for (const pluginName of officialPlugins) {
+    try {
+      // Try to load plugin silently - if it's installed, it will load
+      await pluginManager.loadPlugin(pluginName, program);
+    } catch {
+      // Plugin not installed, skip silently
+    }
+  }
+}
 
 export async function cli(): Promise<void> {
   program
@@ -45,10 +54,6 @@ export async function cli(): Promise<void> {
   pluginsCommand(program, pluginManager);
   helpCommand(program);
   
-  // Project management commands
-  initCommand(program);
-  configCommand(program);
-  
   // Universal commands (auto-install plugins if needed)
   convertCommand(program, pluginManager);
   infoCommand(program, pluginManager);
@@ -58,9 +63,8 @@ export async function cli(): Promise<void> {
   runCommand(program);
   validateCommand(program);
 
-  // Plugins are NOT loaded at startup
-  // Users must explicitly install plugins using: mediaproc add <plugin>
-  // This gives users full control over which plugins they want
+  // Auto-load installed plugins before parsing commands
+  await autoLoadPlugins();
 
   // Parse arguments
   program.parse(process.argv);

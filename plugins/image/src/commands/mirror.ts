@@ -1,8 +1,8 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
-import path from 'path';
-import { validatePaths, resolveOutputPaths, MediaExtensions } from '../utils/pathValidator.js';
+
+import { validatePaths, resolveOutputPaths, MediaExtensions, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 
@@ -141,7 +141,7 @@ export function mirrorCommand(imageCmd: Command): void {
         // Process all files
         for (const inputFile of inputFiles) {
           try {
-            const fileName = path.basename(inputFile);
+            const fileName = getFileName(inputFile);
             const outputPath = outputPaths.get(inputFile)!;
 
             const sharpInstance = createSharpInstance(inputFile);
@@ -243,7 +243,7 @@ export function mirrorCommand(imageCmd: Command): void {
             spinner.succeed(chalk.green(`✓ ${fileName} mirror effect created`));
             successCount++;
           } catch (error) {
-            spinner.fail(chalk.red(`✗ Failed: ${path.basename(inputFile)}`));
+            spinner.fail(chalk.red(`✗ Failed: ${getFileName(inputFile)}`));
             if (options.verbose && error instanceof Error) {
               console.log(chalk.red(`    Error: ${error.message}`));
             }

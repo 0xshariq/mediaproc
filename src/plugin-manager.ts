@@ -1,15 +1,9 @@
 import { Command } from 'commander';
 import type { MediaProcPlugin } from './types.js';
-import { ConfigManager } from './config-manager.js';
 
 export class PluginManager {
   private plugins: Map<string, MediaProcPlugin> = new Map();
   private readonly pluginPrefix = '@mediaproc/';
-  private configManager: ConfigManager;
-
-  constructor() {
-    this.configManager = new ConfigManager();
-  }
 
   // Official plugins (recommended, but installed on-demand)
   private readonly officialPlugins = [
@@ -65,9 +59,6 @@ export class PluginManager {
         isBuiltIn
       });
 
-      // Update config to mark as loaded
-      this.configManager.addLoadedPlugin(pluginName);
-
       return true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -83,31 +74,10 @@ export class PluginManager {
   }
 
   /**
-   * Get list of installed plugins from config
-   */
-  getInstalledPlugins(): string[] {
-    return this.configManager.getInstalledPlugins();
-  }
-
-  /**
-   * Check if a plugin is installed (from config)
-   */
-  isPluginInstalled(pluginName: string): boolean {
-    return this.configManager.isPluginInstalled(pluginName);
-  }
-
-  /**
    * Get official plugins list
    */
   getOfficialPlugins(): string[] {
     return [...this.officialPlugins];
-  }
-
-  /**
-   * Check if a plugin is loaded (in memory)
-   */
-  isPluginLoaded(pluginName: string): boolean {
-    return this.configManager.isPluginLoaded(pluginName);
   }
 
   /**
@@ -123,17 +93,8 @@ export class PluginManager {
   unloadPlugin(pluginName: string): boolean {
     if (this.plugins.has(pluginName)) {
       this.plugins.delete(pluginName);
-      // Update config to mark as unloaded
-      this.configManager.removeLoadedPlugin(pluginName);
       return true;
     }
     return false;
-  }
-
-  /**
-   * Get the config manager instance
-   */
-  getConfigManager(): ConfigManager {
-    return this.configManager;
   }
 }

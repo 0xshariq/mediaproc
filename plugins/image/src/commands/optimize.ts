@@ -1,11 +1,12 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
-import path from 'path';
-import { validatePaths, resolveOutputPaths, MediaExtensions } from '../utils/pathValidator.js';
+
+import { validatePaths, resolveOutputPaths, MediaExtensions, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
+import path from 'node:path';
 
 interface OptimizeOptions extends ImageOptions {
   aggressive?: boolean;
@@ -112,7 +113,7 @@ export function optimizeCommand(imageCmd: Command): void {
           console.log(chalk.green(`Would process ${inputFiles.length} image(s):`));
           inputFiles.forEach((inputFile, index) => {
             const outputPath = outputPaths.get(inputFile);
-            console.log(chalk.dim(`  ${index + 1}. ${path.basename(inputFile)} → ${path.basename(outputPath!)}`));
+            console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
           return;
         }
@@ -122,7 +123,7 @@ export function optimizeCommand(imageCmd: Command): void {
 
         for (const [index, inputFile] of inputFiles.entries()) {
           const outputPath = outputPaths.get(inputFile)!;
-          const fileName = path.basename(inputFile);
+          const fileName = getFileName(inputFile);
           
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 

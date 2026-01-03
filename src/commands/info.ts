@@ -98,8 +98,8 @@ export function infoCommand(program: Command, pluginManager?: PluginManager): vo
 
           // Check plugin status
           const pluginPackage = `@mediaproc/${suggestedPlugin}`;
-          const isLoaded = pluginManager?.isPluginLoaded(pluginPackage);
-          const isInstalled = pluginManager?.isPluginInstalled(pluginPackage);
+          const isLoaded = pluginManager?.getPlugin(pluginPackage) !== undefined;
+          const isInstalled = isLoaded; // If it can be imported, it's installed
 
           if (isLoaded) {
             console.log(chalk.green(`   ✓ ${suggestedPlugin} plugin is loaded - command is ready`));

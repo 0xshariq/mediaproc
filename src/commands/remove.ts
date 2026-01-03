@@ -54,7 +54,7 @@ export function removeCommand(program: Command, pluginManager: PluginManager): v
         }
 
         // Check if plugin is currently loaded
-        const wasLoaded = pluginManager.isPluginLoaded(pluginName);
+        const wasLoaded = pluginManager.getPlugin(pluginName) !== undefined;
         if (wasLoaded) {
           spinner.info(chalk.dim(`Unloading plugin ${pluginName}...`));
           pluginManager.unloadPlugin(pluginName);
@@ -107,10 +107,6 @@ export function removeCommand(program: Command, pluginManager: PluginManager): v
 
         const scope = uninstallGlobally ? 'globally' : 'locally';
         spinner.succeed(chalk.green(`✓ Successfully removed ${pluginName} (${scope})`));
-        
-        // Update config to remove from installed and loaded
-        const configManager = pluginManager.getConfigManager();
-        configManager.removeInstalledPlugin(pluginName);
         
         if (wasLoaded) {
           console.log(chalk.green('✓ Plugin unloaded and cleaned up'));
