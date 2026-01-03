@@ -174,6 +174,10 @@ mediaproc document compress input.pdf --quality high
 - `mediaproc list` - List all plugins (built-in and installed)
 - `mediaproc add <plugin>` - Install add-on plugins from npm
 - `mediaproc remove <plugin>` - Uninstall add-on plugins
+- `mediaproc update [plugin]` - Update plugin(s) to latest version
+  - `--version <version>` - Update to specific version
+  - `--global` - Update globally installed plugins
+  - `--verbose` - Show detailed output
 - `mediaproc plugins` - Show available plugins
 - `mediaproc init` - Initialize configuration
 - `mediaproc config` - Manage settings
@@ -376,6 +380,10 @@ mediaproc-image resize photo.jpg -w 1920
 - `mediaproc list` - List all plugins (built-in and installed)
 - `mediaproc add <plugin>` - Install add-on plugins from npm
 - `mediaproc remove <plugin>` - Uninstall add-on plugins
+- `mediaproc update [plugin]` - Update plugin(s) to latest version
+  - `--version <version>` - Update to specific version
+  - `--global` - Update globally installed plugins
+  - `--verbose` - Show detailed output
 - `mediaproc plugins` - Show available plugins
 - `mediaproc init` - Initialize configuration
 - `mediaproc config` - Manage settings
@@ -584,6 +592,10 @@ mediaproc add video    # Video processing
 mediaproc add audio    # Audio processing
 mediaproc add document # PDF processing
 
+# Update plugins to latest version
+mediaproc update           # Update all plugins
+mediaproc update image     # Update specific plugin
+
 # View all plugins (built-in + installed)
 mediaproc list
 
@@ -678,6 +690,87 @@ mediaproc list
 
 # Use installed plugins
 mediaproc image resize photo.jpg -w 800
+```
+
+### Updating Plugins
+
+Keep your plugins up-to-date to get the latest features and bug fixes:
+
+```bash
+# Update all installed plugins to latest versions
+mediaproc update
+
+# Update a specific plugin to latest
+mediaproc update image
+mediaproc update video
+
+# Update to a specific version
+mediaproc update image --version 1.2.3
+mediaproc update video --version 2.0.0
+
+# Update with installation scope
+mediaproc update --global           # Update globally installed plugins
+mediaproc update image --local      # Update locally installed plugin
+
+# Verbose output (shows detailed information)
+mediaproc update --verbose
+mediaproc update image --verbose
+```
+
+**Plugin Type Detection:**
+
+The update command automatically detects and handles three types of plugins:
+
+1. **Official Plugins** (`@mediaproc/*`) - ★ OFFICIAL
+   - Example: `@mediaproc/image`, `@mediaproc/video`
+   - Short name supported: `mediaproc update image`
+   
+2. **Community Plugins** (`mediaproc-*`) - ◆ COMMUNITY
+   - Example: `mediaproc-custom-filter`
+   - Full name required: `mediaproc update mediaproc-custom-filter`
+   
+3. **Third-Party Plugins** - ◇ THIRD-PARTY
+   - Any other npm package
+   - Full package name: `mediaproc update @company/plugin-name`
+
+**What the update command does:**
+
+1. **Detects Plugin Type**: Identifies official, community, or third-party plugins
+2. **Detects Installation Scope**: Automatically determines if plugins are installed globally or locally
+3. **Fetches Latest Versions**: Checks npm registry for the newest versions (or specific version)
+4. **Updates Dependencies**: Uses the appropriate package manager (npm, pnpm, yarn, bun, deno)
+5. **Shows Changes**: Displays version changes (old → new)
+6. **Auto-Reload**: Plugins are automatically available after update
+
+**Examples:**
+
+```bash
+# Update all plugins (recommended)
+$ mediaproc update
+✓ Updating all MediaProc plugins...
+✓ All MediaProc plugins updated successfully
+
+# Update official plugin to latest
+$ mediaproc update image
+✓ Detecting plugin type for image...
+✓ image ★ OFFICIAL updated successfully (1.2.0 → 1.2.2)
+
+# Update to specific version
+$ mediaproc update image --version 1.2.1
+✓ image ★ OFFICIAL updated successfully (1.2.0 → 1.2.1)
+
+# Update community plugin
+$ mediaproc update mediaproc-custom-filter
+✓ mediaproc-custom-filter ◆ COMMUNITY updated successfully
+
+# Update with verbose output
+$ mediaproc update image --verbose
+ℹ Package manager: pnpm
+ℹ Plugin type: ★ OFFICIAL
+ℹ Package name: @mediaproc/image
+ℹ Current version: 1.2.0
+ℹ Running: pnpm add @mediaproc/image
+✓ image ★ OFFICIAL updated successfully (1.2.0 → 1.2.2)
 ```
 
 **📘 Full Guide:** See [Plugin Terminology Guide](docs/plugin-terminology.md) for detailed explanations.

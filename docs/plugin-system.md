@@ -189,6 +189,100 @@ mediaproc add image --global
 mediaproc add video --local
 ```
 
+### Updating Plugins
+
+Keep plugins up-to-date with the `update` command:
+
+```bash
+# Update all plugins to latest
+mediaproc update
+
+# Update specific plugin to latest
+mediaproc update image
+mediaproc update video
+
+# Update to specific version
+mediaproc update image --version 1.2.3
+mediaproc update video --version 2.0.0-beta.1
+
+# With installation scope
+mediaproc update --global          # Update globally installed plugins
+mediaproc update image --local     # Update locally installed plugin
+
+# Verbose output
+mediaproc update --verbose         # Shows detailed information
+mediaproc update image --verbose   # Shows package manager, versions, etc.
+```
+
+**Plugin Type Detection:**
+
+The update command automatically detects and handles three types of plugins:
+
+1. **Official Plugins** (`@mediaproc/*`) - Displays as ★ OFFICIAL
+   ```bash
+   mediaproc update image                    # Short name
+   mediaproc update @mediaproc/image        # Full name
+   ```
+
+2. **Community Plugins** (`mediaproc-*`) - Displays as ◆ COMMUNITY
+   ```bash
+   mediaproc update mediaproc-custom-filter  # Full name required
+   ```
+
+3. **Third-Party Plugins** - Displays as ◇ THIRD-PARTY
+   ```bash
+   mediaproc update @company/plugin-name     # Full package name
+   ```
+
+**What happens during update:**
+1. Detects plugin type (official/community/third-party)
+2. Detects plugin installation location (global/local)
+3. Checks npm registry for latest version (or uses specified version)
+4. Uses appropriate package manager (npm/pnpm/yarn/bun/deno)
+5. Shows version changes (old → new) with plugin type badge
+6. Automatically reloads updated plugins
+
+**Examples:**
+
+```bash
+# Update official plugin to latest
+$ mediaproc update image
+✓ Detecting plugin type for image...
+✓ image ★ OFFICIAL updated successfully (1.2.0 → 1.2.2)
+
+# Update to specific version
+$ mediaproc update image --version 1.2.1
+✓ image ★ OFFICIAL updated successfully (1.2.0 → 1.2.1)
+
+# Update community plugin
+$ mediaproc update mediaproc-watermark
+✓ mediaproc-watermark ◆ COMMUNITY updated successfully (0.5.0 → 0.6.1)
+
+# Update third-party plugin
+$ mediaproc update @mycompany/media-tools
+✓ @mycompany/media-tools ◇ THIRD-PARTY updated successfully
+
+# Update with verbose output
+$ mediaproc update image --verbose
+ℹ Package manager: pnpm
+ℹ Plugin type: ★ OFFICIAL
+ℹ Package name: @mediaproc/image
+ℹ Current version: 1.2.0
+ℹ Running: pnpm add @mediaproc/image
+✓ image ★ OFFICIAL updated successfully (1.2.0 → 1.2.2)
+
+# Update all plugins
+$ mediaproc update
+✓ Finding all installed MediaProc plugins...
+✓ All MediaProc plugins updated successfully
+```
+
+**Version Flags:**
+
+- `--version <version>`: Update to specific version (e.g., `1.2.3`, `2.0.0-beta.1`)
+- Omit `--version`: Updates to `latest` version
+- Supports semantic versioning and pre-release versions
+
 ## Plugin Categories
 
 Plugins are organized into categories:

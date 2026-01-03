@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- ✨ `mediaproc update` command - Update plugins to latest or specific versions
+  - Update all plugins: `mediaproc update`
+  - Update specific plugin: `mediaproc update <plugin>`
+  - Update to specific version: `mediaproc update <plugin> --version 1.2.3`
+  - Auto-detects plugin types (official, community, third-party)
+  - Auto-detects installation scope (global/local)
+  - Shows version changes with plugin type badges (★ OFFICIAL, ◆ COMMUNITY, ◇ THIRD-PARTY)
+  - Supports all package managers (npm, pnpm, yarn, bun, deno)
+  - Verbose mode: `--verbose` flag for detailed output
+
+### Improved
+- 🔄 Path handling in image plugin
+  - Supports single file: `image.jpg`
+  - Supports multiple files: `img1.jpg,img2.jpg`
+  - Supports directories: `input-images/`
+  - Explicit output file paths: `-o output.jpg`
+  - Output directories: `-o output/`
+- 📚 Updated documentation with update command examples
+
 ### Architecture
 - ✅ Designed plugin-based architecture
 - ✅ Implemented plugin discovery and loading system
