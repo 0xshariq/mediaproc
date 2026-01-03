@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import path from 'path';
-import { validatePaths, resolveOutputPaths, MediaExtensions } from '@mediaproc/cli';
+import { validatePaths, resolveOutputPaths, MediaExtensions } from '../utils/pathValidator.js';
 import type { ResizeOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';

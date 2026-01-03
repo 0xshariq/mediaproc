@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import path from 'path';
-import { validatePaths, resolveOutputPaths, MediaExtensions } from '@mediaproc/cli';
+import { validatePaths, resolveOutputPaths, MediaExtensions } from '../utils/pathValidator.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 
@@ -111,7 +111,7 @@ export function vignetteCommand(imageCmd: Command): void {
         if (options.dryRun) {
           console.log(chalk.yellow('\nDry run mode - no changes will be made\n'));
           console.log(chalk.green(`Would process ${inputFiles.length} image(s):`));
-          inputFiles.forEach((inputFile, index) => {
+          inputFiles.forEach((inputFile: string, index: number) => {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${path.basename(inputFile)} → ${path.basename(outputPath!)}`));
           });

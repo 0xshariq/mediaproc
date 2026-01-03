@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import path from 'path';
 import * as fs from 'fs';
-import { validatePaths, resolveOutputPaths, MediaExtensions } from '@mediaproc/cli';
+import { validatePaths, resolveOutputPaths, MediaExtensions } from '../utils/pathValidator.js';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance, sharp } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';

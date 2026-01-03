@@ -2,6 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs';
+import { validatePaths, MediaExtensions } from '../utils/pathValidator.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 
@@ -125,7 +126,7 @@ export function gridCommand(imageCmd: Command): void {
 
         if (!columns && !rows) {
           // Auto-calculate square-ish grid
-          columns = Math.ceil(Math.sqrt(imageCount));
+          cols = Math.ceil(Math.sqrt(validImages.length));
           rows = Math.ceil(imageCount / columns);
         } else if (columns && !rows) {
           rows = Math.ceil(imageCount / columns);

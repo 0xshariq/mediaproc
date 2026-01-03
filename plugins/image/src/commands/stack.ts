@@ -2,6 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs';
+import { validatePaths, MediaExtensions } from '../utils/pathValidator.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 
@@ -95,8 +96,26 @@ export function stackCommand(imageCmd: Command): void {
           process.exit(1);
         }
 
-        // Check all files exist
-        for (const img of images) {
+        // Validate all input files
+        const { inputFiles, errors } = validatePaths(images.join(','), undefined, {
+          allowedExtensions: MediaExtensions.IMAGE,
+          recursive: false,
+        });
+
+        if (errors.length > 0) {
+          spinner.fail(chalk.red('Validation failed:'));
+          errors.forEach(err => console.log(chalk.red(`  ✗ ${err}`)));
+          process.exit(1);
+        }
+
+        if (inputFiles.length < 2) {
+          spinner.fail(chalk.red('Need at least 2 valid images to stack'));
+          process.exit(1);
+        }
+
+        // Use validated files
+        const validImages = inputFiles;
+        for (const img of validImages) {
           if (!fs.existsSync(img)) {
             spinner.fail(chalk.red(`Image not found: ${img}`));
             process.exit(1);

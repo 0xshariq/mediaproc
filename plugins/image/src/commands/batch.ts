@@ -3,6 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import path from 'path';
 import * as fs from 'fs';
+import { validatePaths, resolveOutputPaths, MediaExtensions } from '../utils/pathValidator.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 
@@ -98,8 +99,20 @@ export function batchCommand(imageCmd: Command): void {
       const spinner = ora('Scanning directory...').start();
 
       try {
-        if (!fs.existsSync(directory)) {
-          spinner.fail(chalk.red(`Directory not found: ${directory}`));
+        // Validate input directory
+        const { inputFiles, errors } = validatePaths(directory, undefined, {
+          allowedExtensions: MediaExtensions.IMAGE,
+          recursive: options.recursive || false,
+        });
+
+        if (errors.length > 0) {
+          spinner.fail(chalk.red('Validation failed:'));
+          errors.forEach(err => console.log(chalk.red(`  ✗ ${err}`)));
+          process.exit(1);
+        }
+
+        if (inputFiles.length === 0) {
+          spinner.fail(chalk.red('No valid image files found in directory'));
           process.exit(1);
         }
 

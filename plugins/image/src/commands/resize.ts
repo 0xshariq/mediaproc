@@ -6,7 +6,7 @@ import type { ResizeOptions } from '../types.js';
 import { createSharpInstance, sharp } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 // Dependency injection: Import global path validator from core
-import { validatePaths, resolveOutputPaths, MediaExtensions } from '@mediaproc/cli';
+import { validatePaths, resolveOutputPaths, MediaExtensions } from '../utils/pathValidator.js';
 
 export function resizeCommand(imageCmd: Command): void {
   imageCmd
