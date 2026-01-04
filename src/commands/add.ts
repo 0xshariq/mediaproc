@@ -12,7 +12,7 @@ type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'deno';
  */
 async function detectPackageManager(): Promise<PackageManager> {
   const managers: PackageManager[] = ['pnpm', 'bun', 'yarn', 'npm', 'deno'];
-  
+
   for (const manager of managers) {
     try {
       await execa(manager, ['--version'], { stdio: 'pipe' });
@@ -21,7 +21,7 @@ async function detectPackageManager(): Promise<PackageManager> {
       continue;
     }
   }
-  
+
   return 'npm'; // Fallback
 }
 
@@ -30,7 +30,7 @@ async function detectPackageManager(): Promise<PackageManager> {
  */
 async function isGlobalInstall(): Promise<boolean> {
   const execPath = process.argv[1];
-  
+
   // Check common global paths
   const globalPaths = [
     '/usr/local',
@@ -43,17 +43,18 @@ async function isGlobalInstall(): Promise<boolean> {
     '/.bun/install/global',
     '/.yarn/global'
   ];
-  
+
   if (globalPaths.some(p => execPath.includes(p))) {
     return true;
   }
-  
+
   return false;
 }
 
 export function addCommand(program: Command, pluginManager: PluginManager): void {
   program
     .command('add <plugin>')
+    .alias('install')
     .description('Install a mediaproc plugin')
     .option('-g, --global', 'Force global installation')
     .option('-l, --local', 'Force local installation')
@@ -63,7 +64,7 @@ export function addCommand(program: Command, pluginManager: PluginManager): void
         // Resolve plugin name
         const pluginName = resolvePluginPackage(plugin);
         const registryEntry = Object.values(PLUGIN_REGISTRY).find(e => e.package === pluginName);
-        
+
         // Check if already loaded
         if (pluginManager.getPlugin(pluginName)) {
           ora().succeed(chalk.green(`✓ Plugin ${chalk.cyan(pluginName)} is already loaded`));
@@ -107,13 +108,13 @@ export function addCommand(program: Command, pluginManager: PluginManager): void
 
         // Determine scope
         let installGlobally = options.global ? true : options.local ? false : await isGlobalInstall();
-        
+
         // Detect package manager
         const packageManager = await detectPackageManager();
-        
+
         // Build command args
         const args: string[] = [];
-        
+
         switch (packageManager) {
           case 'pnpm':
             args.push('add');
@@ -139,17 +140,17 @@ export function addCommand(program: Command, pluginManager: PluginManager): void
             if (installGlobally) args.push('-g');
             else if (options.saveDev) args.push('--save-dev');
         }
-        
+
         args.push(pluginName);
-        
+
         // Execute
         await execa(packageManager, args, {
           stdio: 'inherit',
           cwd: installGlobally ? undefined : process.cwd()
         });
-        
+
         spinner.succeed(chalk.green(`✓ Installed ${pluginName}`));
-        
+
         const scope = installGlobally ? 'globally' : 'locally';
         console.log(chalk.dim(`Installed ${scope} using ${packageManager}`));
 

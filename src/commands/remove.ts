@@ -10,29 +10,29 @@ import type { PluginManager } from '../plugin-manager.js';
 async function isPluginGlobal(pluginName: string): Promise<boolean> {
   try {
     // Try npm list -g
-    const { stdout } = await execa('npm', ['list', '-g', '--depth=0', pluginName], { 
+    const { stdout } = await execa('npm', ['list', '-g', '--depth=0', pluginName], {
       stdio: 'pipe',
-      reject: false 
+      reject: false
     });
     return stdout.includes(pluginName);
-  } catch {}
-  
+  } catch { }
+
   try {
     // Try pnpm list -g
-    const { stdout } = await execa('pnpm', ['list', '-g', '--depth=0', pluginName], { 
+    const { stdout } = await execa('pnpm', ['list', '-g', '--depth=0', pluginName], {
       stdio: 'pipe',
-      reject: false 
+      reject: false
     });
     return stdout.includes(pluginName);
-  } catch {}
-  
+  } catch { }
+
   return false;
 }
 
 export function removeCommand(program: Command, pluginManager: PluginManager): void {
   program
     .command('remove <plugin>')
-    .alias('rm')
+    .aliases(['uninstall', 'rm'])
     .description('Uninstall a mediaproc plugin')
     .option('-g, --global', 'Force global uninstall')
     .option('-l, --local', 'Force local uninstall')
@@ -41,10 +41,10 @@ export function removeCommand(program: Command, pluginManager: PluginManager): v
 
       try {
         // Ensure plugin name is properly formatted
-        const pluginName = plugin.startsWith('@mediaproc/') 
-          ? plugin 
+        const pluginName = plugin.startsWith('@mediaproc/')
+          ? plugin
           : `@mediaproc/${plugin}`;
-        
+
         // Check if plugin is loaded and is marked as built-in (shouldn't happen, but safety check)
         const pluginInstance = pluginManager.getPlugin(pluginName);
         if (pluginInstance?.isBuiltIn) {
@@ -92,26 +92,26 @@ export function removeCommand(program: Command, pluginManager: PluginManager): v
           if (uninstallGlobally) args.push('-g');
         }
         args.push(pluginName);
-        
+
         // Set working directory for local uninstalls
         const uninstallOptions: any = {
           stdio: 'pipe',
           reject: false
         };
-        
+
         if (!uninstallGlobally) {
           uninstallOptions.cwd = process.cwd();
         }
-        
+
         await execa(packageManager, args, uninstallOptions);
 
         const scope = uninstallGlobally ? 'globally' : 'locally';
         spinner.succeed(chalk.green(`✓ Successfully removed ${pluginName} (${scope})`));
-        
+
         if (wasLoaded) {
           console.log(chalk.green('✓ Plugin unloaded and cleaned up'));
         }
-        
+
         console.log(chalk.dim(`\nPlugin has been completely removed ${scope}`));
         console.log(chalk.dim('View remaining plugins: ') + chalk.white('mediaproc list'));
 
