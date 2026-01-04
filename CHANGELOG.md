@@ -5,9 +5,19 @@ All notable changes to MediaProc will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.5.2]
 
 ### Added
+
+- ✨ `mediaproc delete` command - Delete/uninstall plugins with confirmation
+  - Delete plugin: `mediaproc delete <plugin>`
+  - Auto-detects plugin types (official, community, third-party)
+  - Auto-detects installation scope (global/local)
+  - Confirmation prompt before deletion (skip with `--yes`)
+  - Shows plugin type badges (★ OFFICIAL, ◆ COMMUNITY, ◇ THIRD-PARTY)
+  - Supports all package managers (npm, pnpm, yarn, bun)
+  - Alias: `mediaproc uninstall <plugin>`
+  - Verbose mode: `--verbose` flag for detailed output
 - ✨ `mediaproc update` command - Update plugins to latest or specific versions
   - Update all plugins: `mediaproc update`
   - Update specific plugin: `mediaproc update <plugin>`
@@ -19,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Verbose mode: `--verbose` flag for detailed output
 
 ### Improved
+
 - 🔄 Path handling in image plugin
   - Supports single file: `image.jpg`
   - Supports multiple files: `img1.jpg,img2.jpg`
@@ -28,12 +39,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 📚 Updated documentation with update command examples
 
 ### Architecture
+
 - ✅ Designed plugin-based architecture
 - ✅ Implemented plugin discovery and loading system
 - ✅ Created plugin registry with short name mapping
 - ✅ Built core CLI framework with Commander.js
 
 ### Plugins (Scaffolded)
+
 - ✅ Image plugin structure (10 commands)
 - ✅ Video plugin structure (6 commands)
 - ✅ Audio plugin structure (5 commands)
@@ -46,16 +59,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ Pipeline plugin structure (2 commands)
 
 ### Core Commands
+
 - ✅ `add` - Install plugins with auto-detection
 - ✅ `remove` - Uninstall plugins
 - ✅ `list` - List installed plugins
 - ✅ `plugins` - Show plugin catalog
-- ✅ `init` - Initialize configuration
-- ✅ `config` - Manage settings
 - ✅ `run` - Execute pipelines
 - ✅ `validate` - Validate media files
 
 ### Documentation
+
 - ✅ Plugin system architecture guide
 - ✅ Configuration documentation
 - ✅ Upcoming features roadmap
@@ -65,6 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ Third-party plugin standards
 
 ### Infrastructure
+
 - ✅ TypeScript with strict mode
 - ✅ pnpm workspace monorepo
 - ✅ Modular project structure
@@ -73,6 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-12-27
 
 ### Added
+
 - Initial project structure
 - Core CLI framework
 - Plugin system architecture
@@ -81,7 +96,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Community guidelines
 
 ### Status
+
 🚧 **Planning & Development Phase**
+
 - Architecture complete
 - Implementation in progress
 - Expected beta: Q2 2026

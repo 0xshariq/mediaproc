@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import { PluginManager } from './plugin-manager.js';
 import { addCommand } from './commands/add.js';
 import { removeCommand } from './commands/remove.js';
+import { deleteCommand } from './commands/delete.js';
 import { listCommand } from './commands/list.js';
 import { pluginsCommand } from './commands/plugins.js';
 import { helpCommand } from './commands/help.js';
@@ -51,6 +52,7 @@ export async function cli(): Promise<void> {
   // Plugin management commands
   addCommand(program, pluginManager);
   removeCommand(program, pluginManager);
+  deleteCommand(program, pluginManager);
   listCommand(program, pluginManager);
   pluginsCommand(program, pluginManager);
   updateCommand(program);

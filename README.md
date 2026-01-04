@@ -174,10 +174,8 @@ mediaproc document compress input.pdf --quality high
 - `mediaproc list` - List all plugins (built-in and installed)
 - `mediaproc add <plugin>` - Install add-on plugins from npm
 - `mediaproc remove <plugin>` - Uninstall add-on plugins
+- `mediaproc delete <plugin>` - Delete/uninstall plugins (alias: uninstall)
 - `mediaproc update [plugin]` - Update plugin(s) to latest version
-  - `--version <version>` - Update to specific version
-  - `--global` - Update globally installed plugins
-  - `--verbose` - Show detailed output
 - `mediaproc plugins` - Show available plugins
 - `mediaproc init` - Initialize configuration
 - `mediaproc config` - Manage settings
@@ -380,6 +378,11 @@ mediaproc-image resize photo.jpg -w 1920
 - `mediaproc list` - List all plugins (built-in and installed)
 - `mediaproc add <plugin>` - Install add-on plugins from npm
 - `mediaproc remove <plugin>` - Uninstall add-on plugins
+- `mediaproc delete <plugin>` - Delete/uninstall plugins (alias: uninstall)
+  - `--global` - Delete globally installed plugin
+  - `--local` - Delete locally installed plugin
+  - `--yes` - Skip confirmation prompt
+  - `--verbose` - Show detailed output
 - `mediaproc update [plugin]` - Update plugin(s) to latest version
   - `--version <version>` - Update to specific version
   - `--global` - Update globally installed plugins
@@ -771,6 +774,107 @@ $ mediaproc update image --verbose
 ℹ Current version: 1.2.0
 ℹ Running: pnpm add @mediaproc/image
 ✓ image ★ OFFICIAL updated successfully (1.2.0 → 1.2.2)
+```
+
+**📘 Full Guide:** See [Plugin Terminology Guide](docs/plugin-terminology.md) for detailed explanations.
+
+---
+
+### Deleting Plugins
+
+Remove plugins you no longer need to free up disk space:
+
+```bash
+# Delete a plugin (auto-detects installation scope)
+mediaproc delete image
+mediaproc delete video
+
+# Delete specific scope
+mediaproc delete image --global    # Delete globally installed
+mediaproc delete image --local     # Delete locally installed
+
+# Skip confirmation prompt
+mediaproc delete image --yes       # No confirmation
+
+# Verbose output
+mediaproc delete image --verbose   # Show detailed information
+```
+
+**Plugin Type Detection:**
+
+The delete command automatically detects and handles three types of plugins:
+
+1. **Official Plugins** (`@mediaproc/*`) - ★ OFFICIAL
+   ```bash
+   mediaproc delete image                    # Short name
+   mediaproc delete @mediaproc/image        # Full name
+   ```
+
+2. **Community Plugins** (`mediaproc-*`) - ◆ COMMUNITY
+   ```bash
+   mediaproc delete mediaproc-custom-filter  # Full name required
+   ```
+
+3. **Third-Party Plugins** - ◇ THIRD-PARTY
+   ```bash
+   mediaproc delete @company/plugin-name     # Full package name
+   ```
+
+**What the delete command does:**
+
+1. **Detects Plugin Type**: Identifies official, community, or third-party plugins
+2. **Detects Installation Scope**: Automatically determines if plugin is installed globally or locally
+3. **Confirms Deletion**: Shows confirmation prompt (skip with `--yes`)
+4. **Uninstalls Package**: Uses the appropriate package manager (npm, pnpm, yarn, bun)
+5. **Shows Status**: Displays deletion status with plugin type badge
+6. **Frees Memory**: Removes all plugin files from disk
+
+**Examples:**
+
+```bash
+# Delete official plugin
+$ mediaproc delete image
+✓ Found image ★ OFFICIAL installed locally
+
+⚠ You are about to delete:
+  Plugin: @mediaproc/image ★ OFFICIAL
+  Scope: locally
+
+✓ image ★ OFFICIAL deleted successfully (locally)
+
+# Delete with confirmation skip
+$ mediaproc delete video --yes
+✓ Found video ★ OFFICIAL installed globally
+✓ video ★ OFFICIAL deleted successfully (globally)
+
+# Delete community plugin
+$ mediaproc delete mediaproc-watermark
+✓ mediaproc-watermark ◆ COMMUNITY deleted successfully (locally)
+
+# Delete with verbose output
+$ mediaproc delete image --verbose --yes
+ℹ Package manager: pnpm
+ℹ Plugin type: ★ OFFICIAL
+ℹ Package name: @mediaproc/image
+✓ Found image ★ OFFICIAL installed locally
+ℹ Running: pnpm remove @mediaproc/image
+✓ image ★ OFFICIAL deleted successfully (locally)
+
+# Plugin found in both scopes
+$ mediaproc delete image
+⚠ Plugin found in both global and local scope
+Please specify:
+  mediaproc delete image --global  # Delete globally
+  mediaproc delete image --local   # Delete locally
+```
+
+**Aliases:**
+
+You can also use `uninstall` as an alias for `delete`:
+
+```bash
+mediaproc uninstall image
+mediaproc uninstall video --global
 ```
 
 **📘 Full Guide:** See [Plugin Terminology Guide](docs/plugin-terminology.md) for detailed explanations.
