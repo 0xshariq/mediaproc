@@ -129,8 +129,8 @@ mediaproc document compress input.pdf --quality high
 ## 📊 Current Status
 
 **Version**: 0.5.2 (Beta - Production Ready!)  
-**Status**: ✅ Image plugin with 49 commands + Universal CLI commands  
-**Next Release**: Video & Audio plugins (Q1 2026)  
+**Status**: ✅ Image plugin (49 commands) + ✅ Video plugin (6 commands) + Universal CLI  
+**Next Release**: Audio & Document plugins (Q1 2026)  
 **Expected v1.0**: Q2 2026
 
 ### Plugin Management
@@ -155,7 +155,7 @@ MediaProc provides comprehensive plugin lifecycle management:
 Core CLI commands available immediately after installation:
 
 **Media Operations:**
-- `mediaproc convert <input> <output>` - Auto-detect and convert any media file
+- `mediaproc convert <input> <output>` - Auto-detect and suggest the conversion
 - `mediaproc info <file>` - Display comprehensive file information
 - `mediaproc optimize <file>` - Analyze and suggest optimization strategies
 
@@ -255,23 +255,69 @@ Core CLI commands available immediately after installation:
 - Comprehensive error handling
 - File size reporting
 
+### Video Processing (@mediaproc/video)
+
+**Install:** `mediaproc add video`
+
+**6 Professional Commands Available:**
+
+**Format & Quality**
+- `compress` - CRF-based compression with presets (ultrafast to veryslow)
+  - H.264/H.265 codec support
+  - Quality control via CRF (0-51)
+  - Two-pass encoding option
+  - Hardware acceleration support
+- `transcode` - Convert between formats with codec control
+  - MP4, WebM, AVI, MKV, MOV support
+  - Video: H.264, H.265, VP9, AV1
+  - Audio: AAC, MP3, Opus, Vorbis
+  - Custom bitrate and quality settings
+
+**Editing & Manipulation**
+- `trim` - Cut videos by time or percentage
+  - Start/end time specification (HH:MM:SS)
+  - Duration-based trimming
+  - Percentage-based cutting
+  - Frame-accurate cutting
+- `resize` - Scale videos to target resolution
+  - Preset sizes: 4K, 1080p, 720p, 480p, 360p
+  - Custom dimensions with aspect ratio preservation
+  - Multiple scaling algorithms (fast/quality)
+
+**Merging & Extraction**
+- `merge` - Concatenate multiple videos
+  - Fast concat mode (no re-encode)
+  - Re-encode mode for different formats
+  - Automatic format compatibility detection
+- `extract` - Extract media from videos
+  - `extract-audio` - Extract audio tracks (MP3, AAC, WAV, FLAC)
+  - `extract-frames` - Export frame sequences (JPG, PNG)
+  - `extract-thumbnail` - Generate video thumbnails
+
+**Technical Features:**
+- FFmpeg-powered processing
+- Hardware acceleration (when available)
+- Progress tracking with ETA
+- Dry-run mode for preview
+- Comprehensive metadata display
+- File size reporting
+- Quality presets for common use cases
+
 ✅ **Architecture** - Plugin system designed and implemented  
 ✅ **Core CLI** - Command framework with plugin discovery  
-✅ **Built-in Plugin System** - Image plugin ships with CLI  
+✅ **Built-in Plugins** - Image & Video plugins ship with CLI  
 ✅ **Plugin Registry** - Smart plugin management  
 ✅ **Documentation** - Comprehensive guides and standards  
 ✅ **Community Guidelines** - Contributing, security, code of conduct
 
 ### 🚧 In Development
 
-🚧 **Video Plugin** - Format conversion, transcoding, frame extraction  
 🚧 **Audio Plugin** - Format conversion, normalization, trimming  
 🚧 **Testing** - Comprehensive test coverage  
 🚧 **Examples** - Real-world usage examples
 
 ### What's Next
 
-📋 **Video Plugin** - Format conversion, transcoding (Q1 2026)  
 📋 **Audio Plugin** - Format conversion, normalization (Q1 2026)  
 📋 **Document Plugin** - PDF processing, OCR (Q2 2026)  
 📋 **Advanced Plugins** - 3D, streaming, AI features (Q2-Q3 2026)  
@@ -289,13 +335,21 @@ See [Upcoming Features](docs/upcoming-features.md) for detailed roadmap.
 
 MediaProc ships with essential plugins pre-installed, giving you immediate productivity:
 
-- **@mediaproc/image** - Professional image processing (40 commands)
+- **@mediaproc/image** - Professional image processing (49 commands)
   - Resize, crop, rotate, flip, convert formats
   - Filters: blur, sharpen, tint, grayscale, median
   - Color adjustments: modulate, gamma, normalize
   - Utilities: thumbnail, watermark, optimize, trim, extend
 
-_More built-in plugins coming soon: video, audio, document_
+- **@mediaproc/video** - Professional video processing (6 commands)
+  - Compress: CRF-based compression with quality presets
+  - Transcode: Format conversion (MP4, WebM, AVI, MKV)
+  - Trim: Time-based cutting and clipping
+  - Resize: Scale to 4K, 1080p, 720p, or custom
+  - Merge: Concatenate multiple videos
+  - Extract: Audio tracks, frame sequences, thumbnails
+
+_More built-in plugins coming soon: audio, document_
 
 #### 🔌 **Add-on Plugins** (Install as Needed)
 
