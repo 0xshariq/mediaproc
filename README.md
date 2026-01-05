@@ -155,11 +155,13 @@ MediaProc provides comprehensive plugin lifecycle management:
 Core CLI commands available immediately after installation:
 
 **Media Operations:**
+
 - `mediaproc convert <input> <output>` - Auto-detect and suggest the conversion
 - `mediaproc info <file>` - Display comprehensive file information
 - `mediaproc optimize <file>` - Analyze and suggest optimization strategies
 
 **Help & Configuration:**
+
 - `mediaproc help [command]` - Show help for commands
 - `mediaproc init` - Initialize configuration file
 - `mediaproc config` - Manage configuration settings
@@ -169,7 +171,7 @@ Core CLI commands available immediately after installation:
 
 **Install:** `mediaproc add image`
 
-**49 Professional Commands Available:**
+**48 Professional Commands Available:**
 
 **Transform & Resize** (10 commands)
 
@@ -229,11 +231,11 @@ Core CLI commands available immediately after installation:
 
 **Utility** (10 commands)
 
+- `compress` - Advanced compression with quality control
 - `convert` - Format conversion (JPG, PNG, WebP, AVIF, TIFF, GIF)
 - `optimize` - Size optimization (up to 70% reduction, lossless/lossy)
-- `compress` - Advanced compression with quality control
-- `watermark` - Add watermarks with positioning and opacity
 - `info` - Display detailed image metadata
+- `watermark` - Add watermarks with positioning and opacity
 - `stats` - Technical image statistics (channels, depth, color space)
 - `split` - Split image into grid tiles
 - `stack` - Stack images horizontally/vertically
@@ -262,6 +264,7 @@ Core CLI commands available immediately after installation:
 **6 Professional Commands Available:**
 
 **Format & Quality**
+
 - `compress` - CRF-based compression with presets (ultrafast to veryslow)
   - H.264/H.265 codec support
   - Quality control via CRF (0-51)
@@ -274,6 +277,7 @@ Core CLI commands available immediately after installation:
   - Custom bitrate and quality settings
 
 **Editing & Manipulation**
+
 - `trim` - Cut videos by time or percentage
   - Start/end time specification (HH:MM:SS)
   - Duration-based trimming
@@ -285,6 +289,7 @@ Core CLI commands available immediately after installation:
   - Multiple scaling algorithms (fast/quality)
 
 **Merging & Extraction**
+
 - `merge` - Concatenate multiple videos
   - Fast concat mode (no re-encode)
   - Re-encode mode for different formats
@@ -295,6 +300,7 @@ Core CLI commands available immediately after installation:
   - `extract-thumbnail` - Generate video thumbnails
 
 **Technical Features:**
+
 - FFmpeg-powered processing
 - Hardware acceleration (when available)
 - Progress tracking with ETA
@@ -336,6 +342,7 @@ See [Upcoming Features](docs/upcoming-features.md) for detailed roadmap.
 MediaProc ships with essential plugins pre-installed, giving you immediate productivity:
 
 - **@mediaproc/image** - Professional image processing (49 commands)
+
   - Resize, crop, rotate, flip, convert formats
   - Filters: blur, sharpen, tint, grayscale, median
   - Color adjustments: modulate, gamma, normalize
