@@ -26,3 +26,23 @@ export interface ExtractOptions {
   format?: 'jpg' | 'png';
   fps?: number;
 }
+
+export interface TrimOptions {
+  input: string;
+  output?: string;
+  start: string;
+  end: string;
+}
+
+export interface ResizeOptions {
+  input: string;
+  output?: string;
+  width: number;
+  height: number;
+  maintainAspectRatio?: boolean;
+}
+
+export interface MergeOptions {
+  inputs: string[];
+  output?: string;
+}
