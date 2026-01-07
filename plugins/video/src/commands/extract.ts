@@ -12,6 +12,7 @@ import {
   parseTimeToSeconds,
 } from '../utils/ffmpeg.js';
 import { validatePaths, resolveOutputPaths } from '../utils/pathValidator.js';
+import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
 
 export function extractCommand(videoCmd: Command): void {
   // Extract audio
@@ -23,6 +24,7 @@ export function extractCommand(videoCmd: Command): void {
     .option('--bitrate <bitrate>', 'Audio bitrate (e.g., 192k)', '192k')
     .option('--dry-run', 'Show what would be done')
     .option('-v, --verbose', 'Verbose output')
+    .option('--help', 'Display help for command')
     .action(async (input: string, options: any) => {
       try {
         console.log(chalk.blue.bold('🎬 Audio Extraction\n'));
@@ -80,7 +82,11 @@ export function extractCommand(videoCmd: Command): void {
           console.log(chalk.dim(`ffmpeg ${args.join(' ')}\n`));
         }
 
-        await runFFmpeg(args, options.verbose);
+        await runFFmpeg(args, options.verbose, (line) => {
+          if (shouldDisplayLine(line, options.verbose || false)) {
+            console.log(styleFFmpegOutput(line));
+          }
+        });
 
         const outputStat = await stat(output);
 
@@ -107,6 +113,7 @@ export function extractCommand(videoCmd: Command): void {
     .option('--quality <quality>', 'JPEG quality (1-31, lower is better)', parseInt, 2)
     .option('--dry-run', 'Show what would be done')
     .option('-v, --verbose', 'Verbose output')
+    .option('--help', 'Display help for command')
     .action(async (input: string, options: ExtractOptions) => {
       try {
         console.log(chalk.blue.bold('🎬 Frame Extraction\n'));
@@ -181,7 +188,11 @@ export function extractCommand(videoCmd: Command): void {
           console.log(chalk.dim(`ffmpeg ${args.join(' ')}\n`));
         }
 
-        await runFFmpeg(args, options.verbose);
+        await runFFmpeg(args, options.verbose, (line) => {
+          if (shouldDisplayLine(line, options.verbose || false)) {
+            console.log(styleFFmpegOutput(line));
+          }
+        });
 
         console.log();
         console.log(chalk.green.bold('✓ Extraction Complete!\n'));
@@ -203,6 +214,7 @@ export function extractCommand(videoCmd: Command): void {
     .option('--width <width>', 'Thumbnail width in pixels', parseInt)
     .option('--dry-run', 'Show what would be done')
     .option('-v, --verbose', 'Verbose output')
+    .option('--help', 'Display help for command')
     .action(async (input: string, options: any) => {
       try {
         console.log(chalk.blue.bold('🎬 Thumbnail Extraction\n'));
@@ -250,7 +262,11 @@ export function extractCommand(videoCmd: Command): void {
           console.log(chalk.dim(`ffmpeg ${args.join(' ')}\n`));
         }
 
-        await runFFmpeg(args, options.verbose);
+        await runFFmpeg(args, options.verbose, (line) => {
+          if (shouldDisplayLine(line, options.verbose || false)) {
+            console.log(styleFFmpegOutput(line));
+          }
+        });
 
         const outputStat = await stat(output);
 

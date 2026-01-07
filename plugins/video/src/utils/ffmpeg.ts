@@ -1,6 +1,5 @@
 import { spawn } from 'child_process';
 import { resolve } from 'path';
-import chalk from 'chalk';
 import { fileExists } from './pathValidator.js';
 
 export interface VideoMetadata {
@@ -16,18 +15,27 @@ export interface VideoMetadata {
 /**
  * Execute ffmpeg command
  */
-export async function runFFmpeg(args: string[], verbose = false): Promise<void> {
+export async function runFFmpeg(
+  args: string[], 
+  verbose = false, 
+  onOutput?: (line: string) => void
+): Promise<void> {
   return new Promise((resolve, reject) => {
-    if (verbose) {
-      console.log(chalk.dim(`ffmpeg ${args.join(' ')}`));
-    }
-
     const ffmpeg = spawn('ffmpeg', args);
     let stderr = '';
 
     ffmpeg.stderr.on('data', (data) => {
-      stderr += data.toString();
-      if (verbose) {
+      const output = data.toString();
+      stderr += output;
+      
+      if (onOutput) {
+        // Split by lines and call callback for each
+        output.split('\n').forEach((line: string) => {
+          if (line.trim()) {
+            onOutput(line);
+          }
+        });
+      } else if (verbose) {
         process.stderr.write(data);
       }
     });

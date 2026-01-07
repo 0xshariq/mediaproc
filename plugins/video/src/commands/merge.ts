@@ -1,5 +1,6 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
+import ora from 'ora';
 import { writeFile, unlink, stat } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -10,34 +11,92 @@ import {
   formatFileSize,
   formatDuration,
 } from '../utils/ffmpeg.js';
-import { validatePaths, resolveOutputPaths, fileExists } from '../utils/pathValidator.js';
+import { fileExists, validatePaths, resolveOutputPaths } from '../utils/pathValidator.js';
+import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
+import { createStandardHelp } from '../utils/helpFormatter.js';
 
 export function mergeCommand(videoCmd: Command): void {
   videoCmd
     .command('merge <inputs...>')
-    .description('Merge multiple videos into one')
-    .option('-o, --output <path>', 'Output file path', 'merged.mp4')
-    .option('--re-encode', 'Re-encode videos (slower but handles different formats)')
-    .option('--dry-run', 'Show what would be done')
-    .option('-v, --verbose', 'Verbose output')
+    .description('Merge multiple video files into a single video')
+    .option('-o, --output <path>', 'Output file path (default: merged.mp4)', 'merged.mp4')
+    .option('--re-encode', 'Re-encode videos (slower but handles different formats/codecs)')
+    .option('-c, --codec <codec>', 'Video codec for re-encoding: h264, h265, vp9 (default: h264)', 'h264')
+    .option('--format <format>', 'Output format: mp4, mkv, avi, webm (default: mp4)', 'mp4')
+    .option('--dry-run', 'Preview command without executing')
+    .option('-v, --verbose', 'Show detailed FFmpeg output')
+    .option('-h, --help', 'Display help for merge command')
     .action(async (inputs: string[], options: any) => {
+      if (options.help) {
+        createStandardHelp({
+          commandName: 'merge',
+          emoji: '🔗',
+          description: 'Merge multiple video files into a single video. Supports fast concatenation (same format) or re-encoding (different formats). Can merge videos from different sources with automatic format conversion.',
+          usage: [
+            'merge <video1> <video2> [video3...] [options]',
+            'merge video1.mp4 video2.mp4 video3.mp4',
+            'merge part*.mp4 -o complete.mp4'
+          ],
+          options: [
+            { flag: '-o, --output <path>', description: 'Output file path (default: merged.mp4)' },
+            { flag: '--re-encode', description: 'Re-encode videos (handles different formats/codecs)' },
+            { flag: '-c, --codec <codec>', description: 'Video codec for re-encoding: h264, h265, vp9' },
+            { flag: '--format <format>', description: 'Output format: mp4, mkv, avi, webm (default: mp4)' },
+            { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
+            { flag: '-v, --verbose', description: 'Show detailed FFmpeg output' }
+          ],
+          examples: [
+            { command: 'merge video1.mp4 video2.mp4 video3.mp4', description: 'Merge three videos quickly (same format)' },
+            { command: 'merge part1.mp4 part2.mov part3.avi --re-encode', description: 'Merge different format videos with re-encoding' },
+            { command: 'merge *.mp4 -o complete.mp4', description: 'Merge all MP4 files in current directory' },
+            { command: 'merge video1.mp4 video2.mp4 -c h265 --re-encode', description: 'Merge and compress with HEVC codec' },
+            { command: 'merge clip*.mp4 -o final.mkv --format mkv', description: 'Merge to MKV format' }
+          ],
+          additionalSections: [
+            {
+              title: 'Merge Methods',
+              items: [
+                'Fast Concatenation - No re-encoding, very fast, requires same codec/format',
+                'Re-encoding - Slower but handles any format/codec combination',
+                'Auto Detection - Automatically chooses best method based on input files'
+              ]
+            },
+            {
+              title: 'Requirements',
+              items: [
+                'All videos must have the same resolution for best results',
+                'Audio tracks will be merged in order',
+                'At least 2 videos required for merging',
+                'Videos are merged in the order specified'
+              ]
+            }
+          ],
+          tips: [
+            'Use fast concatenation (no --re-encode) when all videos have same format',
+            'Use --re-encode when merging different formats or codecs',
+            'Sort input files numerically if using wildcards: part1, part2, etc.',
+            'Check video compatibility with --dry-run before long merges'
+          ]
+        });
+        process.exit(0);
+      }
       const tempListFile = join(tmpdir(), `mediaproc-merge-${Date.now()}.txt`);
+      const spinner = ora('Processing video merge...').start();
 
       try {
-        console.log(chalk.blue.bold('🎬 Video Merging\n'));
-
         if (inputs.length < 2) {
-          throw new Error('At least 2 videos are required for merging');
+          spinner.fail(chalk.red('At least 2 videos are required for merging'));
+          process.exit(1);
         }
 
         // Check ffmpeg
         const ffmpegAvailable = await checkFFmpeg();
         if (!ffmpegAvailable) {
-          throw new Error('ffmpeg is not installed or not in PATH');
+          spinner.fail(chalk.red('ffmpeg is not installed or not in PATH'));
+          process.exit(1);
         }
 
-        // Validate all inputs
-        console.log(chalk.dim('📊 Analyzing videos...\n'));
+        spinner.text = 'Analyzing videos...';
         const inputPaths: string[] = [];
         const metadataList: any[] = [];
         let totalDuration = 0;
@@ -49,12 +108,12 @@ export function mergeCommand(videoCmd: Command): void {
             throw new Error(`Input ${i + 1}: ${validation.errors.join(', ')}`);
           }
           const inputPath = validation.inputFiles[0];
-          
+
           // Check if input file exists
           if (!(await fileExists(inputPath))) {
             throw new Error(`Input ${i + 1} does not exist: ${inputPath}`);
           }
-          
+
           inputPaths.push(inputPath);
 
           const metadata = await getVideoMetadata(inputPath);
@@ -90,12 +149,12 @@ export function mergeCommand(videoCmd: Command): void {
         if (outputValidation.errors.length > 0) {
           throw new Error(`Output path invalid: ${outputValidation.errors.join(', ')}`);
         }
-        
+
         const outputMap = resolveOutputPaths([inputPaths[0]], options.output, {
           newExtension: '.mp4'
         });
         const output = outputMap.get(inputPaths[0])!;
-        
+
         // Check if output file already exists
         if (await fileExists(output) && !options.dryRun) {
           console.log(chalk.yellow(`⚠️  Output file exists and will be overwritten: ${output}\n`));
@@ -138,7 +197,11 @@ export function mergeCommand(videoCmd: Command): void {
           console.log(chalk.dim(`ffmpeg ${args.join(' ')}\n`));
         }
 
-        await runFFmpeg(args, options.verbose);
+        await runFFmpeg(args, options.verbose, (line) => {
+          if (options.verbose) {
+            logFFmpegOutput(line);
+          }
+        });
 
         // Get output file size
         const outputStat = await stat(output);

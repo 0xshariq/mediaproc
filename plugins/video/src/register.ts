@@ -10,14 +10,11 @@ export const name = '@mediaproc/video';
 export const version = '1.0.0';
 
 export function register(program: Command): void {
-  const videoCmd = program
-    .command('video')
-    .description('Video processing commands (powered by FFmpeg)');
-
-  compressCommand(videoCmd);
-  transcodeCommand(videoCmd);
-  extractCommand(videoCmd);
-  trimCommand(videoCmd);
-  resizeCommand(videoCmd);
-  mergeCommand(videoCmd);
+  // Register commands directly without 'video' subcommand
+  compressCommand(program);
+  transcodeCommand(program);
+  extractCommand(program);
+  trimCommand(program);
+  resizeCommand(program);
+  mergeCommand(program);
 }

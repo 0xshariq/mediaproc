@@ -11,6 +11,7 @@ import {
   formatFileSize,
   formatDuration,
 } from '../utils/ffmpeg.js';
+import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
 
 export function transcodeCommand(videoCmd: Command): void {
   videoCmd
@@ -24,6 +25,7 @@ export function transcodeCommand(videoCmd: Command): void {
     .option('--audio-bitrate <bitrate>', 'Audio bitrate (e.g., 128k)', '128k')
     .option('--dry-run', 'Show what would be done')
     .option('-v, --verbose', 'Verbose output')
+    .option('--help', 'Display help for command')
     .action(async (input: string, options: TranscodeOptions) => {
       try {
         console.log(chalk.blue.bold('🎬 Video Transcoding\n'));
@@ -108,7 +110,11 @@ export function transcodeCommand(videoCmd: Command): void {
           console.log(chalk.dim(`ffmpeg ${args.join(' ')}\n`));
         }
 
-        await runFFmpeg(args, options.verbose);
+        await runFFmpeg(args, options.verbose, (line) => {
+          if (shouldDisplayLine(line, options.verbose || false)) {
+            console.log(styleFFmpegOutput(line));
+          }
+        });
 
         // Get output file size
         const outputStat = await stat(output);
