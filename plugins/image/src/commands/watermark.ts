@@ -13,17 +13,23 @@ interface WatermarkOptions extends ImageOptions {
   position?: string;
   opacity?: number;
   scale?: number;
+  fontSize?: number;
+  fontColor?: string;
+  fontFamily?: string;
   help?: boolean;
 }
 
 export function watermarkCommand(imageCmd: Command): void {
   imageCmd
     .command('watermark <input> <watermark>')
-    .description('Add watermark to image')
+    .description('Add image or text watermark to image')
     .option('-o, --output <path>', 'Output file path')
     .option('--position <position>', 'Position: center, top-left, top-right, bottom-left, bottom-right', 'bottom-right')
     .option('--opacity <opacity>', 'Watermark opacity (0-1, default: 0.5)', parseFloat, 0.5)
-    .option('--scale <scale>', 'Watermark scale (0.1-1, default: 0.2)', parseFloat, 0.2)
+    .option('--scale <scale>', 'Scale: for images (0.1-1 of width, default: 0.2), for text (multiplier, default: 1.0)', parseFloat)
+    .option('--font-size <size>', 'Text base font size in pixels (default: auto-calculated)', parseInt)
+    .option('--font-color <color>', 'Text watermark color (hex or name, default: white)', 'white')
+    .option('--font-family <family>', 'Text watermark font family (default: Arial)', 'Arial')
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
@@ -33,24 +39,40 @@ export function watermarkCommand(imageCmd: Command): void {
         createStandardHelp({
           commandName: 'watermark',
           emoji: '©️',
-          description: 'Add watermark to images for copyright protection, branding, or attribution. Supports positioning and opacity control.',
-          usage: ['watermark <input> <watermark>', 'watermark <input> <logo.png> --position center', 'watermark <input> <mark.png> --opacity 0.3 --scale 0.3'],
+          description: 'Add image or text watermark to images for copyright protection, branding, or attribution. Automatically detects if watermark is a file or text.',
+          usage: [
+            'watermark <input> <watermark>',
+            'watermark <input> logo.png --position center',
+            'watermark <input> "Powered by MediaProc" --font-size 64',
+            'watermark <input> "© 2026" --position bottom-right --opacity 0.7'
+          ],
           options: [
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-watermarked.<ext>)' },
             { flag: '--position <position>', description: 'Position: center, top-left, top-right, bottom-left, bottom-right (default: bottom-right)' },
             { flag: '--opacity <opacity>', description: 'Watermark opacity 0-1 (default: 0.5)' },
-            { flag: '--scale <scale>', description: 'Watermark scale 0.1-1 (default: 0.2, 20% of image width)' },
+            { flag: '--scale <scale>', description: 'Scale factor - Image: 0.1-1 of image width (default: 0.2), Text: size multiplier (default: 1.0)' },
+            { flag: '--font-size <size>', description: 'Text watermark base font size in pixels (auto-calculated if not specified)' },
+            { flag: '--font-color <color>', description: 'Text watermark color (default: white)' },
+            { flag: '--font-family <family>', description: 'Text watermark font family (default: Arial)' },
             { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
-            { command: 'watermark photo.jpg logo.png', description: 'Add watermark to bottom-right (default)' },
-            { command: 'watermark image.jpg mark.png --position center', description: 'Center watermark' },
-            { command: 'watermark pic.jpg logo.png --opacity 0.3', description: 'Subtle watermark (30% opacity)' },
-            { command: 'watermark photo.jpg brand.png --scale 0.3 --position top-right', description: 'Larger watermark in top-right' }
+            { command: 'watermark photo.jpg logo.png', description: 'Add image watermark from file' },
+            { command: 'watermark image.jpg "© 2026 Company"', description: 'Add text watermark' },
+            { command: 'watermark pic.jpg "Powered by MediaProc" --scale 1.5', description: 'Larger text watermark (1.5x)' },
+            { command: 'watermark photo.jpg brand.png --scale 0.3 --position top-right', description: 'Larger image watermark (30% of width)' },
+            { command: 'watermark *.jpg "DRAFT" --font-color red --scale 2', description: 'Batch large text watermark in red' }
           ],
           additionalSections: [
+            {
+              title: 'Watermark Types',
+              items: [
+                'Image - Provide a file path (e.g., logo.png, watermark.svg)',
+                'Text - Provide any text string (e.g., "© 2026", "Powered by MediaProc")'
+              ]
+            },
             {
               title: 'Positions',
               items: [
@@ -60,22 +82,13 @@ export function watermarkCommand(imageCmd: Command): void {
                 'bottom-left - Lower left corner',
                 'bottom-right - Lower right corner (default)'
               ]
-            },
-            {
-              title: 'Opacity Guide',
-              items: [
-                '0.1-0.3 - Very subtle, barely visible',
-                '0.4-0.6 - Balanced visibility (recommended)',
-                '0.7-0.9 - Strong, clearly visible',
-                '1.0 - Fully opaque (no transparency)'
-              ]
             }
           ],
           tips: [
             'Use PNG watermarks with transparency for best results',
-            'Scale 0.2 (20%) is usually appropriate for logos',
-            'Opacity 0.5 balances protection and aesthetics',
-            'Bottom-right is standard for copyright marks'
+            'Quotes are optional for simple text, required for text with spaces',
+            'Text watermarks are rendered with transparent backgrounds',
+            'Common font families: Arial, Times New Roman, Courier, Helvetica'
           ]
         });
         process.exit(0);
@@ -84,10 +97,15 @@ export function watermarkCommand(imageCmd: Command): void {
       const spinner = ora('Processing image...').start();
 
       try {
-        // Validate watermark file exists (single file, not multi)
-        if (!fs.existsSync(watermark)) {
-          spinner.fail(chalk.red(`Watermark file not found: ${watermark}`));
-          process.exit(1);
+        // Detect if watermark is a file or text
+        const isWatermarkFile = fs.existsSync(watermark);
+        const watermarkType = isWatermarkFile ? 'image' : 'text';
+
+        if (options.verbose) {
+          spinner.info(chalk.blue(`Watermark type: ${watermarkType}`));
+          if (!isWatermarkFile) {
+            spinner.info(chalk.dim(`Text: "${watermark}"`));
+          }
         }
 
         // Validate input paths (can be multiple)
@@ -116,32 +134,50 @@ export function watermarkCommand(imageCmd: Command): void {
         if (options.verbose) {
           spinner.info(chalk.blue('Configuration:'));
           console.log(chalk.dim(`  Found ${inputFiles.length} file(s)`));
+          console.log(chalk.dim(`  Watermark type: ${watermarkType}`));
           console.log(chalk.dim(`  Watermark: ${watermark}`));
           console.log(chalk.dim(`  Position: ${options.position || 'bottom-right'}`));
           console.log(chalk.dim(`  Opacity: ${options.opacity || 0.5}`));
-          console.log(chalk.dim(`  Scale: ${options.scale || 0.2}`));
+          if (watermarkType === 'image') {
+            console.log(chalk.dim(`  Scale: ${options.scale || 0.2} (${((options.scale || 0.2) * 100).toFixed(0)}% of image width)`));
+          } else {
+            console.log(chalk.dim(`  Scale: ${options.scale || 1.0}x (text size multiplier)`));
+            console.log(chalk.dim(`  Base font size: ${options.fontSize ? options.fontSize + 'px' : 'auto'}`));
+            console.log(chalk.dim(`  Font color: ${options.fontColor || 'white'}`));
+            console.log(chalk.dim(`  Font family: ${options.fontFamily || 'Arial'}`));
+          }
           spinner.start('Processing...');
         }
 
         if (options.dryRun) {
           spinner.info(chalk.yellow('Dry run mode - no changes will be made'));
-          console.log(chalk.green(`✓ Would add watermark to ${inputFiles.length} file(s):`));
+          console.log(chalk.green(`✓ Would add ${watermarkType} watermark to ${inputFiles.length} file(s):`));
           inputFiles.forEach(f => console.log(chalk.dim(`  - ${f}`)));
           console.log(chalk.dim(`  Watermark: ${watermark}`));
+          if (watermarkType === 'text') {
+            console.log(chalk.dim(`  Text watermark with font size: ${options.fontSize || 48}px`));
+          }
           return;
         }
 
-        // Preload watermark
-        const scale = options.scale || 0.2;
-        const position = options.position || 'bottom-right';
-        
         // Calculate gravity once
+        const position = options.position || 'bottom-right';
         let gravity: sharp.Gravity = 'southeast';
         if (position === 'center') gravity = 'center';
         else if (position === 'top-left') gravity = 'northwest';
         else if (position === 'top-right') gravity = 'northeast';
         else if (position === 'bottom-left') gravity = 'southwest';
         else if (position === 'bottom-right') gravity = 'southeast';
+
+        // Prepare watermark buffer based on type
+        let watermarkBuffer: Buffer | null = null;
+
+        if (watermarkType === 'image') {
+          // For image watermarks, preload the watermark
+          // We'll scale it per image based on each image's dimensions
+          watermarkBuffer = await createSharpInstance(watermark).toBuffer();
+        }
+        // For text watermarks, we create them dynamically per image
 
         // Process all files
         for (const inputFile of inputFiles) {
@@ -150,23 +186,72 @@ export function watermarkCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile)!;
 
             const metadata = await createSharpInstance(inputFile).metadata();
+            const imageWidth = metadata.width || 800;
+            const imageHeight = metadata.height || 600;
 
-            // Calculate watermark size based on scale
-            const targetWidth = Math.round((metadata.width || 0) * scale);
-            
-            const watermarkResized = await createSharpInstance(watermark)
-              .resize(targetWidth)
-              .toBuffer();
+            let watermarkWithOpacity: Buffer;
 
-            // Apply watermark with opacity
-            const watermarkWithOpacity = await sharp(watermarkResized)
-              .composite([{
-                input: Buffer.from([255, 255, 255, Math.round((options.opacity || 0.5) * 255)]),
-                raw: { width: 1, height: 1, channels: 4 },
-                tile: true,
-                blend: 'dest-in'
-              }])
-              .toBuffer();
+            if (watermarkType === 'image') {
+              // Calculate watermark size based on scale for image watermarks
+              const scale = options.scale !== undefined ? options.scale : 0.2;
+              const targetWidth = Math.round(imageWidth * scale);
+              const targetHeight = Math.round(imageHeight * scale);
+
+              const watermarkResized = await sharp(watermarkBuffer!)
+                .resize(targetWidth, targetHeight)
+                .toBuffer();
+
+              // Apply opacity to image watermark
+              watermarkWithOpacity = await sharp(watermarkResized)
+                .composite([{
+                  input: Buffer.from([255, 255, 255, Math.round((options.opacity || 0.5) * 255)]),
+                  raw: { width: 1, height: 1, channels: 4 },
+                  tile: true,
+                  blend: 'dest-in'
+                }])
+                .toBuffer();
+            } else {
+              // For text watermarks, calculate font size based on image dimensions
+              const scale = options.scale !== undefined ? options.scale : 1.0;
+
+              // Auto-calculate base font size if not specified (3% of image width)
+              const baseFontSize = options.fontSize || Math.round(imageWidth * 0.03);
+              const fontSize = Math.round(baseFontSize * scale);
+
+              const fontColor = options.fontColor || 'white';
+              const fontFamily = options.fontFamily || 'Arial';
+
+              // Estimate text dimensions
+              const textWidth = watermark.length * fontSize * 0.6;
+              const textHeight = fontSize * 1.5;
+              const padding = 20;
+
+              const svgText = `
+                <svg width="${Math.ceil(textWidth + padding * 2)}" height="${Math.ceil(textHeight + padding)}">
+                  <text 
+                    x="${padding}" 
+                    y="${fontSize + padding / 2}" 
+                    font-family="${fontFamily}" 
+                    font-size="${fontSize}" 
+                    fill="${fontColor}"
+                    font-weight="bold"
+                  >${watermark}</text>
+                </svg>
+              `;
+
+              const textBuffer = Buffer.from(svgText);
+
+              // Apply opacity to text watermark
+              watermarkWithOpacity = await sharp(textBuffer)
+                .composite([{
+                  input: Buffer.from([255, 255, 255, Math.round((options.opacity || 0.5) * 255)]),
+                  raw: { width: 1, height: 1, channels: 4 },
+                  tile: true,
+                  blend: 'dest-in'
+                }])
+                .png()
+                .toBuffer();
+            }
 
             const pipeline = createSharpInstance(inputFile).composite([{
               input: watermarkWithOpacity,
