@@ -54,3 +54,18 @@ input-images/
 input-videos/
 
 __tests__/
+plugins/**/*.mp4
+plugins/**/*.mov
+plugins/**/*.avi
+plugins/**/*.mkv
+plugins/**/*.png
+plugins/**/*.jpg
+plugins/**/*.jpeg
+plugins/**/*.gif
+plugins/**/*.svg
+plugins/**/*.webp
+plugins/**/*.tiff
+plugins/**/*.bmp
+plugins/**/*.psd
+plugins/**/*.raw
+plugins/**/*.heic
