@@ -16,7 +16,7 @@ export function convertCommand(imageCmd: Command): void {
   imageCmd
     .command('convert <input>')
     .description('Convert image to different format')
-    .option('-f, --format <format>', 'Output format: jpg, png, webp, avif, tiff, gif', 'webp')
+    .option('-f, --format <format>', 'Output format: jpg, png, webp, avif, tiff, gif, webp')
     .option('-o, --output <path>', 'Output file path')
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
     .option('--compression <level>', 'PNG compression level (0-9)', parseInt, 9)

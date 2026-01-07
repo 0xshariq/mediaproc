@@ -47,8 +47,10 @@ WEB_DOCUMENTATION_IMPROVEMENTS.md
 
 # Website docs
 web/
-
+output-images/
+output-videos/
 plugin-marketplace/
 input-images/
+input-videos/
 
 __tests__/

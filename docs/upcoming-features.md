@@ -2,8 +2,8 @@
 
 ## Current Status
 
-**Version**: 0.1.0 (Planning & Development Phase)  
-**Status**: 🚧 Under Active Development  
+**Version**: 0.5.2-beta  
+**Status**: Image and Video Plugin Released
 **Expected Beta**: Q2 2026
 
 MediaProc is currently in the early development phase. The architecture and plugin system are complete, but individual plugin implementations are in progress.
@@ -11,24 +11,24 @@ MediaProc is currently in the early development phase. The architecture and plug
 ## Phase 1: Core Plugins (Q1 2026)
 
 ### Image Plugin ✅ Architecture Complete
-- [ ] Resize with multiple algorithms (bicubic, lanczos, nearest)
-- [ ] Format conversion (JPEG, PNG, WebP, AVIF, HEIF)
-- [ ] Optimization with configurable compression
-- [ ] Filters (grayscale, blur, sharpen, sepia)
-- [ ] Transformations (rotate, flip, crop)
-- [ ] Watermarking with positioning
-- [ ] Batch processing support
-- [ ] EXIF preservation options
+- [x] Resize with multiple algorithms (bicubic, lanczos, nearest)
+- [x] Format conversion (JPEG, PNG, WebP, AVIF, HEIF)
+- [x] Optimization with configurable compression
+- [x] Filters (grayscale, blur, sharpen, sepia)
+- [x] Transformations (rotate, flip, crop)
+- [x] Watermarking with positioning
+- [x] Batch processing support
+- [x] EXIF preservation options
 
 ### Video Plugin ✅ Architecture Complete
-- [ ] Format transcoding (MP4, WebM, AVI, MKV)
-- [ ] Codec conversion (H.264, H.265, VP9, AV1)
-- [ ] Quality presets (web, mobile, high-quality)
-- [ ] Frame extraction at intervals
-- [ ] Trim and cut operations
-- [ ] Resolution scaling
-- [ ] Video merging and concatenation
-- [ ] Audio track management
+- [x] Format transcoding (MP4, WebM, AVI, MKV)
+- [x] Codec conversion (H.264, H.265, VP9, AV1)
+- [x] Quality presets (web, mobile, high-quality)
+- [x] Frame extraction at intervals
+- [x] Trim and cut operations
+- [x] Resolution scaling
+- [x] Video merging and concatenation
+- [x] Audio track management
 
 ### Audio Plugin ✅ Architecture Complete
 - [ ] Format conversion (MP3, AAC, FLAC, WAV, OGG)

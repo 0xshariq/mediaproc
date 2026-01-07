@@ -20,7 +20,7 @@ export function thumbnailCommand(imageCmd: Command): void {
     .option('-s, --size <size>', 'Thumbnail size in pixels (default: 150)', parseInt, 150)
     .option('-o, --output <path>', 'Output file path')
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 85)
-    .option('--fit <fit>', 'Fit mode: cover, contain, fill, inside, outside', 'cover')
+    .option('--fit <fit>', 'Fit mode: cover, contain, fill, inside, outside, cover')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--help', 'Display help for thumbnail command')
