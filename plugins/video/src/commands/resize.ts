@@ -212,8 +212,8 @@ export function resizeCommand(videoCmd: Command): void {
           const metadata = await getVideoMetadata(inputFile);
           const inputStat = await stat(inputFile);
 
-          // Build filter
-          let vf = `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=decrease`;
+          // Build filter - ensure dimensions divisible by 2
+          let vf = `scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=decrease,pad=${targetWidth}:${targetHeight}:(ow-iw)/2:(oh-ih)/2`;
 
           if (options.aspect) {
             const [w, h] = options.aspect.split(':');
