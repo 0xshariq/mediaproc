@@ -21,8 +21,15 @@ export function trimCommand(videoCmd: Command): void {
     .option('-e, --end <time>', 'End time (HH:MM:SS or seconds)')
     .option('-d, --duration <duration>', 'Duration from start (HH:MM:SS or seconds)')
     .option('--fast', 'Fast mode - stream copy (less accurate but faster)')
+    .option('--accurate', 'Accurate mode - re-encode for frame accuracy')
     .option('-c, --codec <codec>', 'Video codec: h264, h265 (default: copy)', 'copy')
     .option('--format <format>', 'Output format: mp4, mkv, webm')
+    .option('--fade-in <duration>', 'Add fade-in effect (seconds)', parseFloat)
+    .option('--fade-out <duration>', 'Add fade-out effect (seconds)', parseFloat)
+    .option('--speed <factor>', 'Adjust playback speed (0.5-2.0)', parseFloat)
+    .option('--volume <factor>', 'Adjust audio volume (0.0-2.0, default: 1.0)', parseFloat)
+    .option('--quality <crf>', 'CRF quality if re-encoding (default: 23)', parseInt, 23)
+    .option('--no-audio', 'Remove audio track from output')
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('-h, --help', 'Display help for trim command')
@@ -44,8 +51,15 @@ export function trimCommand(videoCmd: Command): void {
             { flag: '-e, --end <time>', description: 'End time: HH:MM:SS or seconds' },
             { flag: '-d, --duration <duration>', description: 'Duration from start: HH:MM:SS or seconds' },
             { flag: '--fast', description: 'Fast mode - stream copy without re-encoding' },
+            { flag: '--accurate', description: 'Accurate mode - re-encode for frame accuracy' },
             { flag: '-c, --codec <codec>', description: 'Video codec: h264, h265, copy (default: copy)' },
             { flag: '--format <format>', description: 'Output format: mp4, mkv, webm' },
+            { flag: '--fade-in <duration>', description: 'Add fade-in effect (seconds)' },
+            { flag: '--fade-out <duration>', description: 'Add fade-out effect (seconds)' },
+            { flag: '--speed <factor>', description: 'Adjust playback speed (0.5-2.0)' },
+            { flag: '--volume <factor>', description: 'Adjust audio volume (0.0-2.0, default: 1.0)' },
+            { flag: '--quality <crf>', description: 'CRF quality if re-encoding (default: 23)' },
+            { flag: '--no-audio', description: 'Remove audio track from output' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output' }
           ],

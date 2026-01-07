@@ -21,7 +21,14 @@ export function mergeCommand(videoCmd: Command): void {
     .description('Merge multiple video files into a single video')
     .option('-o, --output <path>', 'Output file path (default: merged.mp4)', 'merged.mp4')
     .option('--re-encode', 'Re-encode videos (slower but handles different formats/codecs)')
+    .option('--transition <type>', 'Transition effect: fade, wipe, dissolve, none (default: none)', 'none')
+    .option('--transition-duration <seconds>', 'Transition duration in seconds (default: 1)', parseFloat, 1)
     .option('-c, --codec <codec>', 'Video codec for re-encoding: h264, h265, vp9 (default: h264)', 'h264')
+    .option('--quality <crf>', 'CRF quality if re-encoding (default: 23)', parseInt, 23)
+    .option('--scale <resolution>', 'Scale all videos to same resolution (e.g., 1080p)')
+    .option('--audio-track <n>', 'Select audio track from videos (1-based, default: 1)', parseInt, 1)
+    .option('--audio-codec <codec>', 'Audio codec: aac, mp3, opus (default: aac)', 'aac')
+    .option('--normalize-audio', 'Normalize audio levels across videos')
     .option('--format <format>', 'Output format: mp4, mkv, avi, webm (default: mp4)', 'mp4')
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
@@ -40,7 +47,14 @@ export function mergeCommand(videoCmd: Command): void {
           options: [
             { flag: '-o, --output <path>', description: 'Output file path (default: merged.mp4)' },
             { flag: '--re-encode', description: 'Re-encode videos (handles different formats/codecs)' },
+            { flag: '--transition <type>', description: 'Transition effect: fade, wipe, dissolve, none (default: none)' },
+            { flag: '--transition-duration <seconds>', description: 'Transition duration in seconds (default: 1)' },
             { flag: '-c, --codec <codec>', description: 'Video codec for re-encoding: h264, h265, vp9' },
+            { flag: '--quality <crf>', description: 'CRF quality if re-encoding (default: 23)' },
+            { flag: '--scale <resolution>', description: 'Scale all videos to same resolution (e.g., 1080p)' },
+            { flag: '--audio-track <n>', description: 'Select audio track from videos (1-based, default: 1)' },
+            { flag: '--audio-codec <codec>', description: 'Audio codec: aac, mp3, opus (default: aac)' },
+            { flag: '--normalize-audio', description: 'Normalize audio levels across videos' },
             { flag: '--format <format>', description: 'Output format: mp4, mkv, avi, webm (default: mp4)' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output' }

@@ -25,6 +25,13 @@ export function resizeCommand(videoCmd: Command): void {
     .option('-a, --aspect <ratio>', 'Aspect ratio: 16:9, 4:3, 21:9, 1:1')
     .option('--fps <fps>', 'Output frame rate (e.g., 24, 30, 60)', parseInt)
     .option('--format <format>', 'Output format: mp4, mkv, webm, avi')
+    .option('--scale-algo <algorithm>', 'Scaling algorithm: bilinear, bicubic, lanczos, spline (default: lanczos)', 'lanczos')
+    .option('--deinterlace', 'Deinterlace video (for interlaced sources)')
+    .option('--rotate <degrees>', 'Rotate video: 90, 180, 270 degrees', parseInt)
+    .option('--flip <direction>', 'Flip video: horizontal, vertical, both')
+    .option('--crop <spec>', 'Crop video (width:height:x:y or preset: 16:9, 4:3, 1:1)')
+    .option('--threads <n>', 'Number of threads for encoding (default: auto)', parseInt)
+    .option('--hw-accel', 'Enable hardware acceleration (GPU)')
     .option('--no-audio', 'Remove audio from output')
     .option('--two-pass', 'Use two-pass encoding for better quality')
     .option('--dry-run', 'Preview command without executing')
@@ -52,6 +59,13 @@ export function resizeCommand(videoCmd: Command): void {
             { flag: '-a, --aspect <ratio>', description: 'Aspect ratio: 16:9, 4:3, 21:9, 1:1' },
             { flag: '--fps <fps>', description: 'Output frame rate (e.g., 24, 30, 60)' },
             { flag: '--format <format>', description: 'Output format: mp4, mkv, webm, avi' },
+            { flag: '--scale-algo <algorithm>', description: 'Scaling algorithm: bilinear, bicubic, lanczos, spline (default: lanczos)' },
+            { flag: '--deinterlace', description: 'Deinterlace video (for interlaced sources)' },
+            { flag: '--rotate <degrees>', description: 'Rotate video: 90, 180, 270 degrees' },
+            { flag: '--flip <direction>', description: 'Flip video: horizontal, vertical, both' },
+            { flag: '--crop <spec>', description: 'Crop video (width:height:x:y or preset: 16:9, 4:3, 1:1)' },
+            { flag: '--threads <n>', description: 'Number of threads for encoding (default: auto)' },
+            { flag: '--hw-accel', description: 'Enable hardware acceleration (GPU)' },
             { flag: '--no-audio', description: 'Remove audio track from output' },
             { flag: '--two-pass', description: 'Enable two-pass encoding for better quality' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },

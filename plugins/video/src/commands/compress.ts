@@ -22,8 +22,16 @@ export function compressCommand(videoCmd: Command): void {
     .option('--crf <crf>', 'CRF value (0-51, lower=better quality)', parseInt)
     .option('--preset <preset>', 'Encoding preset: ultrafast, fast, medium, slow, veryslow (default: medium)', 'medium')
     .option('-b, --bitrate <bitrate>', 'Target bitrate (e.g., 2M, 5M)')
+    .option('--min-bitrate <bitrate>', 'Minimum bitrate (e.g., 1M)')
+    .option('--max-bitrate <bitrate>', 'Maximum bitrate (e.g., 8M)')
     .option('--audio-bitrate <bitrate>', 'Audio bitrate (default: 128k)', '128k')
-    .option('--format <format>', 'Output format: mp4, mkv, webm', 'mp4')
+    .option('--audio-codec <codec>', 'Audio codec: aac, mp3, opus (default: aac)', 'aac')
+    .option('--format <format>', 'Output format: mp4, mkv, webm (default: mp4)', 'mp4')
+    .option('--optimize-for <target>', 'Optimize for: web, streaming, archive, mobile')
+    .option('--resize <scale>', 'Also resize during compression (e.g., 720p, 1080p)')
+    .option('--threads <n>', 'Number of threads for encoding (default: auto)', parseInt)
+    .option('--hw-accel', 'Enable hardware acceleration (GPU)')
+    .option('--strip-metadata', 'Remove all metadata from output')
     .option('--two-pass', 'Use two-pass encoding for better quality')
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
@@ -47,8 +55,16 @@ export function compressCommand(videoCmd: Command): void {
             { flag: '--crf <crf>', description: 'CRF value 0-51, lower=better (overrides quality preset)' },
             { flag: '--preset <preset>', description: 'Encoding: ultrafast, fast, medium, slow, veryslow' },
             { flag: '-b, --bitrate <bitrate>', description: 'Target bitrate (e.g., 2M, 5M)' },
+            { flag: '--min-bitrate <bitrate>', description: 'Minimum bitrate (e.g., 1M)' },
+            { flag: '--max-bitrate <bitrate>', description: 'Maximum bitrate (e.g., 8M)' },
             { flag: '--audio-bitrate <bitrate>', description: 'Audio bitrate (default: 128k)' },
+            { flag: '--audio-codec <codec>', description: 'Audio codec: aac, mp3, opus (default: aac)' },
             { flag: '--format <format>', description: 'Output format: mp4, mkv, webm (default: mp4)' },
+            { flag: '--optimize-for <target>', description: 'Optimize for: web, streaming, archive, mobile' },
+            { flag: '--resize <scale>', description: 'Also resize during compression (e.g., 720p, 1080p)' },
+            { flag: '--threads <n>', description: 'Number of threads for encoding (default: auto)' },
+            { flag: '--hw-accel', description: 'Enable hardware acceleration (GPU)' },
+            { flag: '--strip-metadata', description: 'Remove all metadata from output' },
             { flag: '--two-pass', description: 'Enable two-pass encoding for better quality' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output' }
