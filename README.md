@@ -128,8 +128,8 @@ mediaproc document compress input.pdf --quality high
 
 ## 📊 Current Status
 
-**Version**: 0.5.2 (Beta - Production Ready!)  
-**Status**: ✅ Image plugin (51 commands) + ✅ Video plugin (6 commands) + Universal CLI  
+**Version**: 0.6.0 (Beta - Production Ready!)  
+**Status**: ✅ Image plugin (51 commands) + ✅ Video plugin (6 commands) + Audio plugin (5 commands) + Universal CLI  
 **Next Release**: Audio & Document plugins (Q1 2026)  
 **Expected v1.0**: Q2 2026
 
