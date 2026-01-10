@@ -12,11 +12,6 @@ import { deleteCommand } from './commands/delete.js';
 import { listCommand } from './commands/list.js';
 import { pluginsCommand } from './commands/plugins.js';
 import { helpCommand } from './commands/help.js';
-import { runCommand } from './commands/run.js';
-import { validateCommand } from './commands/validate.js';
-import { convertCommand } from './commands/convert.js';
-import { infoCommand } from './commands/info.js';
-import { optimizeCommand } from './commands/optimize.js';
 import { updateCommand } from './commands/update.js';
 
 const program = new Command();
@@ -57,15 +52,6 @@ export async function cli(): Promise<void> {
   pluginsCommand(program, pluginManager);
   updateCommand(program);
   helpCommand(program);
-  
-  // Universal commands (auto-install plugins if needed)
-  convertCommand(program, pluginManager);
-  infoCommand(program, pluginManager);
-  optimizeCommand(program, pluginManager);
-  
-  // Utility commands
-  runCommand(program);
-  validateCommand(program);
 
   // Auto-load installed plugins before parsing commands
   await autoLoadPlugins();
