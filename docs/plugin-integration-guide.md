@@ -92,7 +92,6 @@ cd mediaproc-plugin-hello
 npm init -y
 
 # 3. Install dependencies
-npm install --save-peer @mediaproc/cli
 npm install --save-dev typescript @types/node
 npm install chalk commander
 
@@ -151,9 +150,6 @@ cat > package.json << 'PKG'
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build"
-  },
-  "peerDependencies": {
-    "@mediaproc/cli": ">=0.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.4",
@@ -249,9 +245,6 @@ npm init -y
 ### Step 2: Install Dependencies
 
 ```bash
-# Peer dependency
-npm install --save-peer @mediaproc/cli
-
 # Dev dependencies
 npm install --save-dev typescript @types/node
 
@@ -427,9 +420,6 @@ export type * from './types.js';
   "engines": {
     "node": ">=18.0.0"
   },
-  "peerDependencies": {
-    "@mediaproc/cli": ">=0.1.0"
-  },
   "dependencies": {
     "chalk": "^5.3.0",
     "commander": "^11.1.0",
@@ -560,9 +550,6 @@ export const metadata: {
   "keywords": ["mediaproc", "mediaproc-plugin"],
   "engines": {
     "node": ">=18.0.0"
-  },
-  "peerDependencies": {
-    "@mediaproc/cli": ">=0.1.0"
   },
   "mediaproc": {
     "pluginName": "yourname",

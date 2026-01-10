@@ -389,9 +389,6 @@ Examples:
   "engines": {
     "node": ">=18.0.0"
   },
-  "peerDependencies": {
-    "@mediaproc/cli": ">=0.1.0"
-  },
   "mediaproc": {
     "pluginName": "yourname",
     "pluginVersion": "1.0.0",
@@ -471,7 +468,6 @@ npm init -y
 #### Step 2: Install Dependencies
 
 ```bash
-npm install --save-peer @mediaproc/cli
 npm install --save-dev typescript @types/node
 npm install chalk commander ora execa
 ```

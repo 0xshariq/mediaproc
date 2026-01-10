@@ -2,7 +2,7 @@
 
 ## Current Status
 
-**Version**: 0.5.2-beta  
+**Version**: 0.6.0-beta  
 **Status**: Image and Video Plugin Released
 **Expected Beta**: Q2 2026
 
