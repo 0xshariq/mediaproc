@@ -13,6 +13,16 @@ import { listCommand } from './commands/list.js';
 import { pluginsCommand } from './commands/plugins.js';
 import { helpCommand } from './commands/help.js';
 import { updateCommand } from './commands/update.js';
+import { doctorCommand } from './commands/doctor.js';
+import { searchCommand } from './commands/search.js';
+import { historyCommand } from './commands/history.js';
+import { batchCommand } from './commands/batch.js';
+import { statsCommand } from './commands/stats.js';
+import { compareCommand } from './commands/compare.js';
+import { templateCommand } from './commands/template.js';
+import { workspaceCommand } from './commands/workspace.js';
+import { watchCommand } from './commands/watch.js';
+import { benchmarkCommand } from './commands/benchmark.js';
 
 const program = new Command();
 const pluginManager = new PluginManager();
@@ -53,6 +63,18 @@ export async function cli(): Promise<void> {
   updateCommand(program);
   helpCommand(program);
 
+  // System & utility commands
+  program.addCommand(doctorCommand);
+  program.addCommand(searchCommand);
+  program.addCommand(historyCommand);
+  program.addCommand(batchCommand);
+  program.addCommand(statsCommand);
+  program.addCommand(compareCommand);
+  program.addCommand(templateCommand);
+  program.addCommand(workspaceCommand);
+  program.addCommand(watchCommand);
+  program.addCommand(benchmarkCommand);
+
   // Auto-load installed plugins before parsing commands
   await autoLoadPlugins();
 
@@ -70,3 +92,4 @@ cli().catch((error) => {
   console.error(chalk.red('Fatal error:'), error);
   process.exit(1);
 });
+
