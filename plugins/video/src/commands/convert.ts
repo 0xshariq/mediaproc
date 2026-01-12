@@ -2,15 +2,16 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import { stat } from 'fs/promises';
 import {
-  runFFmpeg,
-  getVideoMetadata,
-  checkFFmpeg,
-  formatFileSize,
-  formatDuration,
+    runFFmpeg,
+    getVideoMetadata,
+    checkFFmpeg,
+    formatFileSize,
+    formatDuration,
 } from '../utils/ffmpeg.js';
 import { parseInputPaths, resolveOutputPaths } from '../utils/pathValidator.js';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import ora from 'ora';
+import { showPluginBranding } from '../utils/branding.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 
 // Format configurations
@@ -119,16 +120,16 @@ export function convertCommand(videoCmd: Command): void {
                 }
 
                 // Resolve output paths
-        const outputPathsMap = resolveOutputPaths(
-            inputPaths,
-            options.output,
-            {
-                suffix: '',
-                newExtension: formatConfig[format].ext
-            }
-        );
+                const outputPathsMap = resolveOutputPaths(
+                    inputPaths,
+                    options.output,
+                    {
+                        suffix: '',
+                        newExtension: formatConfig[format].ext
+                    }
+                );
 
-        const outputPaths = Array.from(outputPathsMap.values());
+                const outputPaths = Array.from(outputPathsMap.values());
                 // Process each file
                 for (let i = 0; i < inputPaths.length; i++) {
                     const inputFile = inputPaths[i];
@@ -229,6 +230,7 @@ export function convertCommand(videoCmd: Command): void {
                         console.log(chalk.dim('\n[DRY RUN] Would execute:'));
                         console.log(chalk.cyan(`ffmpeg ${args.join(' ')}`));
                         console.log();
+                        showPluginBranding('Video');
                         continue;
                     }
 
@@ -268,6 +270,7 @@ export function convertCommand(videoCmd: Command): void {
                 if (inputPaths.length > 1) {
                     console.log(chalk.green.bold(`\n✓ Converted ${inputPaths.length} videos successfully!`));
                 }
+                showPluginBranding('Video');
 
             } catch (error) {
                 console.log(chalk.red(`\n❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`));

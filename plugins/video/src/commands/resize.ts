@@ -10,6 +10,7 @@ import {
 import { parseInputPaths, resolveOutputPaths } from '../utils/pathValidator.js';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
+import { showPluginBranding } from '../utils/branding.js';
 import ora from 'ora';
 
 export function resizeCommand(videoCmd: Command): void {
@@ -274,10 +275,12 @@ export function resizeCommand(videoCmd: Command): void {
             )
           );
         }
-
+        
         if (!options.dryRun) {
           console.log(chalk.green.bold(`\n✨ Successfully resized ${inputFiles.length} video(s)!`));
+          showPluginBranding('Video');
         }
+        showPluginBranding('Video');
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
         process.exit(1);

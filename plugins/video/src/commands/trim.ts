@@ -10,6 +10,7 @@ import {
 } from '../utils/ffmpeg.js';
 import { parseInputPaths, resolveOutputPaths } from '../utils/pathValidator.js';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
+import { showPluginBranding } from '../utils/branding.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 
 export function trimCommand(videoCmd: Command): void {
@@ -214,10 +215,12 @@ export function trimCommand(videoCmd: Command): void {
             )
           );
         }
-
+        
         if (!options.dryRun) {
           console.log(chalk.green.bold(`\n✨ Successfully trimmed ${inputFiles.length} video(s)!`));
+          showPluginBranding('Video');
         }
+        showPluginBranding('Video');
       } catch (error) {
         spinner.fail(chalk.red(`Error: ${(error as Error).message}`));
         process.exit(1);

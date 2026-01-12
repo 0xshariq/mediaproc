@@ -11,6 +11,7 @@ import {
   formatFileSize,
   formatDuration,
 } from '../utils/ffmpeg.js';
+import { showPluginBranding } from '../utils/branding.js';
 import { fileExists, validatePaths, resolveOutputPaths } from '../utils/pathValidator.js';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
@@ -202,6 +203,7 @@ export function mergeCommand(videoCmd: Command): void {
           console.log(chalk.dim('\nCommand:'));
           console.log(chalk.gray(`  ffmpeg ${args.join(' ')}\n`));
           console.log(chalk.green('✓ Dry run complete'));
+          showPluginBranding('Video');
           return;
         }
 
@@ -226,6 +228,7 @@ export function mergeCommand(videoCmd: Command): void {
         console.log(chalk.gray(`   Total duration: ${formatDuration(totalDuration)}`));
         console.log(chalk.gray(`   Output size: ${formatFileSize(outputStat.size)}`));
         console.log(chalk.dim(`\n   ${output}`));
+        showPluginBranding('Video');
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
         process.exit(1);

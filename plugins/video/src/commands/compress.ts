@@ -215,11 +215,12 @@ export function compressCommand(videoCmd: Command): void {
             )
           );
         }
-
+        
         if (!options.dryRun) {
           console.log(chalk.green.bold(`\n✨ Successfully compressed ${inputFiles.length} video(s)!`));
           showPluginBranding('Video');
         }
+        showPluginBranding('Video');
       } catch (error) {
         spinner.fail(chalk.red(`Error: ${(error as Error).message}`));
         process.exit(1);
