@@ -161,7 +161,6 @@ export function infoCommand(imageCmd: Command): void {
               console.log(chalk.gray(`   Channels: ${imageInfo.format.channels}`));
               console.log(chalk.gray(`   Bit Depth: ${imageInfo.format.depth}`));
               console.log(chalk.gray(`   Alpha Channel: ${imageInfo.format.hasAlpha ? 'Yes' : 'No'}`));
-              showPluginBranding('Image');
               
               if (imageInfo.format.density) {
                 console.log(chalk.gray(`   Density: ${imageInfo.format.density} DPI`));
@@ -180,6 +179,7 @@ export function infoCommand(imageCmd: Command): void {
 
               console.log();
             }
+            showPluginBranding('Image');
           } catch (error) {
             console.error(chalk.red(`\n✗ Failed to read ${fileName}`));
             console.error(chalk.red(`   Error: ${(error as Error).message}`));
