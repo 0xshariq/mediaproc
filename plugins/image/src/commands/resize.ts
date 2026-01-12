@@ -8,7 +8,6 @@ import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from
 import { showPluginBranding } from '../utils/branding.js';
 import path from 'node:path';
 
-export { getFileName } from '../utils/pathValidator.js';
 
 export function resizeCommand(imageCmd: Command): void {
   imageCmd
@@ -20,7 +19,6 @@ export function resizeCommand(imageCmd: Command): void {
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
     .option('--fit <fit>', 'Fit mode: cover, contain, fill, inside, outside', 'cover')
     .option('--maintain-aspect-ratio', 'Maintain aspect ratio (default: true)', true)
-    .option('--no-maintain-aspect-ratio', 'Do not maintain aspect ratio')
     .option('--position <position>', 'Position for cover/contain: center, top, bottom, left, right, etc.', 'center')
     .option('--background <color>', 'Background color for contain/outside (hex, rgb, or named)', '#ffffff')
     .option('--kernel <kernel>', 'Kernel for resizing: nearest, cubic, mitchell, lanczos2, lanczos3', 'lanczos3')
@@ -137,6 +135,7 @@ export function resizeCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
+          showPluginBranding('Image');
           return;
         }
 

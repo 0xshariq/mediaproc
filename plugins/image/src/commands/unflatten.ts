@@ -2,7 +2,8 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
+import { showPluginBranding } from '../utils/branding.js';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
@@ -94,6 +95,7 @@ export function unflattenCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
+          showPluginBranding('Image');
           return;
         }
 
@@ -138,6 +140,7 @@ export function unflattenCommand(imageCmd: Command): void {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
         console.log(chalk.cyan('  ℹ  Alpha channel added (all pixels fully opaque)'));
+        showPluginBranding('Image');
       } catch (error) {
         spinner.fail(chalk.red('Failed to unflatten image'));
         const errorMessage = error instanceof Error ? error.message : String(error);

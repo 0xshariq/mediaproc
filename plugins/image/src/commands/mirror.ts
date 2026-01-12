@@ -2,7 +2,8 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
+import { showPluginBranding } from '../utils/branding.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 
@@ -132,6 +133,7 @@ export function mirrorCommand(imageCmd: Command): void {
           spinner.info(chalk.yellow('Dry run mode - no changes will be made'));
           console.log(chalk.green(`✓ Would create ${mode} mirror effect for ${inputFiles.length} file(s):`));
           inputFiles.forEach(f => console.log(chalk.dim(`  - ${f}`)));
+          showPluginBranding('Image');
           return;
         }
 
@@ -253,6 +255,7 @@ export function mirrorCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
+        showPluginBranding('Image');
 
       } catch (error) {
         spinner.fail(chalk.red('Processing failed'));

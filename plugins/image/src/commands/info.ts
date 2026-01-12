@@ -4,7 +4,7 @@ import ora from 'ora';
 
 import { stat } from 'node:fs/promises';
 import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
-export { getFileName } from '../utils/pathValidator.js';
+import { showPluginBranding } from '../utils/branding.js';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
@@ -161,6 +161,7 @@ export function infoCommand(imageCmd: Command): void {
               console.log(chalk.gray(`   Channels: ${imageInfo.format.channels}`));
               console.log(chalk.gray(`   Bit Depth: ${imageInfo.format.depth}`));
               console.log(chalk.gray(`   Alpha Channel: ${imageInfo.format.hasAlpha ? 'Yes' : 'No'}`));
+              showPluginBranding('Image');
               
               if (imageInfo.format.density) {
                 console.log(chalk.gray(`   Density: ${imageInfo.format.density} DPI`));

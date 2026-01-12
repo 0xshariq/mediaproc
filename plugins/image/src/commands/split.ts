@@ -3,7 +3,8 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
+import { showPluginBranding } from '../utils/branding.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 import path from 'path';
@@ -154,6 +155,7 @@ export function splitCommand(imageCmd: Command): void {
           console.log(chalk.green(`✓ Would split ${inputFiles.length} file(s):`));
           inputFiles.forEach(f => console.log(chalk.dim(`  - ${f}`)));
           console.log(chalk.dim(`  Into: ${rows}x${columns} grid (${totalTiles} tiles each)`));
+          showPluginBranding('Image');
           return;
         }
 
@@ -229,7 +231,7 @@ export function splitCommand(imageCmd: Command): void {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
         console.log(chalk.dim(`  Tiles per image: ${totalTiles} (${rows}x${columns})`));
-
+        showPluginBranding('Image');
       } catch (error) {
         spinner.fail(chalk.red('Processing failed'));
         if (options.verbose) {

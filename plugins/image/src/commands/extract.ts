@@ -2,7 +2,8 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
+import { showPluginBranding } from '../utils/branding.js';
 import type { ExtractOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
@@ -124,6 +125,7 @@ export function extractCommand(imageCmd: Command): void {
           } else {
             console.log(chalk.dim(`  Region: ${options.left},${options.top} ${options.width}x${options.height}`));
           }
+          showPluginBranding('Image');
           return;
         }
 
@@ -196,6 +198,7 @@ export function extractCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
+        showPluginBranding('Image');
 
       } catch (error) {
         spinner.fail(chalk.red('Processing failed'));

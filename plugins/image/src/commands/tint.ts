@@ -2,7 +2,8 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
+import { showPluginBranding } from '../utils/branding.js';
 import type { FilterOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
@@ -111,6 +112,7 @@ export function tintCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
+          showPluginBranding('Image');
           return;
         }
 
@@ -159,7 +161,7 @@ export function tintCommand(imageCmd: Command): void {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
         console.log(chalk.dim(`  Color: ${options.color || '#0000ff'}`));
-
+        showPluginBranding('Image');
       } catch (error) {
         spinner.fail(chalk.red('Failed to apply tint'));
         if (options.verbose) {

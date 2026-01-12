@@ -3,10 +3,11 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 import path from 'path';
+import { showPluginBranding } from '../utils/branding.js';
 
 interface BatchOptions {
   input: string;
@@ -140,6 +141,7 @@ export function batchCommand(imageCmd: Command): void {
           if (imageFiles.length > 10) {
             console.log(chalk.dim(`  ... and ${imageFiles.length - 10} more`));
           }
+          
           return;
         }
 
@@ -237,6 +239,7 @@ export function batchCommand(imageCmd: Command): void {
         if (failed > 0) {
           console.log(chalk.yellow(`  Failed: ${failed}`));
         }
+        showPluginBranding('Image');
 
       } catch (error) {
         spinner.fail(chalk.red('Batch processing failed'));

@@ -5,8 +5,9 @@ import ora from 'ora';
 import type { ConvertOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
-// Dependency injection: Import global path validator from core
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { showPluginBranding } from '../utils/branding.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; 
+
 
 interface ConvertOptionsExtended extends ConvertOptions {
   help?: boolean;
@@ -123,6 +124,7 @@ export function convertCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
+          showPluginBranding('Image');
           return;
         }
 
@@ -183,7 +185,7 @@ export function convertCommand(imageCmd: Command): void {
         }
         console.log(chalk.dim(`  Target format: ${options.format.toUpperCase()}`));
 
-        console.log(chalk.dim(`  Target format: ${options.format.toUpperCase()}`));
+        showPluginBranding('Image');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to convert images'));

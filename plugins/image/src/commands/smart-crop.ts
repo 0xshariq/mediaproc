@@ -2,7 +2,8 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
+import { showPluginBranding } from '../utils/branding.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 
@@ -131,6 +132,7 @@ export function smartCropCommand(imageCmd: Command): void {
           inputFiles.forEach(f => console.log(chalk.dim(`  - ${f}`)));
           console.log(chalk.dim(`  To: ${options.width}x${options.height}`));
           console.log(chalk.dim(`  Strategy: ${options.strategy}`));
+          showPluginBranding('Image');
           return;
         }
 
@@ -165,6 +167,7 @@ export function smartCropCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
+        showPluginBranding('Image');
 
       } catch (error) {
         spinner.fail(chalk.red('Processing failed'));

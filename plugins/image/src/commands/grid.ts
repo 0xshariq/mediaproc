@@ -2,7 +2,8 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, IMAGE_EXTENSIONS } from '../utils/pathValidator.js';
+import { showPluginBranding } from '../utils/branding.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 
@@ -165,6 +166,7 @@ export function gridCommand(imageCmd: Command): void {
           console.log(chalk.dim(`  Images: ${imageCount}`));
           console.log(chalk.dim(`  Layout: ${columns}x${rows}`));
           console.log(chalk.dim(`  Output size: ${gridWidth}x${gridHeight}`));
+          showPluginBranding('Image');
           return;
         }
 
@@ -216,7 +218,7 @@ export function gridCommand(imageCmd: Command): void {
         console.log(chalk.dim(`  Cell size: ${cellWidth}x${cellHeight}`));
         console.log(chalk.dim(`  Output: ${outputPath} (${gridWidth}x${gridHeight})`));
         console.log(chalk.dim(`  File size: ${(outputStats.size / 1024).toFixed(2)}KB`));
-
+        showPluginBranding('Image');
       } catch (error) {
         spinner.fail(chalk.red('Failed to create grid'));
         if (options.verbose) {

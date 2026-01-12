@@ -2,10 +2,11 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
+import { showPluginBranding } from '../utils/branding.js';
 import path from 'node:path';
 
 interface AutoOrientOptions extends ImageOptions {
@@ -95,6 +96,7 @@ export function autoOrientCommand(imageCmd: Command): void {
           const outputPath = outputPaths.get(inputFile);
           console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
         });
+        showPluginBranding('Image');
         return;
       }
 
@@ -137,6 +139,7 @@ export function autoOrientCommand(imageCmd: Command): void {
       if (failCount > 0) {
         console.log(chalk.red(`  ✗ Failed: ${failCount}`));
       }
+      showPluginBranding('Image');
     } catch (error) {
       spinner.fail(chalk.red('Failed to auto-orient image'));
       const errorMessage = error instanceof Error ? error.message : String(error);

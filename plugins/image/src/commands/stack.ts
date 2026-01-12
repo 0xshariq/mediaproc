@@ -2,7 +2,8 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS } from '../utils/pathValidator.js'; export { getFileName } from '../utils/pathValidator.js';
+import { validatePaths, IMAGE_EXTENSIONS } from '../utils/pathValidator.js';
+import { showPluginBranding } from '../utils/branding.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 
@@ -168,6 +169,7 @@ export function stackCommand(imageCmd: Command): void {
           console.log(chalk.dim(`  Images: ${images.length}`));
           console.log(chalk.dim(`  Direction: ${direction}`));
           console.log(chalk.dim(`  Output size: ${canvasWidth}x${canvasHeight}`));
+          showPluginBranding('Image');
           return;
         }
 
@@ -239,7 +241,7 @@ export function stackCommand(imageCmd: Command): void {
         console.log(chalk.dim(`  Alignment: ${align}`));
         console.log(chalk.dim(`  Output: ${outputPath} (${canvasWidth}x${canvasHeight})`));
         console.log(chalk.dim(`  File size: ${(outputStats.size / 1024).toFixed(2)}KB`));
-
+        showPluginBranding('Image');
       } catch (error) {
         spinner.fail(chalk.red('Failed to stack images'));
         if (options.verbose) {
