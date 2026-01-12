@@ -11,6 +11,7 @@ import {
 import { parseInputPaths, resolveOutputPaths } from '../utils/pathValidator.js';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
+import { showPluginBranding } from '../utils/branding.js';
 
 export function compressCommand(videoCmd: Command): void {
   videoCmd
@@ -217,6 +218,7 @@ export function compressCommand(videoCmd: Command): void {
 
         if (!options.dryRun) {
           console.log(chalk.green.bold(`\n✨ Successfully compressed ${inputFiles.length} video(s)!`));
+          showPluginBranding('Video');
         }
       } catch (error) {
         spinner.fail(chalk.red(`Error: ${(error as Error).message}`));

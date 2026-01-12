@@ -17,7 +17,7 @@ export const benchmarkCommand = new Command()
   .option('--file <path>', 'Test file to use for benchmarking')
   .option('--iterations <n>', 'Number of iterations', '5')
   .option('--json', 'Output as JSON')
-  .action(async (options) => {
+  .action(async (options): Promise<void> => {
     if (options.system) {
       await runSystemBenchmark(options.json);
       return;
@@ -32,7 +32,7 @@ export const benchmarkCommand = new Command()
     benchmarkCommand.help();
   });
 
-async function runSystemBenchmark(json: boolean): void {
+async function runSystemBenchmark(json: boolean): Promise<void> {
   const cpus = os.cpus();
   const totalMem = os.totalmem();
   const freeMem = os.freemem();

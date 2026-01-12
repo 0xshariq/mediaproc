@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
+import { showBranding } from '../utils/branding';
 import * as os from 'os';
 
 interface HistoryEntry {
@@ -27,12 +28,14 @@ export const historyCommand = new Command()
     if (options.clear) {
       clearHistory();
       console.log('✓ History cleared');
+      showBranding();
       return;
     }
 
     if (options.export) {
       exportHistory(options.export);
       console.log(`✓ History exported to ${options.export}`);
+      showBranding();
       return;
     }
 
@@ -40,7 +43,8 @@ export const historyCommand = new Command()
     const limit = parseInt(options.limit);
 
     if (history.length === 0) {
-      console.log('\n📝 No command history yet\n');
+      console.log('\n📝 No command history yet');
+      showBranding();
       return;
     }
 
@@ -72,7 +76,9 @@ historyCommand
 
     // In a real implementation, this would actually execute the command
     console.log('⚠️  Note: Command replay requires full implementation');
-    console.log(`   Run manually: mediaproc ${entry.command} ${entry.args.join(' ')}\n`);
+    console.log(`   Run manually: mediaproc ${entry.command} ${entry.args.join(' ')}`);
+    
+    showBranding();
   });
 
 // Add search subcommand
@@ -96,6 +102,8 @@ historyCommand
 
     console.log(`\n🔍 Found ${matches.length} matching commands:\n`);
     displayHistory(matches, matches.length);
+    
+    showBranding();
   });
 
 // Add stats subcommand
@@ -142,7 +150,9 @@ historyCommand
       console.log(`\n⏱️  Average duration: ${(avgDuration / 1000).toFixed(2)}s`);
     }
 
-    console.log('\n' + '━'.repeat(50) + '\n');
+    console.log('\n' + '─'.repeat(50));
+    
+    showBranding();
   });
 
 function loadHistory(): HistoryEntry[] {

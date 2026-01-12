@@ -3,6 +3,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
+import { showBranding } from '../utils/branding';
 
 const execAsync = promisify(exec);
 
@@ -72,6 +73,7 @@ export const doctorCommand = new Command()
 
     if (failCount > 0) {
       console.log('❌ Some critical issues found. Please resolve them before using MediaProc.');
+      showBranding();
       process.exit(1);
     } else if (warnCount > 0) {
       console.log('⚠️  Some warnings found. MediaProc should work, but consider fixing warnings.');
@@ -86,6 +88,8 @@ export const doctorCommand = new Command()
       console.log(`   Architecture: ${process.arch}`);
       console.log(`   Memory: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB used`);
     }
+
+    showBranding();
   });
 
 async function checkNodeVersion(): Promise<DiagnosticResult> {
@@ -137,7 +141,7 @@ async function checkFFmpeg(): Promise<DiagnosticResult> {
 
 async function checkSharp(): Promise<DiagnosticResult> {
   try {
-    const sharp = require('sharp');
+    require('sharp');
     return {
       name: 'Sharp (Image Processing)',
       status: 'pass',

@@ -18,7 +18,6 @@ interface WorkspaceRule {
 }
 
 const WORKSPACE_DIR = '.mediaproc';
-const WORKSPACE_FILE = 'workspace.json';
 
 export const workspaceCommand = new Command()
   .name('workspace')

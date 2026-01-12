@@ -5,6 +5,7 @@ import type { ResizeOptions } from '../types.js';
 import { createSharpInstance, sharp } from '../utils/sharp.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
+import { showPluginBranding } from '../utils/branding.js';
 import path from 'node:path';
 
 export { getFileName } from '../utils/pathValidator.js';
@@ -218,6 +219,8 @@ export function resizeCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
+
+        showPluginBranding('Image');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to resize images'));

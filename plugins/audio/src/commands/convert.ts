@@ -10,6 +10,7 @@ import {
 } from '../utils/ffmpeg.js';
 import { parseInputPaths, resolveOutputPaths, validateOutputPath } from '../utils/pathValidator.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
+import { showPluginBranding } from '../utils/branding.js';
 import ora from 'ora';
 
 export function convertCommand(audioCmd: Command): void {
@@ -166,6 +167,8 @@ export function convertCommand(audioCmd: Command): void {
         if (inputPaths.length > 1) {
           console.log(chalk.green(`\n✓ Converted ${inputPaths.length} files successfully`));
         }
+
+        showPluginBranding('Audio');
 
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
