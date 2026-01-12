@@ -145,6 +145,7 @@ export function convertCommand(audioCmd: Command): void {
           if (options.dryRun) {
             console.log(chalk.yellow('\n[DRY RUN] Would execute:'));
             console.log(chalk.dim(`ffmpeg ${args.join(' ')}`));
+            showPluginBranding('Audio');
             continue;
           }
 

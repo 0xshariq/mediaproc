@@ -1,6 +1,6 @@
 {
   "name": "@mediaproc/audio",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Audio processing plugin for mediaproc - powered by FFmpeg",
   "type": "module",
   "main": "./dist/index.js",
@@ -14,8 +14,17 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist", "bin"],
-  "keywords": ["mediaproc", "audio", "ffmpeg", "convert", "normalize"],
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "keywords": [
+    "mediaproc",
+    "audio",
+    "ffmpeg",
+    "convert",
+    "normalize"
+  ],
   "author": "Sharique Chaudhary",
   "license": "ISC",
   "engines": {

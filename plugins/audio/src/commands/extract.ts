@@ -11,6 +11,7 @@ import {
 import { parseInputPaths, resolveOutputPaths, validateOutputPath } from '../utils/pathValidator.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 import ora from 'ora';
+import { showPluginBranding } from '../utils/branding.js';
 
 export function extractCommand(audioCmd: Command): void {
   audioCmd
@@ -138,6 +139,7 @@ export function extractCommand(audioCmd: Command): void {
           if (options.dryRun) {
             console.log(chalk.yellow('\n[DRY RUN] Would execute:'));
             console.log(chalk.dim(`ffmpeg ${args.join(' ')}`));
+            showPluginBranding('Audio');
             continue;
           }
 
@@ -161,7 +163,7 @@ export function extractCommand(audioCmd: Command): void {
         if (inputPaths.length > 1) {
           console.log(chalk.green(`\n✓ Extracted audio from ${inputPaths.length} videos successfully`));
         }
-
+        showPluginBranding('Audio');
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
         process.exit(1);

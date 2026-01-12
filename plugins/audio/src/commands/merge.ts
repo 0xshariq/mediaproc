@@ -12,6 +12,7 @@ import {
 import { parseInputPaths } from '../utils/pathValidator.js';
 import { createStandardHelp } from '../utils/helpFormatter.js';
 import ora from 'ora';
+import { showPluginBranding } from '../utils/branding.js';
 
 export function mergeCommand(audioCmd: Command): void {
   audioCmd
@@ -134,6 +135,7 @@ export function mergeCommand(audioCmd: Command): void {
           console.log(chalk.yellow('\n[DRY RUN] Would execute:'));
           console.log(chalk.dim(`ffmpeg ${args.join(' ')}`));
           await unlink(concatFile);
+          showPluginBranding('Audio');
           return;
         }
 
@@ -154,7 +156,7 @@ export function mergeCommand(audioCmd: Command): void {
           spinner.fail(chalk.red('Merge failed'));
           throw error;
         }
-
+        showPluginBranding('Audio');
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
         process.exit(1);
