@@ -264,18 +264,31 @@ See [Plugin Integration Guide](docs/plugin-integration-guide.md) for complete do
 
 ## Documentation
 
-- [Installation Guide](docs/configuration.md#installation)
-- [Plugin Integration Guide](docs/plugin-integration-guide.md)
-- [Plugin System Architecture](docs/plugin-system.md)
-- [Architecture Overview](docs/architecture-decisions.md)
-- [Contributing Guide](CONTRIBUTING.md)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
+### Getting Started
+- [Installation Guide](docs/configuration.md#installation) - Setup and configuration
+- [Universal Commands](docs/universal-commands.md) - CLI commands for all plugins
 
-**📚 Full Documentation:** [https://mediaproc.dev](https://mediaproc.dev)
+### Plugin Development
+- [Plugin Integration Guide](docs/plugin-integration-guide.md) - Complete guide to creating plugins
+- [Plugin System Architecture](docs/plugin-system.md) - Understanding the plugin system
+- [Plugin Architecture](docs/plugin-architecture.md) - Technical architecture details
+- [Plugin Terminology](docs/plugin-terminology.md) - Key concepts and definitions
+- [Plugin Ideas](docs/plugin-ideas.md) - Inspiration for new plugins
+
+### Architecture & Design
+- [Architecture Decisions](docs/architecture-decisions.md) - Design decisions and rationale
+- [Upcoming Features](docs/upcoming-features.md) - Planned features and roadmap
+
+### Project Guidelines
+- [Contributing Guide](CONTRIBUTING.md) - How to contribute
+- [Code of Conduct](CODE_OF_CONDUCT.md) - Community guidelines
+- [Security Policy](SECURITY.md) - Security and vulnerability reporting
+
+**📚 Full Documentation Website:** [https://docs-mediaproc.vercel.app](https://docs-mediaproc.vercel.app)
 
 ## Roadmap
 
-**Current (v0.6.0-beta):**
+**Current (v0.7.0):**
 - ✅ Core CLI with plugin system
 - ✅ Image Plugin (51 commands)
 - ✅ Video Plugin (6 commands)
