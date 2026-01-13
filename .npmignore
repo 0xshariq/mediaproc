@@ -8,6 +8,7 @@ STRUCTURE.md
 SECURITY.md
 info.md
 CHANGELOG.md
+internal-docs/
 
 # Source files (we publish dist/)
 src/
