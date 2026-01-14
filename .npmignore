@@ -84,7 +84,5 @@ temp/
 .travis.yml
 
 
-input-images/
-input-videos/
-web/
-plugin-marketplace/
+input/
+output/
