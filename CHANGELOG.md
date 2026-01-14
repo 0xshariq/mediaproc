@@ -5,6 +5,94 @@ All notable changes to MediaProc will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-01-14
+
+### Added
+
+#### Documentation
+- ✨ **Universal Commands Documentation** - Comprehensive guide for all CLI commands
+  - Created `/docs/universal-commands.md` with 13+ universal commands
+  - Updated web docs `/web/content/cli/universal-commands.mdx` with interactive components
+  - Organized commands into 4 categories:
+    - Plugin Management (add, remove, list, validate, update, detect)
+    - Workflow & Automation (batch, template, workspace, watch)
+    - Analysis & Statistics (history, stats, compare, benchmark)
+    - Utilities (doctor, search, help)
+  - Added best practices, examples, and workflow guides
+  - Included exit codes reference and advanced usage tips
+
+#### CLI Features
+- ✨ **CLI Branding System** - Dynamic version display across all commands
+  - Created `/src/utils/branding.ts` with dynamic version detection
+  - Reads version from `package.json` automatically using `import.meta.url`
+  - Added `showBranding()` footer to CLI commands:
+    - doctor, search, history (all actions), batch, stats, compare, template, workspace, watch, benchmark
+  - Displays MediaProc version, docs URL, and GitHub link
+  - Styled with separators for clean output
+
+- ✨ **Plugin Branding System** - Consistent branding for plugin commands
+  - Created branding utilities in image, video, and audio plugins
+  - Added `showPluginBranding()` to plugin commands:
+    - Image: resize, convert, crop
+    - Video: compress, trim
+    - Audio: convert, normalize
+  - Shows plugin name + version with "Powered by MediaProc" footer
+
+#### Web Documentation
+- ✨ **Enhanced Search Functionality** - Fixed and improved search component
+  - Shows all pages on open (Ctrl+K / Cmd+K)
+  - Real-time filtering as you type
+  - Fuzzy search with relevance scoring
+  - Keyboard navigation support (arrows, Enter, Escape)
+  - Proper Next.js Link integration for navigation
+  - Fixed onClick handler structure for proper routing
+
+- ✨ **Improved "On This Page" Navigation** - Compact and clean TOC
+  - Reduced line height matching LangChain style
+  - Tighter spacing (`space-y-0.5`, `py-1`, `py-0.5`)
+  - Added `leading-tight` for compact text
+  - Better visual hierarchy for H2 and H3 headings
+
+### Improved
+
+#### Documentation Structure
+- 📚 **Root README Enhancements**
+  - Organized documentation section into logical categories
+  - Added references to all `/docs` folder markdown files:
+    - Getting Started section
+    - Plugin Development section (5 guides)
+    - Architecture & Design section (2 docs)
+    - Project Guidelines section (3 docs)
+  - Updated documentation website URL to `https://docs-mediaproc.vercel.app`
+
+- 📚 **Web Documentation**
+  - Refactored root README from 1530 lines to ~320 lines (79% reduction)
+  - Transformed web README to Next.js development guide
+  - Added interactive grid cards for quick reference in universal commands
+  - Color-coded sections with borders and callouts
+  - Linked "See Also" cards for better navigation
+
+### Fixed
+
+- 🐛 **TypeScript Compilation Errors**
+  - Fixed async return type in `benchmark.ts` (Promise<void>)
+  - Removed unused imports across multiple command files
+  - Fixed variable access before declaration in Search component
+  - Resolved cascading render warning in useEffect
+
+- 🐛 **Search Component Issues**
+  - Fixed search not initializing when modal opens
+  - Fixed onClick handler on Link component preventing navigation
+  - Moved onClick to div wrapper for proper routing
+  - Added setTimeout to avoid cascading renders in useEffect
+
+### Changed
+
+- 🔄 **Version Management** - All version references now dynamic
+  - CLI version pulled from root `package.json` (0.7.0)
+  - Plugin versions pulled from respective `package.json` files
+  - No more hardcoded version strings to update manually
+
 ## [0.5.2]
 
 ### Added
