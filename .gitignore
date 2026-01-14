@@ -44,10 +44,7 @@ web/
 
 # Input / Output Folders for testing
 output/
-output-images/
-output-videos/
-input-images/
-input-videos/
+input/
 
 # Plugin MarketPlace for future (will publish as a separate repo)
 plugin-marketplace/
