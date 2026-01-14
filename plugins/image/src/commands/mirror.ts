@@ -109,7 +109,7 @@ export function mirrorCommand(imageCmd: Command): void {
 
         const mode = options.mode || 'horizontal';
         const validModes = ['horizontal', 'vertical', 'both', 'quad'];
-        
+
         if (!validModes.includes(mode)) {
           spinner.fail(chalk.red(`Invalid mode: ${mode}. Use: ${validModes.join(', ')}`));
           process.exit(1);
@@ -138,21 +138,27 @@ export function mirrorCommand(imageCmd: Command): void {
         }
 
         // Process all files
-        for (const inputFile of inputFiles) {
+        for (let i = 0; i < inputFiles.length; i++) {
+          const inputFile = inputFiles[i];
           try {
             const fileName = getFileName(inputFile);
             const outputPath = outputPaths.get(inputFile)!;
+
+            if (options.verbose) {
+              spinner.text = `Processing ${fileName} (${i + 1}/${inputFiles.length})...`;
+            }
 
             const sharpInstance = createSharpInstance(inputFile);
             const metadata = await sharpInstance.metadata();
             const width = metadata.width!;
             const height = metadata.height!;
+            const format = metadata.format!;
 
             let resultBuffer: Buffer;
 
             if (mode === 'horizontal') {
-              const originalBuffer = await sharpInstance.toBuffer();
-              const flippedBuffer = await createSharpInstance(originalBuffer).flop().toBuffer();
+              const originalBuffer = await sharpInstance.toFormat(format as any).toBuffer();
+              const flippedBuffer = await createSharpInstance(originalBuffer).flop().toFormat(format as any).toBuffer();
               
               resultBuffer = await createSharpInstance({
                 create: {
@@ -166,11 +172,12 @@ export function mirrorCommand(imageCmd: Command): void {
                 { input: originalBuffer, left: 0, top: 0 },
                 { input: flippedBuffer, left: width, top: 0 }
               ])
+              .toFormat(format as any)
               .toBuffer();
 
             } else if (mode === 'vertical') {
-              const originalBuffer = await sharpInstance.toBuffer();
-              const flippedBuffer = await createSharpInstance(originalBuffer).flip().toBuffer();
+              const originalBuffer = await sharpInstance.toFormat(format as any).toBuffer();
+              const flippedBuffer = await createSharpInstance(originalBuffer).flip().toFormat(format as any).toBuffer();
               
               resultBuffer = await createSharpInstance({
                 create: {
@@ -184,13 +191,14 @@ export function mirrorCommand(imageCmd: Command): void {
                 { input: originalBuffer, left: 0, top: 0 },
                 { input: flippedBuffer, left: 0, top: height }
               ])
+              .toFormat(format as any)
               .toBuffer();
 
             } else if (mode === 'both') {
-              const originalBuffer = await sharpInstance.toBuffer();
-              const flopBuffer = await createSharpInstance(originalBuffer).flop().toBuffer();
-              const flipBuffer = await createSharpInstance(originalBuffer).flip().toBuffer();
-              const bothBuffer = await createSharpInstance(originalBuffer).flop().flip().toBuffer();
+              const originalBuffer = await sharpInstance.toFormat(format as any).toBuffer();
+              const flopBuffer = await createSharpInstance(originalBuffer).flop().toFormat(format as any).toBuffer();
+              const flipBuffer = await createSharpInstance(originalBuffer).flip().toFormat(format as any).toBuffer();
+              const bothBuffer = await createSharpInstance(originalBuffer).flop().flip().toFormat(format as any).toBuffer();
               
               resultBuffer = await createSharpInstance({
                 create: {
@@ -206,6 +214,7 @@ export function mirrorCommand(imageCmd: Command): void {
                 { input: flipBuffer, left: 0, top: height },
                 { input: bothBuffer, left: width, top: height }
               ])
+              .toFormat(format as any)
               .toBuffer();
 
             } else { // quad
@@ -214,11 +223,12 @@ export function mirrorCommand(imageCmd: Command): void {
               
               const centerBuffer = await sharpInstance
                 .extract({ left: halfWidth - Math.floor(halfWidth/2), top: halfHeight - Math.floor(halfHeight/2), width: halfWidth, height: halfHeight })
+                .toFormat(format as any)
                 .toBuffer();
               
-              const flopBuffer = await createSharpInstance(centerBuffer).flop().toBuffer();
-              const flipBuffer = await createSharpInstance(centerBuffer).flip().toBuffer();
-              const bothBuffer = await createSharpInstance(centerBuffer).flop().flip().toBuffer();
+              const flopBuffer = await createSharpInstance(centerBuffer).flop().toFormat(format as any).toBuffer();
+              const flipBuffer = await createSharpInstance(centerBuffer).flip().toFormat(format as any).toBuffer();
+              const bothBuffer = await createSharpInstance(centerBuffer).flop().flip().toFormat(format as any).toBuffer();
               
               resultBuffer = await createSharpInstance({
                 create: {
@@ -234,20 +244,37 @@ export function mirrorCommand(imageCmd: Command): void {
                 { input: flipBuffer, left: 0, top: halfHeight },
                 { input: bothBuffer, left: halfWidth, top: halfHeight }
               ])
+              .toFormat(format as any)
               .toBuffer();
             }
 
             await createSharpInstance(resultBuffer).toFile(outputPath);
 
-            spinner.succeed(chalk.green(`✓ ${fileName} mirror effect created`));
+            if (options.verbose || inputFiles.length === 1) {
+              spinner.succeed(chalk.green(`✓ ${fileName}`));
+              if (i < inputFiles.length - 1) {
+                spinner.start();
+              }
+            }
             successCount++;
           } catch (error) {
-            spinner.fail(chalk.red(`✗ Failed: ${getFileName(inputFile)}`));
+            if (options.verbose || inputFiles.length === 1) {
+              spinner.fail(chalk.red(`✗ Failed: ${getFileName(inputFile)}`));
+              if (i < inputFiles.length - 1) {
+                spinner.start();
+              }
+            } else {
+              console.log(chalk.red(`✗ Failed: ${getFileName(inputFile)}`));
+            }
             if (options.verbose && error instanceof Error) {
               console.log(chalk.red(`    Error: ${error.message}`));
             }
             failCount++;
           }
+        }
+
+        if (!options.verbose && inputFiles.length > 1) {
+          spinner.succeed(chalk.green(`Processed ${inputFiles.length} file(s)`));
         }
 
         console.log(chalk.bold('\nSummary:'));
