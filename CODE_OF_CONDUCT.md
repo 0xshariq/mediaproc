@@ -10,23 +10,23 @@ We pledge to act and interact in ways that contribute to an open, welcoming, div
 
 ### Examples of behavior that contributes to a positive environment:
 
-* **Being respectful** of differing opinions, viewpoints, and experiences
-* **Giving and accepting** constructive feedback gracefully
-* **Showing empathy** towards other community members
-* **Focusing on** what is best for the overall community
-* **Using welcoming** and inclusive language
-* **Being patient** with newcomers and those learning
-* **Acknowledging** the contributions of others
+- **Being respectful** of differing opinions, viewpoints, and experiences
+- **Giving and accepting** constructive feedback gracefully
+- **Showing empathy** towards other community members
+- **Focusing on** what is best for the overall community
+- **Using welcoming** and inclusive language
+- **Being patient** with newcomers and those learning
+- **Acknowledging** the contributions of others
 
 ### Examples of unacceptable behavior:
 
-* **Harassment** of any kind, including offensive comments related to gender, sexual orientation, disability, appearance, race, or religion
-* **Trolling**, insulting or derogatory comments, and personal or political attacks
-* **Public or private harassment** or intimidation
-* **Publishing others' private information** (such as physical or email addresses) without explicit permission
-* **Sexual attention** or advances of any kind
-* **Spam** or excessive self-promotion
-* **Other conduct** which could reasonably be considered inappropriate in a professional setting
+- **Harassment** of any kind, including offensive comments related to gender, sexual orientation, disability, appearance, race, or religion
+- **Trolling**, insulting or derogatory comments, and personal or political attacks
+- **Public or private harassment** or intimidation
+- **Publishing others' private information** (such as physical or email addresses) without explicit permission
+- **Sexual attention** or advances of any kind
+- **Spam** or excessive self-promotion
+- **Other conduct** which could reasonably be considered inappropriate in a professional setting
 
 ## Enforcement Responsibilities
 
