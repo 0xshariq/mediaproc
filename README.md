@@ -14,7 +14,7 @@ npm install -g @mediaproc/cli
 mediaproc image resize photo.jpg --width 1920 --height 1080
 mediaproc image convert *.jpg --format webp --quality 85
 
-# Process videos  
+# Process videos
 mediaproc video compress movie.mp4 --quality high
 mediaproc video trim video.mp4 --start 00:01:30 --end 00:03:45
 
@@ -26,19 +26,20 @@ mediaproc audio normalize podcast.mp3 --target -16
 ## Why MediaProc?
 
 **The Problem:** Modern development workflows require multiple tools for media processing:
+
 - FFmpeg for videos
-- ImageMagick for images  
+- ImageMagick for images
 - SoX for audio
 - Each with different syntax, steep learning curves, and complex workflows
 
 **The Solution:** MediaProc provides a unified CLI with consistent commands across all media types.
 
-| Feature | Traditional | MediaProc |
-|---------|------------|-----------|
-| **Tools Needed** | 5+ separate tools | One tool |
-| **Installation** | Complex setup | `npm install -g @mediaproc/cli` |
-| **Syntax** | Different for each | Consistent everywhere |
-| **Extensibility** | Limited | Plugin architecture |
+| Feature           | Traditional        | MediaProc                       |
+| ----------------- | ------------------ | ------------------------------- |
+| **Tools Needed**  | 5+ separate tools  | One tool                        |
+| **Installation**  | Complex setup      | `npm install -g @mediaproc/cli` |
+| **Syntax**        | Different for each | Consistent everywhere           |
+| **Extensibility** | Limited            | Plugin architecture             |
 
 ## Quick Start
 
@@ -66,6 +67,7 @@ mediaproc image --help
 Included with CLI installation:
 
 #### Image Plugin (51 commands)
+
 ```bash
 mediaproc image resize photo.jpg --width 1920
 mediaproc image convert *.png --format webp
@@ -81,6 +83,7 @@ mediaproc image watermark photo.jpg --text "Copyright 2026"
 [Full Image Plugin Documentation →](plugins/image/README.md)
 
 #### Video Plugin (6 commands)
+
 ```bash
 mediaproc video compress movie.mp4 --quality medium
 mediaproc video transcode video.mp4 --format webm --codec vp9
@@ -97,6 +100,7 @@ mediaproc video extract movie.mp4 --type audio --output audio.mp3
 [Full Video Plugin Documentation →](plugins/video/README.md)
 
 #### Audio Plugin (5 commands)
+
 ```bash
 mediaproc audio convert song.wav --format mp3 --quality high
 mediaproc audio normalize podcast.mp3 --target -16
@@ -128,7 +132,7 @@ mediaproc list
 # Install plugins
 mediaproc add <plugin-name>
 
-# Remove plugins  
+# Remove plugins
 mediaproc remove <plugin-name>
 
 # Update plugins
@@ -198,6 +202,7 @@ mediaproc audio extract video.mp4 --format flac
 ## CLI Commands
 
 ### Plugin Management
+
 - `mediaproc add <plugin>` - Install plugin
 - `mediaproc remove <plugin>` - Uninstall plugin
 - `mediaproc list` - List installed plugins
@@ -205,6 +210,7 @@ mediaproc audio extract video.mp4 --format flac
 - `mediaproc update [plugin]` - Update plugin(s)
 
 ### Help & Info
+
 - `mediaproc --help` - Show help
 - `mediaproc <plugin> --help` - Plugin-specific help
 - `mediaproc --version` - Show version
@@ -213,13 +219,14 @@ mediaproc audio extract video.mp4 --format flac
 
 - **Node.js** >= 18.0.0
 - **FFmpeg** (for video/audio plugins)
+
   ```bash
   # macOS
   brew install ffmpeg
-  
+
   # Ubuntu/Debian
   sudo apt install ffmpeg
-  
+
   # Windows
   choco install ffmpeg
   ```
@@ -233,7 +240,7 @@ mediaproc/
 ├── src/              # Core CLI source
 ├── plugins/          # Official plugins
 │   ├── image/       # Image processing
-│   ├── video/       # Video processing  
+│   ├── video/       # Video processing
 │   └── audio/       # Audio processing
 ├── docs/            # Documentation
 └── web/             # Documentation website
@@ -265,10 +272,12 @@ See [Plugin Integration Guide](docs/plugin-integration-guide.md) for complete do
 ## Documentation
 
 ### Getting Started
+
 - [Installation Guide](docs/configuration.md#installation) - Setup and configuration
 - [Universal Commands](docs/universal-commands.md) - CLI commands for all plugins
 
 ### Plugin Development
+
 - [Plugin Integration Guide](docs/plugin-integration-guide.md) - Complete guide to creating plugins
 - [Plugin System Architecture](docs/plugin-system.md) - Understanding the plugin system
 - [Plugin Architecture](docs/plugin-architecture.md) - Technical architecture details
@@ -276,10 +285,12 @@ See [Plugin Integration Guide](docs/plugin-integration-guide.md) for complete do
 - [Plugin Ideas](docs/plugin-ideas.md) - Inspiration for new plugins
 
 ### Architecture & Design
+
 - [Architecture Decisions](docs/architecture-decisions.md) - Design decisions and rationale
 - [Upcoming Features](docs/upcoming-features.md) - Planned features and roadmap
 
 ### Project Guidelines
+
 - [Contributing Guide](CONTRIBUTING.md) - How to contribute
 - [Code of Conduct](CODE_OF_CONDUCT.md) - Community guidelines
 - [Security Policy](SECURITY.md) - Security and vulnerability reporting
@@ -289,24 +300,28 @@ See [Plugin Integration Guide](docs/plugin-integration-guide.md) for complete do
 ## Roadmap
 
 **Current (v0.7.0):**
+
 - ✅ Core CLI with plugin system
 - ✅ Image Plugin (51 commands)
 - ✅ Video Plugin (6 commands)
 - ✅ Audio Plugin (5 commands)
 
 **Q1 2026:**
+
 - 🚧 Document Plugin
 - 🚧 Comprehensive testing
 - 🚧 CI/CD pipeline
 
 **Q2 2026:**
+
 - 📋 Animation Plugin
 - 📋 Metadata Plugin
 - 📋 v1.0 Release
 
 **Q3-Q4 2026:**
+
 - 📋 3D Plugin
-- 📋 Stream Plugin  
+- 📋 Stream Plugin
 - 📋 AI Plugin
 - 📋 Plugin Marketplace
 
@@ -317,6 +332,7 @@ See [Upcoming Features](docs/upcoming-features.md) for details.
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 **Ways to contribute:**
+
 - 🐛 Report bugs
 - 💡 Suggest features
 - 📝 Improve documentation
