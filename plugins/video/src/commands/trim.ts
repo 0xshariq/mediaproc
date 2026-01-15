@@ -32,6 +32,7 @@ export function trimCommand(videoCmd: Command): void {
     .option('--quality <crf>', 'CRF quality if re-encoding (default: 23)', parseInt, 23)
     .option('--no-audio', 'Remove audio track from output')
     .option('--dry-run', 'Preview command without executing')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('-h, --help', 'Display help for trim command')
     .action(async (input: string | undefined, options: any) => {
@@ -62,6 +63,7 @@ export function trimCommand(videoCmd: Command): void {
             { flag: '--quality <crf>', description: 'CRF quality if re-encoding (default: 23)' },
             { flag: '--no-audio', description: 'Remove audio track from output' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output' }
           ],
           examples: [

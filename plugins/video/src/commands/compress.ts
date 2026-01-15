@@ -36,6 +36,7 @@ export function compressCommand(videoCmd: Command): void {
     .option('--two-pass', 'Use two-pass encoding for better quality')
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('-h, --help', 'Display help for compress command')
     .action(async (input: string | undefined, options: any) => {
       // Show help if requested (before input validation)
@@ -68,6 +69,7 @@ export function compressCommand(videoCmd: Command): void {
             { flag: '--strip-metadata', description: 'Remove all metadata from output' },
             { flag: '--two-pass', description: 'Enable two-pass encoding for better quality' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output' }
           ],
           examples: [

@@ -44,6 +44,7 @@ export function convertCommand(videoCmd: Command): void {
         .option('--fast', 'Fast conversion (remux when possible, no re-encode)')
         .option('--dry-run', 'Preview command without executing')
         .option('-v, --verbose', 'Show detailed FFmpeg output')
+        .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
         .option('-h, --help', 'Display help for convert command')
         .action(async (input: string | undefined, options: any) => {
             // Show help if requested
@@ -71,6 +72,7 @@ export function convertCommand(videoCmd: Command): void {
                         { flag: '--hw-accel', description: 'Enable hardware acceleration (GPU)' },
                         { flag: '--fast', description: 'Fast mode: remux when possible (no re-encode)' },
                         { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
+                        { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
                         { flag: '-v, --verbose', description: 'Show detailed FFmpeg output' }
                     ],
                     examples: [

@@ -24,6 +24,7 @@ export function extractCommand(videoCmd: Command): void {
     .option('--format <format>', 'Audio format: mp3, aac, wav, opus', 'mp3')
     .option('--bitrate <bitrate>', 'Audio bitrate (e.g., 192k)', '192k')
     .option('--dry-run', 'Show what would be done')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('-v, --verbose', 'Verbose output')
     .option('--help', 'Display help for command')
     .action(async (input: string, options: any) => {
@@ -113,6 +114,7 @@ export function extractCommand(videoCmd: Command): void {
     .option('--format <format>', 'Image format: jpg, png', 'jpg')
     .option('--quality <quality>', 'JPEG quality (1-31, lower is better)', parseInt, 2)
     .option('--dry-run', 'Show what would be done')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('-v, --verbose', 'Verbose output')
     .option('--help', 'Display help for command')
     .action(async (input: string, options: ExtractOptions) => {
@@ -215,6 +217,7 @@ export function extractCommand(videoCmd: Command): void {
     .option('--width <width>', 'Thumbnail width in pixels', parseInt)
     .option('--dry-run', 'Show what would be done')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for command')
     .action(async (input: string, options: any) => {
       try {

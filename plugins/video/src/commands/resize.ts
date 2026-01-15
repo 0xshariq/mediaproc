@@ -34,6 +34,7 @@ export function resizeCommand(videoCmd: Command): void {
     .option('--threads <n>', 'Number of threads for encoding (default: auto)', parseInt)
     .option('--hw-accel', 'Enable hardware acceleration (GPU)')
     .option('--no-audio', 'Remove audio from output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--two-pass', 'Use two-pass encoding for better quality')
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
@@ -70,6 +71,7 @@ export function resizeCommand(videoCmd: Command): void {
             { flag: '--no-audio', description: 'Remove audio track from output' },
             { flag: '--two-pass', description: 'Enable two-pass encoding for better quality' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output' }
           ],
           examples: [

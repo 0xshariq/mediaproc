@@ -32,6 +32,7 @@ export function mergeCommand(videoCmd: Command): void {
     .option('--normalize-audio', 'Normalize audio levels across videos')
     .option('--format <format>', 'Output format: mp4, mkv, avi, webm (default: mp4)', 'mp4')
     .option('--dry-run', 'Preview command without executing')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('-h, --help', 'Display help for merge command')
     .action(async (inputs: string[], options: any) => {
@@ -58,6 +59,7 @@ export function mergeCommand(videoCmd: Command): void {
             { flag: '--normalize-audio', description: 'Normalize audio levels across videos' },
             { flag: '--format <format>', description: 'Output format: mp4, mkv, avi, webm (default: mp4)' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output' }
           ],
           examples: [

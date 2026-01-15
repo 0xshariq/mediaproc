@@ -25,6 +25,7 @@ export function transcodeCommand(videoCmd: Command): void {
     .option('--audio-codec <codec>', 'Audio codec: aac, opus, mp3', 'aac')
     .option('--audio-bitrate <bitrate>', 'Audio bitrate (e.g., 128k)', '128k')
     .option('--dry-run', 'Show what would be done')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('-v, --verbose', 'Verbose output')
     .option('--help', 'Display help for command')
     .action(async (input: string, options: TranscodeOptions) => {
