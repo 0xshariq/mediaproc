@@ -128,7 +128,7 @@ mediaproc audio extract video.mp4 --format mp3
 
 ### Coming Soon
 
-- **Document** - PDF processing (Q2 2026)
+- **Document** - PDF,DOCX,MARKDOWN,PPTX,LATEX,etc processing (Q2 2026)
 - **Animation** - GIF/Lottie optimization (Q2 2026)
 - **3D** - 3D model processing (Q3 2026)
 - **Stream** - HLS/DASH streaming (Q3 2026)
