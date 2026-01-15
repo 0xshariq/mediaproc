@@ -71,13 +71,15 @@ Include the following information:
 MediaProc uses `execa` to execute system commands (e.g., FFmpeg, ImageMagick). All user inputs are properly sanitized and passed as arguments, not shell commands.
 
 **Bad (vulnerable):**
+
 ```typescript
 exec(`ffmpeg -i ${userInput} output.mp4`); // DON'T DO THIS
 ```
 
 **Good (safe):**
+
 ```typescript
-execa('ffmpeg', ['-i', userInput, 'output.mp4']); // ✓ Safe
+execa("ffmpeg", ["-i", userInput, "output.mp4"]); // ✓ Safe
 ```
 
 ### Path Traversal
@@ -85,17 +87,17 @@ execa('ffmpeg', ['-i', userInput, 'output.mp4']); // ✓ Safe
 All file paths are validated to prevent directory traversal:
 
 ```typescript
-import path from 'path';
+import path from "path";
 
 function validatePath(userPath: string): string {
   const normalized = path.normalize(userPath);
   const resolved = path.resolve(normalized);
-  
+
   // Ensure path is within allowed directories
   if (!resolved.startsWith(process.cwd())) {
-    throw new Error('Path traversal detected');
+    throw new Error("Path traversal detected");
   }
-  
+
   return resolved;
 }
 ```
@@ -144,6 +146,7 @@ Example timeline for critical vulnerabilities:
 We don't currently have a bug bounty program, but we recognize and credit security researchers who responsibly disclose vulnerabilities.
 
 **Recognition includes:**
+
 - Credit in security advisory
 - Mention in CHANGELOG
 - GitHub contributor badge
