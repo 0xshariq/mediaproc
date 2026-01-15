@@ -25,6 +25,7 @@ export function extractCommand(audioCmd: Command): void {
     .option('--channels <channels>', 'Number of channels: 1 (mono), 2 (stereo)', parseInt)
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('-h, --help', 'Display help for extract command')
     .action(async (input: string | undefined, options: any) => {
       if (options.help || !input) {
@@ -45,6 +46,7 @@ export function extractCommand(audioCmd: Command): void {
             { flag: '--sample-rate <rate>', description: 'Sample rate: 44100 (CD), 48000 (studio), 96000 (Hi-Res)' },
             { flag: '--channels <channels>', description: 'Audio channels: 1 (mono), 2 (stereo)' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output and progress' }
           ],
           examples: [

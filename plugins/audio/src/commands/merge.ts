@@ -25,6 +25,7 @@ export function mergeCommand(audioCmd: Command): void {
     .option('--normalize', 'Normalize audio levels before merging')
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('-h, --help', 'Display help for merge command')
     .action(async (inputs: string[], options: any) => {
       if (options.help || !inputs || inputs.length === 0) {
@@ -44,6 +45,7 @@ export function mergeCommand(audioCmd: Command): void {
             { flag: '--crossfade <seconds>', description: 'Crossfade duration between files in seconds (0-10)' },
             { flag: '--normalize', description: 'Normalize audio levels before merging for consistent volume' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output and progress' }
           ],
           examples: [

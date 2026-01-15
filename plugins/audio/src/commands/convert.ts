@@ -25,6 +25,7 @@ export function convertCommand(audioCmd: Command): void {
     .option('-q, --quality <quality>', 'Quality preset: low, medium, high, lossless', 'medium')
     .option('--codec <codec>', 'Audio codec override (libmp3lame, aac, flac, libvorbis, libopus)')
     .option('--dry-run', 'Preview command without executing')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('-h, --help', 'Display help for convert command')
     .action(async (input: string | undefined, options: any) => {
@@ -47,6 +48,7 @@ export function convertCommand(audioCmd: Command): void {
             { flag: '-q, --quality <quality>', description: 'Quality preset: low (96k), medium (192k), high (320k), lossless' },
             { flag: '--codec <codec>', description: 'Codec override: libmp3lame, aac, flac, libvorbis, libopus' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output and progress' }
           ],
           examples: [

@@ -24,6 +24,7 @@ export function normalizeCommand(audioCmd: Command): void {
     .option('--format <format>', 'Output format (default: same as input)')
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('-h, --help', 'Display help for normalize command')
     .action(async (input: string | undefined, options: any) => {
       if (options.help || !input) {
@@ -43,6 +44,7 @@ export function normalizeCommand(audioCmd: Command): void {
             { flag: '-m, --method <method>', description: 'Normalization method: loudnorm (EBU R128 standard), peak' },
             { flag: '--format <format>', description: 'Output format: mp3, aac, wav, flac (default: same as input)' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output and progress' }
           ],
           examples: [

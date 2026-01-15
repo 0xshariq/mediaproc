@@ -28,6 +28,7 @@ export function trimCommand(audioCmd: Command): void {
     .option('--fast', 'Fast mode (stream copy, no re-encoding)')
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('-h, --help', 'Display help for trim command')
     .action(async (input: string | undefined, options: any) => {
       if (options.help || !input) {
@@ -50,6 +51,7 @@ export function trimCommand(audioCmd: Command): void {
             { flag: '--format <format>', description: 'Output format: mp3, aac, wav, flac (default: same as input)' },
             { flag: '--fast', description: 'Fast mode using stream copy (no quality loss, frame-accurate)' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output and progress' }
           ],
           examples: [
