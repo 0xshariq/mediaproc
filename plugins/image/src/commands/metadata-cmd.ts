@@ -29,6 +29,7 @@ export function metadataCommand(imageCmd: Command): void {
     .option('-o, --output <path>', 'Output file (when removing metadata)')
     .option('--dry-run', 'Show what would be analyzed without executing')
     .option('-v, --verbose', 'Show detailed metadata')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for metadata command')
     .action(async (input: string, options: MetadataCommandOptions) => {
       if (options.help) {
@@ -42,6 +43,7 @@ export function metadataCommand(imageCmd: Command): void {
             { flag: '--remove-all', description: 'Alias for --remove' },
             { flag: '--export <path>', description: 'Export metadata to JSON file' },
             { flag: '-o, --output <path>', description: 'Output file path (when removing metadata)' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed metadata information' }
           ],
           examples: [

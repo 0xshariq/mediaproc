@@ -23,6 +23,7 @@ export function resizeCommand(imageCmd: Command): void {
     .option('--background <color>', 'Background color for contain/outside (hex, rgb, or named)', '#ffffff')
     .option('--kernel <kernel>', 'Kernel for resizing: nearest, cubic, mitchell, lanczos2, lanczos3', 'lanczos3')
     .option('--dry-run', 'Show what would be done without executing')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('-v, --verbose', 'Verbose output')
     .option('--help', 'Display help for resize command')
     .action(async (input: string, options: ResizeOptions) => {
@@ -49,6 +50,7 @@ export function resizeCommand(imageCmd: Command): void {
             { flag: '--background <color>', description: 'Background color for contain/outside (default: #ffffff)' },
             { flag: '--kernel <kernel>', description: 'Resize kernel: nearest, cubic, mitchell, lanczos2, lanczos3 (default: lanczos3)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain the proper flow of this command in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

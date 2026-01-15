@@ -23,6 +23,7 @@ export function compressCommand(imageCmd: Command): void {
     .option('--lossy', 'Use lossy compression for better size reduction')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for compress command')
     .action(async (input: string, options: CompressOptions) => {
       if (options.help) {
@@ -36,6 +37,7 @@ export function compressCommand(imageCmd: Command): void {
             { flag: '-q, --quality <quality>', description: 'Compression quality 1-100 (default: 75)' },
             { flag: '--lossy', description: 'Enable lossy compression for maximum reduction' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

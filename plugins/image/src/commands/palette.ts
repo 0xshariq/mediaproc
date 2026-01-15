@@ -22,6 +22,7 @@ export function paletteCommand(imageCmd: Command): void {
     .option('-c, --colors <count>', 'Number of colors to extract 1-10 (default: 5)', parseInt, 5)
     .option('--dry-run', 'Show what would be analyzed without executing')
     .option('-v, --verbose', 'Verbose output with hex codes')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for palette command')
     .action(async (input: string, options: PaletteOptions) => {
       if (options.help) {
@@ -32,6 +33,7 @@ export function paletteCommand(imageCmd: Command): void {
           usage: ['palette <input>', 'palette <input> --colors 8', 'palette <input> -c 3 -v'],
           options: [
             { flag: '-c, --colors <count>', description: 'Number of colors to extract 1-10 (default: 5)' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output with hex codes and RGB values' }
           ],
           examples: [

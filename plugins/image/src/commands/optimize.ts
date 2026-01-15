@@ -23,6 +23,7 @@ export function optimizeCommand(imageCmd: Command): void {
     .option('--aggressive', 'More aggressive compression (lower quality)')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for optimize command')
     .action(async (input: string, options: OptimizeOptions) => {
       if (options.help) {
@@ -36,6 +37,7 @@ export function optimizeCommand(imageCmd: Command): void {
             { flag: '-q, --quality <quality>', description: 'Quality 1-100 (default: 85)' },
             { flag: '--aggressive', description: 'More aggressive compression (quality 70)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

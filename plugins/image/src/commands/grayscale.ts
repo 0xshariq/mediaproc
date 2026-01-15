@@ -18,6 +18,7 @@ export function grayscaleCommand(imageCmd: Command): void {
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for grayscale command')
     .action(async (input: string, options: FilterOptions) => {
       if (options.help) {
@@ -30,6 +31,7 @@ export function grayscaleCommand(imageCmd: Command): void {
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-grayscale.<ext>)' },
             { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

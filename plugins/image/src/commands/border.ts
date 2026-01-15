@@ -21,6 +21,7 @@ export function borderCommand(imageCmd: Command): void {
     .option('-o, --output <path>', 'Output file path')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for border command')
     .action(async (input: string, options: BorderOptionsExtended) => {
       if (options.help) {
@@ -34,6 +35,7 @@ export function borderCommand(imageCmd: Command): void {
             { flag: '--color <color>', description: 'Border color - hex (#FF0000), rgb (rgb(255,0,0)), or name (red) (default: #000000)' },
             { flag: '-o, --output <path>', description: 'Output file path' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

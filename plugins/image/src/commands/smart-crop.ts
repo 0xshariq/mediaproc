@@ -28,6 +28,7 @@ export function smartCropCommand(imageCmd: Command): void {
     .option('-o, --output <path>', 'Output file path')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for smart-crop command')
     .action(async (input: string, options: SmartCropOptions) => {
       if (options.help) {
@@ -42,6 +43,7 @@ export function smartCropCommand(imageCmd: Command): void {
             { flag: '-s, --strategy <type>', description: 'Cropping strategy: entropy (edges/details) or attention (center-weighted) (default: entropy)' },
             { flag: '-o, --output <path>', description: 'Output file path' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

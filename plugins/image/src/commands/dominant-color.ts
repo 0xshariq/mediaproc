@@ -25,6 +25,7 @@ export function dominantColorCommand(imageCmd: Command): void {
     .option('--export <path>', 'Export color palette to JSON file')
     .option('--dry-run', 'Show what would be analyzed without executing')
     .option('-v, --verbose', 'Show detailed color information')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for dominant-color command')
     .action(async (input: string, options: DominantColorOptions) => {
       if (options.help) {
@@ -36,6 +37,7 @@ export function dominantColorCommand(imageCmd: Command): void {
           options: [
             { flag: '-c, --count <number>', description: 'Number of dominant colors to extract (default: 5, max: 10)' },
             { flag: '--export <path>', description: 'Export color palette to JSON file' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed RGB/HSL values' }
           ],
           examples: [

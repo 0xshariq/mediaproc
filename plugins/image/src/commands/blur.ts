@@ -19,6 +19,7 @@ export function blurCommand(imageCmd: Command): void {
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--help', 'Display help for blur command')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .action(async (input: string, options: FilterOptions) => {
       // Show help if requested
       if (options.help) {
@@ -36,6 +37,7 @@ export function blurCommand(imageCmd: Command): void {
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-blurred.<ext>)' },
             { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

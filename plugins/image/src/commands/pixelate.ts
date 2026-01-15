@@ -24,6 +24,7 @@ export function pixelateCommand(imageCmd: Command): void {
     .option('-o, --output <path>', 'Output file path')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for pixelate command')
     .action(async (input: string, options: PixelateOptions) => {
       if (options.help) {
@@ -36,6 +37,7 @@ export function pixelateCommand(imageCmd: Command): void {
             { flag: '-p, --pixels <size>', description: 'Pixel size 2-50 (default: 10) - larger = more pixelated' },
             { flag: '-o, --output <path>', description: 'Output file path' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
@@ -124,7 +126,7 @@ export function pixelateCommand(imageCmd: Command): void {
         for (const [index, inputFile] of inputFiles.entries()) {
           const outputPath = outputPaths.get(inputFile)!;
           const fileName = getFileName(inputFile);
-          
+
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 
           try {
@@ -144,7 +146,7 @@ export function pixelateCommand(imageCmd: Command): void {
                 kernel: 'nearest'
               })
               .toFile(outputPath);
-            
+
             spinner.succeed(chalk.green(`✓ ${fileName} processed`));
             successCount++;
           } catch (error) {

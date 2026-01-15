@@ -30,6 +30,7 @@ export function splitCommand(imageCmd: Command): void {
     .option('-o, --output <directory>', 'Output directory (default: ./tiles)')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for split command')
     .action(async (input: string, options: SplitOptions) => {
       if (options.help) {
@@ -44,6 +45,7 @@ export function splitCommand(imageCmd: Command): void {
             { flag: '-c, --columns <number>', description: 'Number of columns (alternative to --tiles)' },
             { flag: '-o, --output <directory>', description: 'Output directory (default: ./tiles)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

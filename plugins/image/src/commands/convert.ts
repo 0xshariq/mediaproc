@@ -24,6 +24,7 @@ export function convertCommand(imageCmd: Command): void {
     .option('--progressive', 'Use progressive/interlaced format')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for convert command')
     .action(async (input: string, options: ConvertOptionsExtended) => {
       if (options.help) {
@@ -39,6 +40,7 @@ export function convertCommand(imageCmd: Command): void {
             { flag: '--compression <level>', description: 'PNG compression level 0-9 (default: 9)' },
             { flag: '--progressive', description: 'Use progressive/interlaced format' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

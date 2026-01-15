@@ -22,6 +22,7 @@ export function statsCommand(imageCmd: Command): void {
     .option('--histogram', 'Calculate and display color histogram')
     .option('--dry-run', 'Show what would be analyzed without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for stats command')
     .action(async (input: string, options: StatsOptionsExtended) => {
       if (options.help) {
@@ -33,6 +34,7 @@ export function statsCommand(imageCmd: Command): void {
           options: [
             { flag: '-d, --detailed', description: 'Show detailed EXIF and metadata information' },
             { flag: '--histogram', description: 'Calculate and display color channel statistics' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show extra verbose output' }
           ],
           examples: [

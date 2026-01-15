@@ -34,6 +34,7 @@ export function watermarkCommand(imageCmd: Command): void {
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for watermark command')
     .action(async (input: string, watermark: string, options: WatermarkOptions) => {
       if (options.help) {
@@ -57,6 +58,7 @@ export function watermarkCommand(imageCmd: Command): void {
             { flag: '--font-family <family>', description: 'Text watermark font family (default: Arial)' },
             { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

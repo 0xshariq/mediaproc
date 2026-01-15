@@ -10,100 +10,102 @@ import { createStandardHelp } from '../utils/helpFormatter.js';
 import path from 'node:path';
 
 interface RecombOptions extends ImageOptions {
-    matrix?: string;
-    help?: boolean;
+  matrix?: string;
+  help?: boolean;
 }
 
 export function recombCommand(imageCmd: Command): void {
-    imageCmd
-        .command('recomb <input>')
-        .description('Recombine RGB channels using matrix')
-        .option('--matrix <values>', 'Recombination matrix (3x3) as JSON', '[[1,0,0],[0,1,0],[0,0,1]]')
-        .option('-o, --output <path>', 'Output file path')
-        .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
-        .option('--dry-run', 'Show what would be done without executing')
-        .option('-v, --verbose', 'Verbose output')
-        .option('--help', 'Display help for recomb command')
-        .action(async (input: string, options: RecombOptions) => {
-            if (options.help) {
-                createStandardHelp({
-                    commandName: 'recomb',
-                    emoji: '🌈',
-                    description: 'Recombine image channels using a transformation matrix. Create custom color effects by mixing R, G, B channels.',
-                    usage: [
-                        'recomb <input> --matrix "[[1,0,0],[0,1,0],[0,0,1]]"',
-                        'recomb <input> --matrix "[[0,0,1],[0,1,0],[1,0,0]]" (swap R/B)'
-                    ],
-                    options: [
-                        { flag: '--matrix <values>', description: '3x3 matrix as JSON array (default: identity)' },
-                        { flag: '-o, --output <path>', description: 'Output file path (default: <input>-recomb.<ext>)' },
-                        { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
-                        { flag: '--dry-run', description: 'Preview changes without executing' },
-                        { flag: '-v, --verbose', description: 'Show detailed output' }
-                    ],
-                    examples: [
-                        { command: 'recomb image.jpg --matrix "[[0,0,1],[0,1,0],[1,0,0]]"', description: 'Swap red and blue channels' },
-                        { command: 'recomb photo.jpg --matrix "[[0.5,0.5,0],[0.5,0.5,0],[0,0,1]]"', description: 'Average red/green, keep blue' },
-                        { command: 'recomb pic.jpg --matrix "[[1,0,0],[1,0,0],[1,0,0]]"', description: 'Use red channel for all' }
-                    ],
-                    additionalSections: [
-                        {
-                            title: 'Matrix Format',
-                            items: [
-                                '3x3 matrix: [[R],[G],[B]]',
-                                'Each row defines output channel',
-                                'Each column represents input channel (R, G, B)',
-                                'Identity [[1,0,0],[0,1,0],[0,0,1]] = no change'
-                            ]
-                        },
-                        {
-                            title: 'Common Operations',
-                            items: [
-                                'Swap R/B: [[0,0,1],[0,1,0],[1,0,0]]',
-                                'Swap R/G: [[0,1,0],[1,0,0],[0,0,1]]',
-                                'Grayscale: [[0.33,0.33,0.33],...] (all rows same)',
-                                'Red only: [[1,0,0],[0,0,0],[0,0,0]]',
-                                'Remove red: [[0,0,0],[0,1,0],[0,0,1]]'
-                            ]
-                        },
-                        {
-                            title: 'Creative Effects',
-                            items: [
-                                'Channel shifting creates false color effects',
-                                'Mixing channels creates unique tones',
-                                'Can simulate color blindness',
-                                'Create infrared-like effects'
-                            ]
-                        }
-                    ],
-                    tips: [
-                        'Identity matrix produces no change',
-                        'Values typically 0 to 1',
-                        'Can use negative values for inversions',
-                        'Useful for color correction and artistic effects'
-            ]
+  imageCmd
+    .command('recomb <input>')
+    .description('Recombine RGB channels using matrix')
+    .option('--matrix <values>', 'Recombination matrix (3x3) as JSON', '[[1,0,0],[0,1,0],[0,0,1]]')
+    .option('-o, --output <path>', 'Output file path')
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('--dry-run', 'Show what would be done without executing')
+    .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
+    .option('--help', 'Display help for recomb command')
+    .action(async (input: string, options: RecombOptions) => {
+      if (options.help) {
+        createStandardHelp({
+          commandName: 'recomb',
+          emoji: '🌈',
+          description: 'Recombine image channels using a transformation matrix. Create custom color effects by mixing R, G, B channels.',
+          usage: [
+            'recomb <input> --matrix "[[1,0,0],[0,1,0],[0,0,1]]"',
+            'recomb <input> --matrix "[[0,0,1],[0,1,0],[1,0,0]]" (swap R/B)'
+          ],
+          options: [
+            { flag: '--matrix <values>', description: '3x3 matrix as JSON array (default: identity)' },
+            { flag: '-o, --output <path>', description: 'Output file path (default: <input>-recomb.<ext>)' },
+            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
+            { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
+            { flag: '-v, --verbose', description: 'Show detailed output' }
+          ],
+          examples: [
+            { command: 'recomb image.jpg --matrix "[[0,0,1],[0,1,0],[1,0,0]]"', description: 'Swap red and blue channels' },
+            { command: 'recomb photo.jpg --matrix "[[0.5,0.5,0],[0.5,0.5,0],[0,0,1]]"', description: 'Average red/green, keep blue' },
+            { command: 'recomb pic.jpg --matrix "[[1,0,0],[1,0,0],[1,0,0]]"', description: 'Use red channel for all' }
+          ],
+          additionalSections: [
+            {
+              title: 'Matrix Format',
+              items: [
+                '3x3 matrix: [[R],[G],[B]]',
+                'Each row defines output channel',
+                'Each column represents input channel (R, G, B)',
+                'Identity [[1,0,0],[0,1,0],[0,0,1]] = no change'
+              ]
+            },
+            {
+              title: 'Common Operations',
+              items: [
+                'Swap R/B: [[0,0,1],[0,1,0],[1,0,0]]',
+                'Swap R/G: [[0,1,0],[1,0,0],[0,0,1]]',
+                'Grayscale: [[0.33,0.33,0.33],...] (all rows same)',
+                'Red only: [[1,0,0],[0,0,0],[0,0,0]]',
+                'Remove red: [[0,0,0],[0,1,0],[0,0,1]]'
+              ]
+            },
+            {
+              title: 'Creative Effects',
+              items: [
+                'Channel shifting creates false color effects',
+                'Mixing channels creates unique tones',
+                'Can simulate color blindness',
+                'Create infrared-like effects'
+              ]
+            }
+          ],
+          tips: [
+            'Identity matrix produces no change',
+            'Values typically 0 to 1',
+            'Can use negative values for inversions',
+            'Useful for color correction and artistic effects'
+          ]
         });
         return;
-    }
-    const spinner = ora('Validating inputs...').start();
+      }
+      const spinner = ora('Validating inputs...').start();
 
       try {
         // Parse matrix
         const matrixStr = options.matrix || '[[1,0,0],[0,1,0],[0,0,1]]';
         let matrix: number[][];
         try {
-            matrix = JSON.parse(matrixStr);
-            if (!Array.isArray(matrix) || matrix.length !== 3) {
-                throw new Error('Matrix must be 3x3');
+          matrix = JSON.parse(matrixStr);
+          if (!Array.isArray(matrix) || matrix.length !== 3) {
+            throw new Error('Matrix must be 3x3');
+          }
+          for (const row of matrix) {
+            if (!Array.isArray(row) || row.length !== 3) {
+              throw new Error('Each row must have 3 values');
             }
-            for (const row of matrix) {
-                if (!Array.isArray(row) || row.length !== 3) {
-                    throw new Error('Each row must have 3 values');
-                }
-            }
+          }
         } catch (e) {
-            spinner.fail(chalk.red('Invalid matrix format. Use 3x3 JSON array like [[1,0,0],[0,1,0],[0,0,1]]'));
-            process.exit(1);
+          spinner.fail(chalk.red('Invalid matrix format. Use 3x3 JSON array like [[1,0,0],[0,1,0],[0,0,1]]'));
+          process.exit(1);
         }
 
         const { inputFiles, outputPath, errors } = validatePaths(input, options.output, {
@@ -150,7 +152,7 @@ export function recombCommand(imageCmd: Command): void {
         for (const [index, inputFile] of inputFiles.entries()) {
           const outputPath = outputPaths.get(inputFile)!;
           const fileName = getFileName(inputFile);
-          
+
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 
           try {
@@ -158,15 +160,15 @@ export function recombCommand(imageCmd: Command): void {
 
             const outputExt = path.extname(outputPath).toLowerCase();
             if (outputExt === '.jpg' || outputExt === '.jpeg') {
-                pipeline.jpeg({ quality: options.quality || 90 });
+              pipeline.jpeg({ quality: options.quality || 90 });
             } else if (outputExt === '.png') {
-                pipeline.png({ quality: options.quality || 90 });
+              pipeline.png({ quality: options.quality || 90 });
             } else if (outputExt === '.webp') {
-                pipeline.webp({ quality: options.quality || 90 });
+              pipeline.webp({ quality: options.quality || 90 });
             }
 
             await pipeline.toFile(outputPath);
-            
+
             spinner.succeed(chalk.green(`✓ ${fileName} processed`));
             successCount++;
           } catch (error) {

@@ -24,6 +24,7 @@ export function thumbnailCommand(imageCmd: Command): void {
     .option('--fit <fit>', 'Fit mode: cover, contain, fill, inside, outside, cover')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for thumbnail command')
     .action(async (input: string, options: ThumbnailOptions) => {
       if (options.help) {
@@ -38,6 +39,7 @@ export function thumbnailCommand(imageCmd: Command): void {
             { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 85)' },
             { flag: '--fit <fit>', description: 'Fit mode: cover, contain, fill, inside, outside (default: cover)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

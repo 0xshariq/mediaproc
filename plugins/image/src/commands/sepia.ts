@@ -24,6 +24,7 @@ export function sepiaCommand(imageCmd: Command): void {
     .option('-o, --output <path>', 'Output file path')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for sepia command')
     .action(async (input: string, options: SepiaOptions) => {
       if (options.help) {
@@ -36,6 +37,7 @@ export function sepiaCommand(imageCmd: Command): void {
             { flag: '-i, --intensity <value>', description: 'Sepia intensity 0-100 (default: 80)' },
             { flag: '-o, --output <path>', description: 'Output file path' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

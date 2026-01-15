@@ -20,6 +20,7 @@ export function infoCommand(imageCmd: Command): void {
     .description('Display comprehensive image information and metadata')
     .option('--json', 'Output information in JSON format')
     .option('-v, --verbose', 'Verbose output with all available metadata')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for info command')
     .action(async (input: string, options: InfoOptions) => {
       if (options.help) {
@@ -30,6 +31,7 @@ export function infoCommand(imageCmd: Command): void {
           usage: ['info <input>', 'info <input> --json', 'info <input> -v'],
           options: [
             { flag: '--json', description: 'Output data in JSON format for scripting' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show all available metadata including EXIF' }
           ],
           examples: [

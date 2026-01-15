@@ -23,6 +23,7 @@ export function negateCommand(imageCmd: Command): void {
     .option('--alpha', 'Also negate alpha channel')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for negate command')
     .action(async (input: string, options: NegateOptions) => {
       if (options.help) {
@@ -36,6 +37,7 @@ export function negateCommand(imageCmd: Command): void {
             { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
             { flag: '--alpha', description: 'Also invert alpha/transparency channel' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

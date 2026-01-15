@@ -36,6 +36,7 @@ export function batchCommand(imageCmd: Command): void {
     .option('-q, --quality <quality>', 'Quality for optimization', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for batch command')
     .action(async (directory: string, options: BatchOptions) => {
       if (options.help) {
@@ -54,6 +55,7 @@ export function batchCommand(imageCmd: Command): void {
             { flag: '-f, --format <format>', description: 'Output format for convert operations' },
             { flag: '-q, --quality <quality>', description: 'Quality for optimization/conversion' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

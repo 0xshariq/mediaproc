@@ -33,6 +33,7 @@ export function gridCommand(imageCmd: Command): void {
     .option('-b, --background <color>', 'Background color (default: #FFFFFF)', '#FFFFFF')
     .option('-o, --output <path>', 'Output file path (default: grid.jpg)')
     .option('--dry-run', 'Show what would be done without executing')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('-v, --verbose', 'Verbose output')
     .option('--help', 'Display help for grid command')
     .action(async (images: string[], options: GridOptions) => {
@@ -51,6 +52,7 @@ export function gridCommand(imageCmd: Command): void {
             { flag: '-b, --background <color>', description: 'Background color - hex or name (default: #FFFFFF)' },
             { flag: '-o, --output <path>', description: 'Output file path (default: grid.jpg)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

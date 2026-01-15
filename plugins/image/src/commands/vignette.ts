@@ -24,6 +24,7 @@ export function vignetteCommand(imageCmd: Command): void {
     .option('-o, --output <path>', 'Output file path')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for vignette command')
     .action(async (input: string, options: VignetteOptions) => {
       if (options.help) {
@@ -36,6 +37,7 @@ export function vignetteCommand(imageCmd: Command): void {
             { flag: '-s, --strength <value>', description: 'Vignette strength 0-100 (default: 50)' },
             { flag: '-o, --output <path>', description: 'Output file path' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

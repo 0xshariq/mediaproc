@@ -27,6 +27,7 @@ export function compositeCommand(imageCmd: Command): void {
     .option('--tile', 'Tile the overlay across the image')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
+    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('--help', 'Display help for composite command')
     .action(async (input: string, options: CompositeOptionsExtended) => {
       if (options.help) {
@@ -45,6 +46,7 @@ export function compositeCommand(imageCmd: Command): void {
             { flag: '--opacity <value>', description: 'Opacity 0-1 (default: 1)' },
             { flag: '--tile', description: 'Tile the overlay across the entire image' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
