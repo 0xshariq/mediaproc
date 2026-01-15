@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Documentation
+
 - ✨ **Universal Commands Documentation** - Comprehensive guide for all CLI commands
   - Created `/docs/universal-commands.md` with 13+ universal commands
   - Updated web docs `/web/content/cli/universal-commands.mdx` with interactive components
@@ -22,7 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Included exit codes reference and advanced usage tips
 
 #### CLI Features
+
 - ✨ **CLI Branding System** - Dynamic version display across all commands
+
   - Created `/src/utils/branding.ts` with dynamic version detection
   - Reads version from `package.json` automatically using `import.meta.url`
   - Added `showBranding()` footer to CLI commands:
@@ -39,7 +42,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Shows plugin name + version with "Powered by MediaProc" footer
 
 #### Web Documentation
+
 - ✨ **Enhanced Search Functionality** - Fixed and improved search component
+
   - Shows all pages on open (Ctrl+K / Cmd+K)
   - Real-time filtering as you type
   - Fuzzy search with relevance scoring
@@ -56,7 +61,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Improved
 
 #### Documentation Structure
+
 - 📚 **Root README Enhancements**
+
   - Organized documentation section into logical categories
   - Added references to all `/docs` folder markdown files:
     - Getting Started section
@@ -75,6 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - 🐛 **TypeScript Compilation Errors**
+
   - Fixed async return type in `benchmark.ts` (Promise<void>)
   - Removed unused imports across multiple command files
   - Fixed variable access before declaration in Search component
