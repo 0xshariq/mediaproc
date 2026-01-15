@@ -10,18 +10,29 @@
 # Install
 npm install -g @mediaproc/cli
 
+# Add Image Plugin to use image commands
+mediaproc add image
+
 # Process images
 mediaproc image resize photo.jpg --width 1920 --height 1080
 mediaproc image convert *.jpg --format webp --quality 85
+
+# Add Video Plugin to use image commands
+mediaproc add video
 
 # Process videos
 mediaproc video compress movie.mp4 --quality high
 mediaproc video trim video.mp4 --start 00:01:30 --end 00:03:45
 
+# Add Audio Plugin to use image commands
+mediaproc add audio
+
 # Process audio
 mediaproc audio convert song.wav --format mp3 --quality high
 mediaproc audio normalize podcast.mp3 --target -16
 ```
+
+> See [Plugin Terminology Guide](./docs/plugin-terminology.md)
 
 ## Why MediaProc?
 
