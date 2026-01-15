@@ -20,11 +20,13 @@ Before creating bug reports, please check the existing issues to avoid duplicate
 Title: Video compression fails on files larger than 2GB
 
 Environment:
+
 - OS: Ubuntu 22.04
 - Node.js: v20.10.0
 - MediaProc: v0.1.0
 
 Steps to reproduce:
+
 1. Run `mediaproc video compress large-file.mp4 --quality 80`
 2. Wait for processing
 3. Error occurs at ~75% completion
@@ -105,6 +107,7 @@ chore(deps): update dependencies
 ```
 
 Types:
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation changes
@@ -127,17 +130,21 @@ Types:
 
 ```markdown
 ## Description
+
 Brief description of changes
 
 ## Related Issues
+
 Closes #123
 
 ## Changes Made
+
 - Added X feature
 - Fixed Y bug
 - Updated Z documentation
 
 ## Testing
+
 - [ ] Unit tests added
 - [ ] Integration tests added
 - [ ] Manually tested on Linux
@@ -145,11 +152,13 @@ Closes #123
 - [ ] Manually tested on Windows
 
 ## Documentation
+
 - [ ] Updated README
 - [ ] Added inline comments
 - [ ] Updated docs/
 
 ## Screenshots
+
 (if applicable)
 ```
 
@@ -191,20 +200,18 @@ src/
 
 ```typescript
 // src/register.ts
-import { Command } from 'commander';
+import { Command } from "commander";
 
-export const name = 'myplugin';
-export const version = '1.0.0';
+export const name = "myplugin";
+export const version = "1.0.0";
 
 export function register(program: Command): void {
-  const cmd = program
-    .command('myplugin')
-    .description('My plugin description');
-  
+  const cmd = program.command("myplugin").description("My plugin description");
+
   cmd
-    .command('mycommand <input>')
-    .description('Command description')
-    .option('-o, --output <path>', 'Output path')
+    .command("mycommand <input>")
+    .description("Command description")
+    .option("-o, --output <path>", "Output path")
     .action(async (input, options) => {
       // Implementation
     });
@@ -250,17 +257,17 @@ export function register(program: Command): void {
 
 ```typescript
 // src/__tests__/mycommand.test.ts
-import { describe, it, expect } from 'vitest';
-import { myCommand } from '../commands/mycommand.js';
+import { describe, it, expect } from "vitest";
+import { myCommand } from "../commands/mycommand.js";
 
-describe('myCommand', () => {
-  it('should process input correctly', async () => {
-    const result = await myCommand('input.txt');
+describe("myCommand", () => {
+  it("should process input correctly", async () => {
+    const result = await myCommand("input.txt");
     expect(result).toBeDefined();
   });
-  
-  it('should handle errors gracefully', async () => {
-    await expect(myCommand('invalid.txt')).rejects.toThrow();
+
+  it("should handle errors gracefully", async () => {
+    await expect(myCommand("invalid.txt")).rejects.toThrow();
   });
 });
 ```
@@ -296,6 +303,7 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 ### Recognition
 
 Contributors are recognized in:
+
 - `CONTRIBUTORS.md` file
 - Release notes
 - GitHub contributor graph
