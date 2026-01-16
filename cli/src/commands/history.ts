@@ -1,7 +1,7 @@
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
-import { showBranding } from '../utils/branding';
+import { showBranding } from '@mediaproc/core';
 import * as os from 'os';
 
 interface HistoryEntry {

@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "build:all": "pnpm build && pnpm --filter '@mediaproc/*' build",
+    "build:all": "pnpm build --filter ./cli && pnpm build --filter ./core && pnpm --filter '@mediaproc/*' build",
     "clean": "rm -rf dist",
     "clean:all": "pnpm clean && pnpm --filter '@mediaproc/*' clean",
     "dev": "tsc --watch",
@@ -48,8 +48,8 @@
   "dependencies": {
     "@gltf-transform/cli": "^4.2.1",
     "@gltf-transform/core": "^4.2.1",
-    "@lottiefiles/dotlottie-web": "^0.60.0",
-    "@mediaproc/image": "^1.2.1",
+    "@lottiefiles/dotlottie-web": "^0.61.0",
+    "@mediaproc/core": "^1.0.0",
     "chalk": "^5.3.0",
     "commander": "^14.0.2",
     "execa": "^9.6.1",

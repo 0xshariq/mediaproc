@@ -2,12 +2,13 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
-import { showPluginBranding } from '../utils/branding.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
+import { showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '../utils/helpFormatter.js';
+import { createStandardHelp } from '@mediaproc/core';
+import { ImageOptions } from '../index.js';
 
-interface ClaheOptions {
+interface ClaheOptions extends ImageOptions {
   input: string;
   output?: string;
   width?: number;
@@ -123,6 +124,10 @@ export function claheCommand(imageCmd: Command): void {
           });
           showPluginBranding('Image');
           return;
+        }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
         }
 
         let successCount = 0;

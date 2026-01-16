@@ -3,10 +3,10 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
-import { showPluginBranding } from '../utils/branding.js';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
+import { showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '../utils/helpFormatter.js';
+import { createStandardHelp } from '@mediaproc/core';
 
 interface DominantColorOptions {
   input: string;

@@ -7,6 +7,7 @@ export interface AudioOptions {
   channels?: number;
   verbose?: boolean;
   dryRun?: boolean;
+  explain?: boolean;
 }
 
 export interface NormalizeOptions extends AudioOptions {

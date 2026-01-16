@@ -2,11 +2,11 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
-import { showPluginBranding } from '../utils/branding.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
+import { showPluginBranding } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '../utils/helpFormatter.js';
+import { createStandardHelp } from '@mediaproc/core';
 import path from 'node:path';
 
 interface UnflattenOptions extends ImageOptions {

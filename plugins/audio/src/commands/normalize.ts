@@ -8,9 +8,9 @@ import {
   formatFileSize,
   formatDuration,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, validateOutputPath } from '../utils/pathValidator.js';
-import { createStandardHelp } from '../utils/helpFormatter.js';
-import { showPluginBranding } from '../utils/branding.js';
+import { parseInputPaths, resolveOutputPaths, validateOutputPath } from '@mediaproc/core';
+import { createStandardHelp } from '@mediaproc/core';
+import { showPluginBranding } from '@mediaproc/core';
 import ora from 'ora';
 
 export function normalizeCommand(audioCmd: Command): void {
@@ -112,12 +112,16 @@ export function normalizeCommand(audioCmd: Command): void {
             continue;
           }
 
+          if (options.explain) {
+            console.log(chalk.gray('Explain mode is not yet available.'))
+            console.log(chalk.cyan('Planned for v0.8.x.'))
+          }
           const spinner = ora('Normalizing...').start();
-          
+
           try {
             await runFFmpeg(args, options.verbose);
             const outputStat = await stat(outputFile);
-            
+
             spinner.succeed(chalk.green('Normalization complete'));
             console.log(chalk.green(`✓ Output: ${outputFile}`));
             console.log(chalk.dim(`Target: ${options.target} LUFS • Peak limit: ${options.maxLevel} dB`));

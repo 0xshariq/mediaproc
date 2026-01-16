@@ -4,9 +4,9 @@ import ora from 'ora';
 
 import type { ConvertOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '../utils/helpFormatter.js';
-import { showPluginBranding } from '../utils/branding.js';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js'; 
+import { createStandardHelp } from '@mediaproc/core';
+import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core'; 
 
 
 interface ConvertOptionsExtended extends ConvertOptions {

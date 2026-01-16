@@ -8,6 +8,7 @@ export interface ImageOptions {
   fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
   verbose?: boolean;
   dryRun?: boolean;
+  explain?: boolean;
 }
 
 export interface ResizeOptions extends ImageOptions {

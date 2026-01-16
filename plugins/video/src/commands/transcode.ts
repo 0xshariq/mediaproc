@@ -11,7 +11,7 @@ import {
   formatFileSize,
   formatDuration,
 } from '../utils/ffmpeg.js';
-import { showPluginBranding } from '../utils/branding.js';
+import { showPluginBranding } from '@mediaproc/core';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
 
 export function transcodeCommand(videoCmd: Command): void {
@@ -107,6 +107,10 @@ export function transcodeCommand(videoCmd: Command): void {
           return;
         }
 
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
+        }
         // Run transcode
         console.log(chalk.dim('🔄 Transcoding video...'));
         if (options.verbose) {

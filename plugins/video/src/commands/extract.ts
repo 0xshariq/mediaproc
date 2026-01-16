@@ -11,8 +11,8 @@ import {
   formatDuration,
   parseTimeToSeconds,
 } from '../utils/ffmpeg.js';
-import { showPluginBranding } from '../utils/branding.js';
-import { validatePaths, resolveOutputPaths } from '../utils/pathValidator.js';
+import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths } from '@mediaproc/core';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
 
 export function extractCommand(videoCmd: Command): void {
@@ -79,6 +79,10 @@ export function extractCommand(videoCmd: Command): void {
           return;
         }
 
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
+        }
         console.log(chalk.dim('🎵 Extracting audio...'));
         if (options.verbose) {
           console.log(chalk.dim(`ffmpeg ${args.join(' ')}\n`));
@@ -186,6 +190,10 @@ export function extractCommand(videoCmd: Command): void {
           return;
         }
 
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
+        }
         console.log(chalk.dim('📸 Extracting frames...'));
         if (options.verbose) {
           console.log(chalk.dim(`ffmpeg ${args.join(' ')}\n`));
@@ -260,6 +268,10 @@ export function extractCommand(videoCmd: Command): void {
           console.log(chalk.green('✓ Dry run complete'));
           showPluginBranding('Video');
           return;
+        }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
         }
 
         console.log(chalk.dim('📸 Extracting thumbnail...'));

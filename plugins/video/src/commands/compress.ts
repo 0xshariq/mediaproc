@@ -8,10 +8,10 @@ import {
   checkFFmpeg,
   formatFileSize,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths } from '../utils/pathValidator.js';
+import { parseInputPaths, resolveOutputPaths } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
-import { createStandardHelp } from '../utils/helpFormatter.js';
-import { showPluginBranding } from '../utils/branding.js';
+import { createStandardHelp } from '@mediaproc/core';
+import { showPluginBranding } from '@mediaproc/core';
 
 export function compressCommand(videoCmd: Command): void {
   videoCmd
@@ -198,6 +198,10 @@ export function compressCommand(videoCmd: Command): void {
             console.log();
             continue;
           }
+          if (options.explain) {
+            console.log(chalk.gray('Explain mode is not yet available.'))
+            console.log(chalk.cyan('Planned for v0.8.x.'))
+          }
 
           // Run compression
           await runFFmpeg(args, options.verbose, (line) => {
@@ -217,12 +221,11 @@ export function compressCommand(videoCmd: Command): void {
             )
           );
         }
-        
+
         if (!options.dryRun) {
           console.log(chalk.green.bold(`\n✨ Successfully compressed ${inputFiles.length} video(s)!`));
           showPluginBranding('Video');
         }
-        showPluginBranding('Video');
       } catch (error) {
         spinner.fail(chalk.red(`Error: ${(error as Error).message}`));
         process.exit(1);

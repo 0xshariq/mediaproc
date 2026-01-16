@@ -2,11 +2,11 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
-import { showPluginBranding } from '../utils/branding.js';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
+import { showPluginBranding } from '@mediaproc/core';
 import type { BorderOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '../utils/helpFormatter.js';
+import { createStandardHelp } from '@mediaproc/core';
 
 interface BorderOptionsExtended extends BorderOptions {
   help?: boolean;
@@ -116,6 +116,10 @@ export function borderCommand(imageCmd: Command): void {
           showPluginBranding('Image');
           return;
         }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
+        }
 
         let successCount = 0;
         let failCount = 0;
@@ -123,7 +127,7 @@ export function borderCommand(imageCmd: Command): void {
         for (const [index, inputFile] of inputFiles.entries()) {
           const outputPath = outputPaths.get(inputFile)!;
           const fileName = getFileName(inputFile);
-          
+
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 
           try {
@@ -136,7 +140,7 @@ export function borderCommand(imageCmd: Command): void {
                 background: options.color || '#000000'
               })
               .toFile(outputPath);
-            
+
             spinner.succeed(chalk.green(`✓ ${fileName} processed`));
             successCount++;
           } catch (error) {

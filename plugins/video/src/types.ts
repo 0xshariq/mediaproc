@@ -18,6 +18,7 @@ export interface VideoOptions {
   duration?: string;
   end?: string;
   fast?: boolean;
+  explain?: boolean;
 }
 
 export interface CompressOptions extends VideoOptions {
@@ -30,7 +31,7 @@ export interface TranscodeOptions extends VideoOptions {
   audioBitrate?: string;
 }
 
-export interface ExtractOptions {
+export interface ExtractOptions extends VideoOptions {
   input: string;
   output?: string;
   start?: string;
@@ -42,14 +43,14 @@ export interface ExtractOptions {
   dryRun?: boolean;
 }
 
-export interface TrimOptions {
+export interface TrimOptions extends VideoOptions {
   input: string;
   output?: string;
   start: string;
   end: string;
 }
 
-export interface ResizeOptions {
+export interface ResizeOptions extends VideoOptions {
   input: string;
   output?: string;
   width: number;
@@ -57,7 +58,7 @@ export interface ResizeOptions {
   maintainAspectRatio?: boolean;
 }
 
-export interface MergeOptions {
+export interface MergeOptions extends VideoOptions {
   inputs: string[];
   output?: string;
 }

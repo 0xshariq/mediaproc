@@ -3,7 +3,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
-import { showBranding } from '../utils/branding';
+import { showBranding } from '@mediaproc/core';
 
 const execAsync = promisify(exec);
 

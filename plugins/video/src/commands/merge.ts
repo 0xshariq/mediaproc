@@ -11,10 +11,10 @@ import {
   formatFileSize,
   formatDuration,
 } from '../utils/ffmpeg.js';
-import { showPluginBranding } from '../utils/branding.js';
-import { fileExists, validatePaths, resolveOutputPaths } from '../utils/pathValidator.js';
+import { showPluginBranding } from '@mediaproc/core';
+import { fileExists, validatePaths, resolveOutputPaths } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
-import { createStandardHelp } from '../utils/helpFormatter.js';
+import { createStandardHelp } from '@mediaproc/core';
 
 export function mergeCommand(videoCmd: Command): void {
   videoCmd
@@ -209,6 +209,10 @@ export function mergeCommand(videoCmd: Command): void {
           return;
         }
 
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
+        }
         // Run merge
         console.log(chalk.dim(`🔗 Merging videos (${needsReEncode ? 're-encoding' : 'fast mode'})...`));
         if (options.verbose) {

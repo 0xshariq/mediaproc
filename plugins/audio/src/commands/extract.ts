@@ -8,10 +8,10 @@ import {
   formatFileSize,
   formatDuration,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, validateOutputPath } from '../utils/pathValidator.js';
-import { createStandardHelp } from '../utils/helpFormatter.js';
+import { parseInputPaths, resolveOutputPaths, validateOutputPath } from '@mediaproc/core';
+import { createStandardHelp } from '@mediaproc/core';
 import ora from 'ora';
-import { showPluginBranding } from '../utils/branding.js';
+import { showPluginBranding } from '@mediaproc/core';
 
 export function extractCommand(audioCmd: Command): void {
   audioCmd
@@ -145,12 +145,16 @@ export function extractCommand(audioCmd: Command): void {
             continue;
           }
 
+          if (options.explain) {
+            console.log(chalk.gray('Explain mode is not yet available.'))
+            console.log(chalk.cyan('Planned for v0.8.x.'))
+          }
           const spinner = ora('Extracting audio...').start();
-          
+
           try {
             await runFFmpeg(args, options.verbose);
             const outputStat = await stat(outputFile);
-            
+
             spinner.succeed(chalk.green('Extraction complete'));
             console.log(chalk.green(`✓ Output: ${outputFile}`));
             console.log(chalk.dim(`Format: ${options.format.toUpperCase()} • ` +

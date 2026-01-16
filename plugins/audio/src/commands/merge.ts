@@ -9,10 +9,10 @@ import {
   formatFileSize,
   formatDuration,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths } from '../utils/pathValidator.js';
-import { createStandardHelp } from '../utils/helpFormatter.js';
+import { parseInputPaths } from '@mediaproc/core';
+import { createStandardHelp } from '@mediaproc/core';
 import ora from 'ora';
-import { showPluginBranding } from '../utils/branding.js';
+import { showPluginBranding } from '@mediaproc/core';
 
 export function mergeCommand(audioCmd: Command): void {
   audioCmd
@@ -140,25 +140,29 @@ export function mergeCommand(audioCmd: Command): void {
           showPluginBranding('Audio');
           return;
         }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
+        }
 
         const spinner = ora('Merging audio files...').start();
-        
+
         try {
           await runFFmpeg(args, options.verbose);
           const outputStat = await stat(options.output);
-          
+
           // Clean up concat file
           await unlink(concatFile);
-          
+
           spinner.succeed(chalk.green('Merge complete'));
           console.log(chalk.green(`✓ Output: ${options.output}`));
           console.log(chalk.dim(`Duration: ${formatDuration(totalDuration)} • Size: ${formatFileSize(outputStat.size)}`));
+          showPluginBranding('Audio');
         } catch (error) {
-          await unlink(concatFile).catch(() => {});
+          await unlink(concatFile).catch(() => { });
           spinner.fail(chalk.red('Merge failed'));
           throw error;
         }
-        showPluginBranding('Audio');
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
         process.exit(1);

@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { showBranding } from '../utils/branding';
+import { showBranding } from '@mediaproc/core';
 
 interface SearchResult {
   plugin: string;

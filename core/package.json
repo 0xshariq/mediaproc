@@ -1,12 +1,68 @@
 {
   "name": "@mediaproc/core",
   "version": "1.0.0",
-  "description": "Core Package of MediaProc CLI and Plugins",
-  "license": "ISC",
-  "author": "",
+  "description": "Core utilities for MediaProc CLI and Plugins",
   "type": "module",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./branding": {
+      "import": "./dist/branding.js",
+      "types": "./dist/branding.d.ts"
+    },
+    "./helpFormatter": {
+      "import": "./dist/helpFormatter.js",
+      "types": "./dist/helpFormatter.d.ts"
+    },
+    "./pathValidator": {
+      "import": "./dist/pathValidator.js",
+      "types": "./dist/pathValidator.d.ts"
+    },
+    "./explainFormatter": {
+      "import": "./dist/explainFormatter.js",
+      "types": "./dist/explainFormatter.d.ts"
+    },
+    "./supportedExtensions": {
+      "import": "./dist/supportedExtensions.js",
+      "types": "./dist/supportedExtensions.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "dev": "tsc --watch",
+    "prepublishOnly": "pnpm clean && pnpm build"
+  },
+  "keywords": [
+    "mediaproc",
+    "core",
+    "utilities",
+    "cli",
+    "plugins"
+  ],
+  "author": {
+    "name": "0xshariq",
+    "url": "https://github.com/0xshariq"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/0xshariq/mediaproc-cli.git",
+    "directory": "core"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
   }
 }

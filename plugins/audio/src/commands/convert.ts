@@ -8,9 +8,9 @@ import {
   formatFileSize,
   formatDuration,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, validateOutputPath } from '../utils/pathValidator.js';
-import { createStandardHelp } from '../utils/helpFormatter.js';
-import { showPluginBranding } from '../utils/branding.js';
+import { parseInputPaths, resolveOutputPaths, validateOutputPath } from '@mediaproc/core';
+import { createStandardHelp } from '@mediaproc/core';
+import { showPluginBranding } from '@mediaproc/core';
 import ora from 'ora';
 
 export function convertCommand(audioCmd: Command): void {
@@ -72,7 +72,7 @@ export function convertCommand(audioCmd: Command): void {
         }
 
         // Parse and validate input/output paths
-        const inputPaths = parseInputPaths(input, { 
+        const inputPaths = parseInputPaths(input, {
           allowedExtensions: ['.mp3', '.wav', '.flac', '.aac', '.ogg', '.opus', '.m4a', '.wma']
         });
         const outputDir = validateOutputPath(options.output);
@@ -150,14 +150,18 @@ export function convertCommand(audioCmd: Command): void {
             showPluginBranding('Audio');
             continue;
           }
+          if (options.explain) {
+            console.log(chalk.gray('Explain mode is not yet available.'))
+            console.log(chalk.cyan('Planned for v0.8.x.'))
+          }
 
           // Execute conversion
           const spinner = ora('Converting...').start();
-          
+
           try {
             await runFFmpeg(args, options.verbose);
             const outputStat = await stat(outputFile);
-            
+
             spinner.succeed(chalk.green('Conversion complete'));
             console.log(chalk.green(`✓ Output: ${outputFile}`));
             console.log(chalk.dim(`Size: ${formatFileSize(inputStat.size)} → ${formatFileSize(outputStat.size)}`));

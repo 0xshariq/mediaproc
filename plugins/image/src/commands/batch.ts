@@ -3,11 +3,11 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '../utils/pathValidator.js';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '../utils/helpFormatter.js';
+import { createStandardHelp } from '@mediaproc/core';
 import path from 'path';
-import { showPluginBranding } from '../utils/branding.js';
+import { showPluginBranding } from '@mediaproc/core';
 
 interface BatchOptions {
   input: string;
@@ -143,8 +143,12 @@ export function batchCommand(imageCmd: Command): void {
           if (imageFiles.length > 10) {
             console.log(chalk.dim(`  ... and ${imageFiles.length - 10} more`));
           }
-          
+
           return;
+        }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
         }
 
         // Create output directory

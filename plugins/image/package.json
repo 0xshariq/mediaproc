@@ -44,6 +44,7 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
+    "@mediaproc/core": "latest",
     "chalk": "^5.3.0",
     "commander": "^14.0.2",
     "ora": "^9.0.0",

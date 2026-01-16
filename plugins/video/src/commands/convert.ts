@@ -8,11 +8,11 @@ import {
     formatFileSize,
     formatDuration,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths } from '../utils/pathValidator.js';
+import { parseInputPaths, resolveOutputPaths } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import ora from 'ora';
-import { showPluginBranding } from '../utils/branding.js';
-import { createStandardHelp } from '../utils/helpFormatter.js';
+import { showPluginBranding } from '@mediaproc/core';
+import { createStandardHelp } from '@mediaproc/core';
 
 // Format configurations
 const formatConfig: Record<string, { codec: string; audioCodec: string; ext: string }> = {
@@ -236,6 +236,10 @@ export function convertCommand(videoCmd: Command): void {
                         continue;
                     }
 
+                    if (options.explain) {
+                        console.log(chalk.gray('Explain mode is not yet available.'))
+                        console.log(chalk.cyan('Planned for v0.8.x.'))
+                    }
                     // Execute conversion
                     const spinner = ora('Converting...').start();
 

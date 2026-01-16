@@ -5,7 +5,142 @@ All notable changes to MediaProc will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.7.0] - 2026-01-14
+---
+
+## Package Versions
+
+MediaProc is organized as a monorepo with the following packages:
+
+- **@mediaproc/core** - Core utilities shared across CLI and plugins
+- **@mediaproc/cli** - Main CLI application (previously versioned as root package)
+- **@mediaproc/image** - Image processing plugin
+- **@mediaproc/video** - Video processing plugin
+- **@mediaproc/audio** - Audio processing plugin
+- **@mediaproc/document** - Document processing plugin
+- **@mediaproc/animation** - Animation processing plugin
+- **@mediaproc/3d** - 3D model processing plugin
+- **@mediaproc/stream** - Stream processing plugin
+- **@mediaproc/ai** - AI-powered processing plugin
+- **@mediaproc/metadata** - Metadata extraction plugin
+- **@mediaproc/pipeline** - Pipeline processing plugin
+
+---
+
+## [@mediaproc/core@1.0.0] - 2026-01-16
+
+### Added
+
+**🎉 First Release - Core Utilities Package**
+
+Created `@mediaproc/core` package to centralize common utilities used across CLI and all plugins:
+
+#### Core Utilities
+
+- ✨ **Branding System** - Dynamic version display and branding
+  - `showBranding()` - Display CLI version, docs URL, and GitHub link
+  - `showPluginBranding(pluginName)` - Display plugin-specific branding
+  - `getCliVersion()` - Dynamically read version from package.json
+  - Automatic version detection using `import.meta.url`
+  - No hardcoded versions - always reads from package.json
+
+- ✨ **Help Formatter** - Consistent help text formatting
+  - `displayHelp(config)` - Display formatted help for commands
+  - Supports command examples, options, and descriptions
+  - Color-coded output with proper alignment
+  - Consistent help text across all plugins
+
+- ✨ **Path Validator** - File and directory path validation
+  - `validateAndResolvePaths(inputs, options)` - Validate input paths
+  - `resolveOutputPath(input, output, format)` - Resolve output paths
+  - Support for files, directories, and glob patterns
+  - Error handling with descriptive messages
+
+- ✨ **Explain Formatter** - Detailed command explanations
+  - `showExplanation(config)` - Display detailed command info
+  - Formatted output for `--explain` flag
+  - Technical details about command operations
+  - Performance considerations and tips
+
+- ✨ **Supported Extensions** - File extension definitions
+  - Image formats: `.jpg`, `.jpeg`, `.png`, `.webp`, `.avif`, `.gif`, `.tiff`, `.bmp`, `.svg`
+  - Video formats: `.mp4`, `.avi`, `.mov`, `.mkv`, `.webm`, `.flv`, `.wmv`, `.m4v`
+  - Audio formats: `.mp3`, `.wav`, `.aac`, `.flac`, `.ogg`, `.m4a`, `.wma`, `.opus`
+  - Centralized format support across all plugins
+
+#### Package Configuration
+
+- 📦 **Modern Package Setup**
+  - ES Modules with proper exports map
+  - TypeScript definitions included
+  - Individual utility exports for tree-shaking
+  - Optimized build output in `dist/` folder
+
+- 📚 **Complete Documentation**
+  - Comprehensive README with usage examples
+  - API documentation for all utilities
+  - Integration guide for plugins
+  - Migration guide from old structure
+
+#### Monorepo Architecture
+
+- 🏗️ **Proper Package Structure**
+  - Moved common code from CLI and plugins to core
+  - Updated all plugins to use `@mediaproc/core` dependency
+  - Removed duplicate utility files from plugins
+  - Centralized version management
+
+- 🔧 **Build System**
+  - Separate tsconfig for core package
+  - Independent build process
+  - TypeScript strict mode enabled
+  - Proper rootDir configuration
+
+### Changed
+
+- 🔄 **Plugin Dependencies** - Updated all official plugins
+  - Image plugin now depends on `@mediaproc/core@^1.0.0`
+  - Video plugin now depends on `@mediaproc/core@^1.0.0`
+  - Audio plugin now depends on `@mediaproc/core@^1.0.0`
+  - All plugins use centralized utilities
+
+- 🔄 **Import Paths** - Standardized imports across codebase
+  - Old: `import { showBranding } from '../utils/branding'`
+  - New: `import { showBranding } from '@mediaproc/core'`
+  - Cleaner imports with package namespacing
+
+### Removed
+
+- 🗑️ **Duplicate Files** - Cleaned up redundant utility files
+  - Removed `utils/branding.ts` from CLI and all plugins
+  - Removed `utils/helpFormatter.ts` from plugins
+  - Removed `utils/pathValidator.ts` from plugins
+  - Removed `utils/explainFormatter.ts` from plugins
+  - Single source of truth in `@mediaproc/core`
+
+### Technical Details
+
+**Package Information:**
+- Package: `@mediaproc/core`
+- Version: `1.0.0`
+- License: MIT
+- Node.js: >= 18.0.0
+- TypeScript: ^5.3.3
+- Published: npm registry
+
+**Why Version 1.0.0?**
+- Stable API for core utilities
+- Breaking change from previous architecture
+- Foundation for MediaProc v1.0 release
+- Production-ready code quality
+- Comprehensive test coverage (planned)
+
+---
+
+## [@mediaproc/cli@0.7.0] - 2026-01-14
+
+> **Note:** Previous versions (0.1.0 - 0.6.0) were released as the root package before the monorepo structure. Starting from 0.7.0, the CLI is a separate `@mediaproc/cli` package.
+
+### Added
 
 ### Added
 
