@@ -8,7 +8,7 @@
 
 This package contains shared utilities used across MediaProc CLI and all plugins, ensuring consistency and reducing code duplication.
 
-## 📦 Installation (Don't need install directly, this package will install automatically with cli and plugins)
+## 📦 Installation (Don't need to install directly, this package will install automatically with cli and plugins)
 
 ```bash
 # For plugin developers

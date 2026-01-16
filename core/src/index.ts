@@ -15,6 +15,7 @@ export * from './helpFormatter.js';
 export * from './pathValidator.js';
 export * from './explainFormatter.js';
 export * from './supportedExtensions.js';
+export * from './exitCodes.js';
 
 // Re-export types for convenience
 export type {

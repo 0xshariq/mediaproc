@@ -1,13 +1,13 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { AUDIO_EXTENSIONS, IMAGE_EXTENSIONS, VIDEO_EXTENSIONS } from './supportedExtensions';
+import { AUDIO_EXTENSIONS, IMAGE_EXTENSIONS, VIDEO_EXTENSIONS } from './supportedExtensions.js';
 
 /**
  * Parse input path and return array of files
  * Supports:
  * - Single file: "image.jpg"
  * - Multiple files with commas: "image1.jpg,image2.jpg,image3.jpg"
- * - Directory: "input-images/" (finds all matching files)
+ * - Directory: "input/images/" | "input/videos/" | "input/audios/" (finds all matching files)
  */
 export function parseInputPaths(
   inputPath: string,
@@ -203,6 +203,17 @@ export function validatePaths(
     outputPath,
     errors,
   };
+}
+
+/**
+ * Check if a file exists (sync)
+ */
+export function fileExists(inputPath: string): boolean {
+  try {
+    return fs.existsSync(inputPath) && fs.statSync(inputPath).isFile();
+  } catch {
+    return false;
+  }
 }
 
 /**
