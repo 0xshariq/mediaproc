@@ -19,6 +19,7 @@ export function resizeCommand(imageCmd: Command): void {
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
     .option('--fit <fit>', 'Fit mode: cover, contain, fill, inside, outside', 'cover')
     .option('--maintain-aspect-ratio', 'Maintain aspect ratio (default: true)', true)
+    .option('--no-maintain-aspect-ratio', 'Do not maintain aspect ratio (uses fill mode)')
     .option('--position <position>', 'Position for cover/contain: center, top, bottom, left, right, etc.', 'center')
     .option('--background <color>', 'Background color for contain/outside (hex, rgb, or named)', '#ffffff')
     .option('--kernel <kernel>', 'Kernel for resizing: nearest, cubic, mitchell, lanczos2, lanczos3', 'lanczos3')
