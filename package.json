@@ -1,18 +1,9 @@
 {
-  "name": "@mediaproc/cli",
-  "version": "0.7.0",
+  "name": "mediaproc",
+  "version": "0.1.0",
+  "private": true,
   "description": "Universal media processing CLI with plugin architecture",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "bin": {
-    "mediaproc": "dist/cli.js"
-  },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
   "scripts": {
     "build": "tsc",
     "build:all": "pnpm build && pnpm --filter '@mediaproc/*' build",
@@ -52,7 +43,7 @@
   },
   "homepage": "https://github.com/0xshariq/mediaproc-cli#readme",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "dependencies": {
     "@gltf-transform/cli": "^4.2.1",

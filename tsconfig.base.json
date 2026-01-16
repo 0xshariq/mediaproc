@@ -20,6 +20,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/**/*"],
+  "include": ["./core/src/**/*", "./cli/src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
