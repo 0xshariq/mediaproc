@@ -1,16 +1,9 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
 import { stat } from 'fs/promises';
-import {
-  runFFmpeg,
-  getAudioMetadata,
-  checkFFmpeg,
-  formatFileSize,
-  formatDuration,
-} from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, validateOutputPath } from '@mediaproc/core';
-import { createStandardHelp } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuration } from '../utils/ffmpeg.js';
+import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
+import { AUDIO_EXTENSIONS, parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import ora from 'ora';
 
 export function normalizeCommand(audioCmd: Command): void {
@@ -65,12 +58,10 @@ export function normalizeCommand(audioCmd: Command): void {
           process.exit(1);
         }
 
-        const inputPaths = parseInputPaths(input, {
-          allowedExtensions: ['.mp3', '.wav', '.flac', '.aac', '.ogg', '.opus', '.m4a']
-        });
+        const inputPaths = parseInputPaths(input, AUDIO_EXTENSIONS);
         const suffix = options.format ? `-normalized.${options.format}` : '-normalized';
-        const outputDir = validateOutputPath(options.output);
-        const outputPathsMap = resolveOutputPaths(inputPaths, outputDir, { suffix });
+        const { outputPath } = validatePaths(input, options.output, { allowedExtensions: AUDIO_EXTENSIONS });
+        const outputPathsMap = resolveOutputPaths(inputPaths, outputPath, { suffix });
         const outputPaths = Array.from(outputPathsMap.values());
 
         for (let i = 0; i < inputPaths.length; i++) {
@@ -119,7 +110,15 @@ export function normalizeCommand(audioCmd: Command): void {
           const spinner = ora('Normalizing...').start();
 
           try {
-            await runFFmpeg(args, options.verbose);
+            await runFFmpeg(
+              args,
+              options.verbose,
+              (line: string) => {
+                if (shouldDisplayLine(line, options.verbose)) {
+                  console.log(styleFFmpegOutput(line));
+                }
+              }
+            );
             const outputStat = await stat(outputFile);
 
             spinner.succeed(chalk.green('Normalization complete'));
@@ -136,7 +135,7 @@ export function normalizeCommand(audioCmd: Command): void {
           console.log(chalk.green(`\n✓ Normalized ${inputPaths.length} files successfully`));
         }
 
-        showPluginBranding('Audio');
+        showPluginBranding('Audio', '../../package.json');
 
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));

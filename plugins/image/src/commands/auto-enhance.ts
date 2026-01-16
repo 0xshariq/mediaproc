@@ -2,13 +2,11 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
 import { ImageOptions } from '../types.js';
 
-interface AutoEnhanceOptions extends ImageOptions{
+interface AutoEnhanceOptions extends ImageOptions {
   input: string;
   output?: string;
   level?: string;
@@ -127,7 +125,7 @@ export function autoEnhanceCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image');
+          showPluginBranding('Image', '../../package.json');
           return;
         }
         if (options.explain) {
@@ -192,7 +190,7 @@ export function autoEnhanceCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
       } catch (error) {
         spinner.fail(chalk.red('Auto-enhancement failed'));
         if (options.verbose) {

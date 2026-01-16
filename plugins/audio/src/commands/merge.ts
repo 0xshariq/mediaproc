@@ -2,17 +2,10 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import { stat, writeFile, unlink } from 'fs/promises';
 import { join, dirname } from 'path';
-import {
-  runFFmpeg,
-  getAudioMetadata,
-  checkFFmpeg,
-  formatFileSize,
-  formatDuration,
-} from '../utils/ffmpeg.js';
-import { parseInputPaths } from '@mediaproc/core';
-import { createStandardHelp } from '@mediaproc/core';
+import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuration } from '../utils/ffmpeg.js';
+import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
+import { AUDIO_EXTENSIONS, parseInputPaths, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import ora from 'ora';
-import { showPluginBranding } from '@mediaproc/core';
 
 export function mergeCommand(audioCmd: Command): void {
   audioCmd
@@ -77,9 +70,7 @@ export function mergeCommand(audioCmd: Command): void {
         const validatedInputs: string[] = [];
         for (const input of inputs) {
           try {
-            const paths = parseInputPaths(input, {
-              allowedExtensions: ['.mp3', '.wav', '.flac', '.aac', '.ogg', '.opus', '.m4a']
-            });
+            const paths = parseInputPaths(input, AUDIO_EXTENSIONS);
             validatedInputs.push(...paths);
           } catch (err) {
             console.warn(chalk.yellow(`⚠ Skipping invalid input: ${input}`));
@@ -137,7 +128,7 @@ export function mergeCommand(audioCmd: Command): void {
           console.log(chalk.yellow('\n[DRY RUN] Would execute:'));
           console.log(chalk.dim(`ffmpeg ${args.join(' ')}`));
           await unlink(concatFile);
-          showPluginBranding('Audio');
+          showPluginBranding('Audio', '../../package.json');
           return;
         }
         if (options.explain) {
@@ -148,7 +139,15 @@ export function mergeCommand(audioCmd: Command): void {
         const spinner = ora('Merging audio files...').start();
 
         try {
-          await runFFmpeg(args, options.verbose);
+          await runFFmpeg(
+            args,
+            options.verbose,
+            (line: string) => {
+              if (shouldDisplayLine(line, options.verbose)) {
+                console.log(styleFFmpegOutput(line));
+              }
+            }
+          );
           const outputStat = await stat(options.output);
 
           // Clean up concat file
@@ -157,7 +156,7 @@ export function mergeCommand(audioCmd: Command): void {
           spinner.succeed(chalk.green('Merge complete'));
           console.log(chalk.green(`✓ Output: ${options.output}`));
           console.log(chalk.dim(`Duration: ${formatDuration(totalDuration)} • Size: ${formatFileSize(outputStat.size)}`));
-          showPluginBranding('Audio');
+          showPluginBranding('Audio', '../../package.json');
         } catch (error) {
           await unlink(concatFile).catch(() => { });
           spinner.fail(chalk.red('Merge failed'));

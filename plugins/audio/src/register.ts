@@ -9,13 +9,10 @@ export const name = '@mediaproc/audio';
 export const version = '1.0.0';
 
 export function register(program: Command): void {
-  const audioCmd = program
-    .command('audio')
-    .description('Audio processing commands (powered by FFmpeg)');
-
-  convertCommand(audioCmd);
-  normalizeCommand(audioCmd);
-  trimCommand(audioCmd);
-  mergeCommand(audioCmd);
-  extractCommand(audioCmd);
+  // Register each command directly on the root program
+  convertCommand(program);
+  normalizeCommand(program);
+  trimCommand(program);
+  mergeCommand(program);
+  extractCommand(program);
 }

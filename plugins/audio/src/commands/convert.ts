@@ -1,16 +1,9 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
 import { stat } from 'fs/promises';
-import {
-  runFFmpeg,
-  getAudioMetadata,
-  checkFFmpeg,
-  formatFileSize,
-  formatDuration,
-} from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, validateOutputPath } from '@mediaproc/core';
-import { createStandardHelp } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuration } from '../utils/ffmpeg.js';
+import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
+import { parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, showPluginBranding, AUDIO_EXTENSIONS } from '@mediaproc/core';
 import ora from 'ora';
 
 export function convertCommand(audioCmd: Command): void {
@@ -24,6 +17,13 @@ export function convertCommand(audioCmd: Command): void {
     .option('-c, --channels <channels>', 'Number of channels: 1 (mono), 2 (stereo)', parseInt)
     .option('-q, --quality <quality>', 'Quality preset: low, medium, high, lossless', 'medium')
     .option('--codec <codec>', 'Audio codec override (libmp3lame, aac, flac, libvorbis, libopus)')
+    .option('--normalize', 'Normalize audio levels (EBU R128 loudness normalization)')
+    .option('--volume <db>', 'Adjust output volume in dB (e.g., -3 for -3dB)')
+    .option('--fade-in <seconds>', 'Add fade-in effect (seconds)', parseFloat)
+    .option('--fade-out <seconds>', 'Add fade-out effect (seconds)', parseFloat)
+    .option('--trim <start>:<duration>', 'Trim audio: <start>:<duration> (e.g., 00:01:00:30)')
+    .option('--metadata <key=value>', 'Set custom metadata (repeatable)', (val: string, acc: string[] = []) => { acc.push(val); return acc; }, [] as string[])
+    .option('--force', 'Overwrite output files without prompt')
     .option('--dry-run', 'Preview command without executing')
     .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
@@ -47,6 +47,13 @@ export function convertCommand(audioCmd: Command): void {
             { flag: '-c, --channels <channels>', description: 'Audio channels: 1 (mono), 2 (stereo)' },
             { flag: '-q, --quality <quality>', description: 'Quality preset: low (96k), medium (192k), high (320k), lossless' },
             { flag: '--codec <codec>', description: 'Codec override: libmp3lame, aac, flac, libvorbis, libopus' },
+            { flag: '--normalize', description: 'Normalize audio levels (EBU R128 loudness normalization)' },
+            { flag: '--volume <db>', description: 'Adjust output volume in dB (e.g., -3 for -3dB)' },
+            { flag: '--fade-in <seconds>', description: 'Add fade-in effect (seconds)' },
+            { flag: '--fade-out <seconds>', description: 'Add fade-out effect (seconds)' },
+            { flag: '--trim <start>:<duration>', description: 'Trim audio: <start>:<duration> (e.g., 00:01:00:30)' },
+            { flag: '--metadata <key=value>', description: 'Set custom metadata (repeatable)' },
+            { flag: '--force', description: 'Overwrite output files without prompt' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
             { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output and progress' }
@@ -72,11 +79,9 @@ export function convertCommand(audioCmd: Command): void {
         }
 
         // Parse and validate input/output paths
-        const inputPaths = parseInputPaths(input, {
-          allowedExtensions: ['.mp3', '.wav', '.flac', '.aac', '.ogg', '.opus', '.m4a', '.wma']
-        });
-        const outputDir = validateOutputPath(options.output);
-        const outputPathsMap = resolveOutputPaths(inputPaths, outputDir, {
+        const inputPaths = parseInputPaths(input, AUDIO_EXTENSIONS);
+        const { outputPath } = validatePaths(input, options.output, { allowedExtensions: AUDIO_EXTENSIONS });
+        const outputPathsMap = resolveOutputPaths(inputPaths, outputPath, {
           suffix: '-converted',
           newExtension: `.${options.format}`
         });
@@ -108,7 +113,15 @@ export function convertCommand(audioCmd: Command): void {
             `Channels: ${metadata.channels}`));
 
           // Build FFmpeg args
-          const args = ['-i', inputFile, '-y'];
+          const args = ['-i', inputFile];
+          if (options.force) args.push('-y');
+
+          // Trim
+          if (options.trim) {
+            const [start, duration] = options.trim.split(':');
+            if (start) args.push('-ss', start);
+            if (duration) args.push('-t', duration);
+          }
 
           // Codec selection
           const codecMap: Record<string, string> = {
@@ -120,25 +133,29 @@ export function convertCommand(audioCmd: Command): void {
             ogg: 'libvorbis',
             opus: 'libopus',
           };
-
           const codec = options.codec || codecMap[options.format];
-          if (codec) {
-            args.push('-c:a', codec);
-          }
+          if (codec) args.push('-c:a', codec);
+          if (targetBitrate !== 'lossless') args.push('-b:a', targetBitrate);
+          if (options.sampleRate) args.push('-ar', options.sampleRate.toString());
+          if (options.channels) args.push('-ac', options.channels.toString());
 
-          // Bitrate
-          if (targetBitrate !== 'lossless') {
-            args.push('-b:a', targetBitrate);
+          // Audio filters
+          const filters: string[] = [];
+          if (options.normalize) filters.push('loudnorm=I=-16:TP=-1.5:LRA=11');
+          if (options.volume) filters.push(`volume=${options.volume}dB`);
+          if (options.fadeIn) filters.push(`afade=t=in:st=0:d=${options.fadeIn}`);
+          if (options.fadeOut && metadata && metadata.duration) {
+            const fadeStart = metadata.duration - options.fadeOut;
+            filters.push(`afade=t=out:st=${fadeStart}:d=${options.fadeOut}`);
           }
+          if (filters.length > 0) args.push('-af', filters.join(','));
 
-          // Sample rate
-          if (options.sampleRate) {
-            args.push('-ar', options.sampleRate.toString());
-          }
-
-          // Channels
-          if (options.channels) {
-            args.push('-ac', options.channels.toString());
+          // Metadata
+          if (options.metadata && Array.isArray(options.metadata)) {
+            for (const entry of options.metadata) {
+              const [key, value] = entry.split('=');
+              if (key && value) args.push('-metadata', `${key}=${value}`);
+            }
           }
 
           args.push(outputFile);
@@ -147,19 +164,27 @@ export function convertCommand(audioCmd: Command): void {
           if (options.dryRun) {
             console.log(chalk.yellow('\n[DRY RUN] Would execute:'));
             console.log(chalk.dim(`ffmpeg ${args.join(' ')}`));
-            showPluginBranding('Audio');
+            showPluginBranding('Audio', require.resolve('../../package.json'));
             continue;
           }
-          if (options.explain) {
-            console.log(chalk.gray('Explain mode is not yet available.'))
-            console.log(chalk.cyan('Planned for v0.8.x.'))
-          }
+          // if (options.explain) {
+          //   console.log(chalk.gray('Explain mode is not yet available.'))
+          //   console.log(chalk.cyan('Planned for v0.8.x.'))
+          // }
 
           // Execute conversion
           const spinner = ora('Converting...').start();
 
           try {
-            await runFFmpeg(args, options.verbose);
+            await runFFmpeg(
+              args,
+              options.verbose,
+              (line: string) => {
+                if (shouldDisplayLine(line, options.verbose)) {
+                  console.log(styleFFmpegOutput(line));
+                }
+              }
+            );
             const outputStat = await stat(outputFile);
 
             spinner.succeed(chalk.green('Conversion complete'));
@@ -175,7 +200,7 @@ export function convertCommand(audioCmd: Command): void {
           console.log(chalk.green(`\n✓ Converted ${inputPaths.length} files successfully`));
         }
 
-        showPluginBranding('Audio');
+        showPluginBranding('Audio', require.resolve('../../package.json'));
 
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));

@@ -1,18 +1,10 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
 import { stat } from 'fs/promises';
-import {
-  runFFmpeg,
-  getAudioMetadata,
-  checkFFmpeg,
-  formatFileSize,
-  formatDuration,
-  parseTime,
-} from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, validateOutputPath } from '@mediaproc/core';
-import { createStandardHelp } from '@mediaproc/core';
+import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuration, parseTime } from '../utils/ffmpeg.js';
+import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
+import { AUDIO_EXTENSIONS, parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import ora from 'ora';
-import { showPluginBranding } from '@mediaproc/core';
 
 export function trimCommand(audioCmd: Command): void {
   audioCmd
@@ -26,6 +18,8 @@ export function trimCommand(audioCmd: Command): void {
     .option('--fade-out <seconds>', 'Add fade-out effect (seconds)', parseFloat)
     .option('--format <format>', 'Output format (default: same as input)')
     .option('--fast', 'Fast mode (stream copy, no re-encoding)')
+    .option('--force', 'Overwrite output files without prompt')
+    .option('--metadata <key=value>', 'Set custom metadata (repeatable)', (val: string, acc: string[] = []) => { acc.push(val); return acc; }, [] as string[])
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
@@ -50,6 +44,8 @@ export function trimCommand(audioCmd: Command): void {
             { flag: '--fade-out <seconds>', description: 'Fade-out effect duration in seconds (0.1-10)' },
             { flag: '--format <format>', description: 'Output format: mp3, aac, wav, flac (default: same as input)' },
             { flag: '--fast', description: 'Fast mode using stream copy (no quality loss, frame-accurate)' },
+            { flag: '--force', description: 'Overwrite output files without prompt' },
+            { flag: '--metadata <key=value>', description: 'Set custom metadata (repeatable)' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
             { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output and progress' }
@@ -78,12 +74,10 @@ export function trimCommand(audioCmd: Command): void {
           process.exit(1);
         }
 
-        const inputPaths = parseInputPaths(input, {
-          allowedExtensions: ['.mp3', '.wav', '.flac', '.aac', '.ogg', '.opus', '.m4a']
-        });
+        const inputPaths = parseInputPaths(input, AUDIO_EXTENSIONS);
         const suffix = options.format ? `-trimmed.${options.format}` : '-trimmed';
-        const outputDir = validateOutputPath(options.output);
-        const outputPathsMap = resolveOutputPaths(inputPaths, outputDir, { suffix });
+        const { outputPath } = validatePaths(input, options.output, { allowedExtensions: AUDIO_EXTENSIONS });
+        const outputPathsMap = resolveOutputPaths(inputPaths, outputPath, { suffix });
         const outputPaths = Array.from(outputPathsMap.values());
 
         for (let i = 0; i < inputPaths.length; i++) {
@@ -104,7 +98,8 @@ export function trimCommand(audioCmd: Command): void {
           console.log(chalk.dim(`Trim: ${formatDuration(startTime)} → ${formatDuration(endTime)} ` +
             `(${formatDuration(duration)})`));
 
-          const args = ['-i', inputFile, '-y'];
+          const args = ['-i', inputFile];
+          if (options.force) args.push('-y');
 
           // Start time
           args.push('-ss', startTime.toString());
@@ -137,12 +132,21 @@ export function trimCommand(audioCmd: Command): void {
             }
           }
 
+
+          // Metadata
+          if (options.metadata && Array.isArray(options.metadata)) {
+            for (const entry of options.metadata) {
+              const [key, value] = entry.split('=');
+              if (key && value) args.push('-metadata', `${key}=${value}`);
+            }
+          }
+
           args.push(outputFile);
 
           if (options.dryRun) {
             console.log(chalk.yellow('\n[DRY RUN] Would execute:'));
             console.log(chalk.dim(`ffmpeg ${args.join(' ')}`));
-            showPluginBranding('Audio');
+            showPluginBranding('Audio', '../../package.json');
             continue;
           }
           if (options.explain) {
@@ -153,7 +157,15 @@ export function trimCommand(audioCmd: Command): void {
           const spinner = ora('Trimming...').start();
 
           try {
-            await runFFmpeg(args, options.verbose);
+            await runFFmpeg(
+              args,
+              options.verbose,
+              (line: string) => {
+                if (shouldDisplayLine(line, options.verbose)) {
+                  console.log(styleFFmpegOutput(line));
+                }
+              }
+            );
             const outputStat = await stat(outputFile);
 
             spinner.succeed(chalk.green('Trim complete'));
@@ -168,7 +180,7 @@ export function trimCommand(audioCmd: Command): void {
         if (inputPaths.length > 1) {
           console.log(chalk.green(`\n✓ Trimmed ${inputPaths.length} files successfully`));
         }
-        showPluginBranding('Audio');
+        showPluginBranding('Audio', '../../package.json');
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
         process.exit(1);
