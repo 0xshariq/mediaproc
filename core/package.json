@@ -1,0 +1,12 @@
+{
+  "name": "@mediaproc/core",
+  "version": "1.0.0",
+  "description": "Core Package of MediaProc CLI and Plugins",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
