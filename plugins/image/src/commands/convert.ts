@@ -4,9 +4,7 @@ import ora from 'ora';
 
 import type { ConvertOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core'; 
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
 
 
 interface ConvertOptionsExtended extends ConvertOptions {
@@ -126,8 +124,12 @@ export function convertCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image');
+          showPluginBranding('Image', '../../package.json');
           return;
+        }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
         }
 
         // Process each input file
@@ -137,7 +139,7 @@ export function convertCommand(imageCmd: Command): void {
         for (const [index, inputFile] of inputFiles.entries()) {
           const outputPath = outputPaths.get(inputFile)!;
           const fileName = getFileName(inputFile);
-          
+
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 
           try {
@@ -162,7 +164,7 @@ export function convertCommand(imageCmd: Command): void {
             await pipeline.toFile(outputPath);
 
             spinner.succeed(chalk.green(`✓ ${fileName} converted to ${options.format.toUpperCase()}`));
-            
+
             if (options.verbose) {
               console.log(chalk.dim(`    Original format: ${metadata.format?.toUpperCase()}`));
               console.log(chalk.dim(`    Size: ${metadata.width}x${metadata.height}`));
@@ -187,7 +189,7 @@ export function convertCommand(imageCmd: Command): void {
         }
         console.log(chalk.dim(`  Target format: ${options.format.toUpperCase()}`));
 
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to convert images'));

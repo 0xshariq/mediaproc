@@ -2,11 +2,9 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import type { FilterOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
 import path from 'node:path';
 
 interface ThresholdOptions extends FilterOptions {
@@ -81,98 +79,102 @@ export function thresholdCommand(imageCmd: Command): void {
   cmd.action(async (input: string, options: ThresholdOptions) => {
     const spinner = ora('Validating inputs...').start();
 
-      try {
-        const thresholdValue = Math.max(0, Math.min(255, options.threshold || 128));
+    try {
+      const thresholdValue = Math.max(0, Math.min(255, options.threshold || 128));
 
-        const { inputFiles, outputPath, errors } = validatePaths(input, options.output, {
-          allowedExtensions: IMAGE_EXTENSIONS,
-        });
+      const { inputFiles, outputPath, errors } = validatePaths(input, options.output, {
+        allowedExtensions: IMAGE_EXTENSIONS,
+      });
 
-        if (errors.length > 0) {
-          spinner.fail(chalk.red('Validation failed:'));
-          errors.forEach(err => console.log(chalk.red(`  ✗ ${err}`)));
-          process.exit(1);
-        }
-
-        if (inputFiles.length === 0) {
-          spinner.fail(chalk.red('No valid image files found'));
-          process.exit(1);
-        }
-
-        const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
-          suffix: '-threshold',
-        });
-
-        spinner.succeed(chalk.green(`Found ${inputFiles.length} image(s) to process`));
-
-        if (options.verbose) {
-          console.log(chalk.blue('\nConfiguration:'));
-          console.log(chalk.dim(`  Threshold: ${thresholdValue}`));
-          console.log(chalk.dim(`  Grayscale: ${options.grayscale !== false}`));
-        }
-
-        if (options.dryRun) {
-          console.log(chalk.yellow('\nDry run mode - no changes will be made\n'));
-          console.log(chalk.green(`Would apply threshold to ${inputFiles.length} image(s):`));
-          inputFiles.forEach((inputFile, index) => {
-            const outputPath = outputPaths.get(inputFile);
-            console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
-          });
-          showPluginBranding('Image');
-          return;
-        }
-
-        let successCount = 0;
-        let failCount = 0;
-
-        for (const [index, inputFile] of inputFiles.entries()) {
-          const outputPath = outputPaths.get(inputFile)!;
-          const fileName = getFileName(inputFile);
-          
-          spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
-
-          try {
-            let pipeline = createSharpInstance(inputFile);
-
-            if (options.grayscale !== false) {
-              pipeline = pipeline.grayscale();
-            }
-
-            pipeline = pipeline.threshold(thresholdValue);
-
-            const outputExt = path.extname(outputPath).toLowerCase();
-            if (outputExt === '.jpg' || outputExt === '.jpeg') {
-              pipeline.jpeg({ quality: options.quality || 90 });
-            } else if (outputExt === '.png') {
-              pipeline.png({ quality: options.quality || 90 });
-            } else if (outputExt === '.webp') {
-              pipeline.webp({ quality: options.quality || 90 });
-            }
-
-            await pipeline.toFile(outputPath);
-
-            spinner.succeed(chalk.green(`✓ ${fileName} processed`));
-            successCount++;
-          } catch (error) {
-            spinner.fail(chalk.red(`✗ Failed: ${fileName}`));
-            if (options.verbose && error instanceof Error) {
-              console.log(chalk.red(`    Error: ${error.message}`));
-            }
-            failCount++;
-          }
-        }
-
-        console.log(chalk.bold('\nSummary:'));
-        console.log(chalk.green(`  ✓ Success: ${successCount}`));
-        if (failCount > 0) {
-          console.log(chalk.red(`  ✗ Failed: ${failCount}`));
-        }
-        showPluginBranding('Image');
-      } catch (error) {
-        spinner.fail(chalk.red('Failed to apply threshold'));
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error(chalk.red(errorMessage));
+      if (errors.length > 0) {
+        spinner.fail(chalk.red('Validation failed:'));
+        errors.forEach(err => console.log(chalk.red(`  ✗ ${err}`)));
         process.exit(1);
       }
-    });
+
+      if (inputFiles.length === 0) {
+        spinner.fail(chalk.red('No valid image files found'));
+        process.exit(1);
+      }
+
+      const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
+        suffix: '-threshold',
+      });
+
+      spinner.succeed(chalk.green(`Found ${inputFiles.length} image(s) to process`));
+
+      if (options.verbose) {
+        console.log(chalk.blue('\nConfiguration:'));
+        console.log(chalk.dim(`  Threshold: ${thresholdValue}`));
+        console.log(chalk.dim(`  Grayscale: ${options.grayscale !== false}`));
+      }
+
+      if (options.dryRun) {
+        console.log(chalk.yellow('\nDry run mode - no changes will be made\n'));
+        console.log(chalk.green(`Would apply threshold to ${inputFiles.length} image(s):`));
+        inputFiles.forEach((inputFile, index) => {
+          const outputPath = outputPaths.get(inputFile);
+          console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
+        });
+        showPluginBranding('Image', '../../package.json');
+        return;
+      }
+      if (options.explain) {
+        console.log(chalk.gray('Explain mode is not yet available.'))
+        console.log(chalk.cyan('Planned for v0.8.x.'))
+      }
+
+      let successCount = 0;
+      let failCount = 0;
+
+      for (const [index, inputFile] of inputFiles.entries()) {
+        const outputPath = outputPaths.get(inputFile)!;
+        const fileName = getFileName(inputFile);
+
+        spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
+
+        try {
+          let pipeline = createSharpInstance(inputFile);
+
+          if (options.grayscale !== false) {
+            pipeline = pipeline.grayscale();
+          }
+
+          pipeline = pipeline.threshold(thresholdValue);
+
+          const outputExt = path.extname(outputPath).toLowerCase();
+          if (outputExt === '.jpg' || outputExt === '.jpeg') {
+            pipeline.jpeg({ quality: options.quality || 90 });
+          } else if (outputExt === '.png') {
+            pipeline.png({ quality: options.quality || 90 });
+          } else if (outputExt === '.webp') {
+            pipeline.webp({ quality: options.quality || 90 });
+          }
+
+          await pipeline.toFile(outputPath);
+
+          spinner.succeed(chalk.green(`✓ ${fileName} processed`));
+          successCount++;
+        } catch (error) {
+          spinner.fail(chalk.red(`✗ Failed: ${fileName}`));
+          if (options.verbose && error instanceof Error) {
+            console.log(chalk.red(`    Error: ${error.message}`));
+          }
+          failCount++;
+        }
+      }
+
+      console.log(chalk.bold('\nSummary:'));
+      console.log(chalk.green(`  ✓ Success: ${successCount}`));
+      if (failCount > 0) {
+        console.log(chalk.red(`  ✗ Failed: ${failCount}`));
+      }
+      showPluginBranding('Image', '../../package.json');
+    } catch (error) {
+      spinner.fail(chalk.red('Failed to apply threshold'));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(chalk.red(errorMessage));
+      process.exit(1);
+    }
+  });
 }

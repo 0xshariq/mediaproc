@@ -2,10 +2,8 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
 import { ImageOptions } from '../index.js';
 
 interface ClaheOptions extends ImageOptions {
@@ -122,7 +120,7 @@ export function claheCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image');
+          showPluginBranding('Image', '../../package.json');
           return;
         }
         if (options.explain) {
@@ -136,7 +134,7 @@ export function claheCommand(imageCmd: Command): void {
         for (const [index, inputFile] of inputFiles.entries()) {
           const outputPath = outputPaths.get(inputFile)!;
           const fileName = getFileName(inputFile);
-          
+
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 
           try {
@@ -147,7 +145,7 @@ export function claheCommand(imageCmd: Command): void {
                 maxSlope: options.maxSlope || 3
               })
               .toFile(outputPath);
-            
+
             spinner.succeed(chalk.green(`✓ ${fileName} processed`));
             successCount++;
           } catch (error) {
@@ -164,7 +162,7 @@ export function claheCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
       } catch (error) {
         spinner.fail(chalk.red('Failed to apply CLAHE'));
         if (options.verbose) {

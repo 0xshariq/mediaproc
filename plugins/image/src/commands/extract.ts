@@ -2,11 +2,9 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import type { ExtractOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
 
 interface ExtractOptionsExtended extends ExtractOptions {
   help?: boolean;
@@ -127,8 +125,12 @@ export function extractCommand(imageCmd: Command): void {
           } else {
             console.log(chalk.dim(`  Region: ${options.left},${options.top} ${options.width}x${options.height}`));
           }
-          showPluginBranding('Image');
+          showPluginBranding('Image', '../../package.json');
           return;
+        }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
         }
 
         // Validate channel or region options once before processing
@@ -166,7 +168,7 @@ export function extractCommand(imageCmd: Command): void {
                 alpha: 3
               };
               const channelIndex = channelMap[options.channel as keyof typeof channelMap];
-              
+
               if (channelIndex === 3) {
                 pipeline = pipeline.ensureAlpha().extractChannel(channelIndex);
               } else {
@@ -200,7 +202,7 @@ export function extractCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Processing failed'));

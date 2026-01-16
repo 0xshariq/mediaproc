@@ -2,11 +2,9 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
 import { stat } from 'node:fs/promises';
 
 interface CompressOptions extends ImageOptions {
@@ -120,8 +118,12 @@ export function compressCommand(imageCmd: Command): void {
             console.log(chalk.gray(`   Output: ${outputFile}`));
             console.log(chalk.gray(`   Quality: ${options.quality || 75}`));
             console.log(chalk.gray(`   Lossy: ${options.lossy ? 'Yes' : 'No'}`));
-            showPluginBranding('Image');
+            showPluginBranding('Image', '../../package.json');
             continue;
+          }
+          if (options.explain) {
+            console.log(chalk.gray('Explain mode is not yet available.'))
+            console.log(chalk.cyan('Planned for v0.8.x.'))
           }
 
           const processSpinner = ora(`Compressing ${fileName}...`).start();
@@ -130,7 +132,7 @@ export function compressCommand(imageCmd: Command): void {
             const inputStat = await stat(inputPath);
 
             const sharp = await createSharpInstance(inputPath);
-            
+
             // Get image format
             const metadata = await sharp.metadata();
             const format = metadata.format;
@@ -199,7 +201,7 @@ export function compressCommand(imageCmd: Command): void {
         console.log();
         console.log(chalk.green.bold('✓ Compression Complete!'));
         console.log(chalk.gray(`   Processed: ${inputFiles.length} image(s)`));
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
       } catch (error) {
         spinner.fail(chalk.red('Error during compression'));
         console.error(chalk.red(`Error: ${(error as Error).message}`));

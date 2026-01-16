@@ -3,11 +3,9 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import type { CompositeOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
 
 interface CompositeOptionsExtended extends CompositeOptions {
   help?: boolean;
@@ -143,7 +141,7 @@ export function compositeCommand(imageCmd: Command): void {
           inputFiles.forEach(f => console.log(chalk.dim(`  - ${f}`)));
           console.log(chalk.dim(`  Overlay: ${options.overlay}`));
           console.log(chalk.dim(`  Position: ${options.left !== undefined && options.top !== undefined ? `${options.left}x${options.top}` : options.gravity}`));
-          showPluginBranding('Image');
+          showPluginBranding('Image', '../../package.json');
           return;
         }
         if (options.explain) {
@@ -203,7 +201,7 @@ export function compositeCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
       } catch (error) {
         spinner.fail(chalk.red('Processing failed'));
         if (options.verbose) {

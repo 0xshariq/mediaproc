@@ -3,12 +3,11 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
+import { ImageOptions } from '../types.js';
 
-interface DominantColorOptions {
+interface DominantColorOptions extends ImageOptions {
   input: string;
   count?: number;
   export?: string;
@@ -106,8 +105,12 @@ export function dominantColorCommand(imageCmd: Command): void {
             console.log(chalk.dim(`  [${index + 1}/${totalFiles}] ${file}`));
           });
           console.log(chalk.dim(`\n  Total files: ${totalFiles}`));
-          showPluginBranding('Image');
+          showPluginBranding('Image', '../../package.json');
           process.exit(0);
+        }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
         }
 
         spinner.succeed(chalk.green(`Found ${totalFiles} file${totalFiles > 1 ? 's' : ''} to analyze`));
@@ -134,7 +137,7 @@ export function dominantColorCommand(imageCmd: Command): void {
             // Get image stats which includes dominant color
             const sharpInstance = createSharpInstance(inputFile);
             const metadata = await sharpInstance.metadata();
-            
+
             // Resize for faster processing
             const smallImage = await sharpInstance
               .resize(100, 100, { fit: 'inside' })
@@ -148,65 +151,65 @@ export function dominantColorCommand(imageCmd: Command): void {
             // Color histogram approach
             const colorMap = new Map<string, number>();
 
-        for (let i = 0; i < data.length; i += channels) {
-          const r = data[i];
-          const g = data[i + 1];
-          const b = data[i + 2];
-          
-          // Bucket colors to reduce variations
-          const bucketSize = 16;
-          const bucketR = Math.floor(r / bucketSize) * bucketSize;
-          const bucketG = Math.floor(g / bucketSize) * bucketSize;
-          const bucketB = Math.floor(b / bucketSize) * bucketSize;
-          
-          const key = `${bucketR},${bucketG},${bucketB}`;
-          colorMap.set(key, (colorMap.get(key) || 0) + 1);
-        }
+            for (let i = 0; i < data.length; i += channels) {
+              const r = data[i];
+              const g = data[i + 1];
+              const b = data[i + 2];
 
-        // Sort by frequency
-        const sortedColors = Array.from(colorMap.entries())
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, count);
+              // Bucket colors to reduce variations
+              const bucketSize = 16;
+              const bucketR = Math.floor(r / bucketSize) * bucketSize;
+              const bucketG = Math.floor(g / bucketSize) * bucketSize;
+              const bucketB = Math.floor(b / bucketSize) * bucketSize;
 
-        const dominantColors = sortedColors.map(([rgb, count]) => {
-          const [r, g, b] = rgb.split(',').map(Number);
-          const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-          const percentage = ((count / pixels) * 100).toFixed(2);
-          
-          // Calculate HSL
-          const rNorm = r / 255;
-          const gNorm = g / 255;
-          const bNorm = b / 255;
-          const max = Math.max(rNorm, gNorm, bNorm);
-          const min = Math.min(rNorm, gNorm, bNorm);
-          const l = (max + min) / 2;
-          let s = 0;
-          let h = 0;
-          
-          if (max !== min) {
-            const d = max - min;
-            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-            
-            if (max === rNorm) {
-              h = ((gNorm - bNorm) / d + (gNorm < bNorm ? 6 : 0)) / 6;
-            } else if (max === gNorm) {
-              h = ((bNorm - rNorm) / d + 2) / 6;
-            } else {
-              h = ((rNorm - gNorm) / d + 4) / 6;
+              const key = `${bucketR},${bucketG},${bucketB}`;
+              colorMap.set(key, (colorMap.get(key) || 0) + 1);
             }
-          }
-          
-            return {
-              hex,
-              rgb: { r, g, b },
-              hsl: {
-                h: Math.round(h * 360),
-                s: Math.round(s * 100),
-                l: Math.round(l * 100)
-              },
-              percentage: parseFloat(percentage)
-            };
-          });
+
+            // Sort by frequency
+            const sortedColors = Array.from(colorMap.entries())
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, count);
+
+            const dominantColors = sortedColors.map(([rgb, count]) => {
+              const [r, g, b] = rgb.split(',').map(Number);
+              const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+              const percentage = ((count / pixels) * 100).toFixed(2);
+
+              // Calculate HSL
+              const rNorm = r / 255;
+              const gNorm = g / 255;
+              const bNorm = b / 255;
+              const max = Math.max(rNorm, gNorm, bNorm);
+              const min = Math.min(rNorm, gNorm, bNorm);
+              const l = (max + min) / 2;
+              let s = 0;
+              let h = 0;
+
+              if (max !== min) {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+                if (max === rNorm) {
+                  h = ((gNorm - bNorm) / d + (gNorm < bNorm ? 6 : 0)) / 6;
+                } else if (max === gNorm) {
+                  h = ((bNorm - rNorm) / d + 2) / 6;
+                } else {
+                  h = ((rNorm - gNorm) / d + 4) / 6;
+                }
+              }
+
+              return {
+                hex,
+                rgb: { r, g, b },
+                hsl: {
+                  h: Math.round(h * 360),
+                  s: Math.round(s * 100),
+                  l: Math.round(l * 100)
+                },
+                percentage: parseFloat(percentage)
+              };
+            });
 
             fileSpinner.succeed(chalk.green(`${fileNum} Color analysis complete!\n`));
 
@@ -215,12 +218,12 @@ export function dominantColorCommand(imageCmd: Command): void {
             dominantColors.forEach((color, index) => {
               const colorPreview = chalk.bgHex(color.hex)('    ');
               console.log(colorPreview + ' ' + chalk.bold(color.hex) + chalk.dim(` (${color.percentage}%)`));
-              
+
               if (options.verbose) {
                 console.log(chalk.dim(`   RGB: (${color.rgb.r}, ${color.rgb.g}, ${color.rgb.b})`));
                 console.log(chalk.dim(`   HSL: (${color.hsl.h}°, ${color.hsl.s}%, ${color.hsl.l}%)`));
               }
-              
+
               if (index < dominantColors.length - 1) {
                 console.log('');
               }
@@ -236,11 +239,11 @@ export function dominantColorCommand(imageCmd: Command): void {
                 },
                 colors: dominantColors
               };
-              
-              const exportPath = totalFiles > 1 
+
+              const exportPath = totalFiles > 1
                 ? options.export.replace(/(\.json)?$/, `-${i + 1}.json`)
                 : options.export;
-              
+
               fs.writeFileSync(exportPath, JSON.stringify(exportData, null, 2));
               console.log(chalk.dim(`\n✓ Palette exported to: ${exportPath}`));
             }
@@ -270,7 +273,7 @@ export function dominantColorCommand(imageCmd: Command): void {
         if (failCount > 0 && failCount === totalFiles) {
           process.exit(1);
         }
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to validate input'));

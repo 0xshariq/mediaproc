@@ -3,11 +3,9 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance, sharp } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
 import path from 'path';
 
 interface WatermarkOptions extends ImageOptions {
@@ -160,8 +158,12 @@ export function watermarkCommand(imageCmd: Command): void {
           if (watermarkType === 'text') {
             console.log(chalk.dim(`  Text watermark with font size: ${options.fontSize || 48}px`));
           }
-          showPluginBranding('Image');
+          showPluginBranding('Image', '../../package.json');
           return;
+        }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
         }
 
         // Calculate gravity once
@@ -289,7 +291,7 @@ export function watermarkCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Processing failed'));

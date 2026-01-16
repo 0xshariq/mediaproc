@@ -2,12 +2,11 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
+import { ImageOptions } from '../types.js';
 
-interface StackOptions {
+interface StackOptions extends ImageOptions {
   inputs: string[];
   direction?: 'horizontal' | 'vertical';
   align?: 'start' | 'center' | 'end';
@@ -171,8 +170,12 @@ export function stackCommand(imageCmd: Command): void {
           console.log(chalk.dim(`  Images: ${images.length}`));
           console.log(chalk.dim(`  Direction: ${direction}`));
           console.log(chalk.dim(`  Output size: ${canvasWidth}x${canvasHeight}`));
-          showPluginBranding('Image');
+          showPluginBranding('Image', '../../package.json');
           return;
+        }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
         }
 
         // Create canvas
@@ -243,7 +246,7 @@ export function stackCommand(imageCmd: Command): void {
         console.log(chalk.dim(`  Alignment: ${align}`));
         console.log(chalk.dim(`  Output: ${outputPath} (${canvasWidth}x${canvasHeight})`));
         console.log(chalk.dim(`  File size: ${(outputStats.size / 1024).toFixed(2)}KB`));
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
       } catch (error) {
         spinner.fail(chalk.red('Failed to stack images'));
         if (options.verbose) {

@@ -2,11 +2,9 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import type { ConvolveOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
 
 interface ConvolveOptionsExtended extends ConvolveOptions {
   help?: boolean;
@@ -18,8 +16,8 @@ const KERNELS = {
   sharpen: [[0, -1, 0], [-1, 5, -1], [0, -1, 0]],
   emboss: [[-2, -1, 0], [-1, 1, 1], [0, 1, 2]],
   'edge-detect': [[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]],
-  'box-blur': [[1/9, 1/9, 1/9], [1/9, 1/9, 1/9], [1/9, 1/9, 1/9]],
-  'gaussian-blur': [[1/16, 2/16, 1/16], [2/16, 4/16, 2/16], [1/16, 2/16, 1/16]],
+  'box-blur': [[1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9]],
+  'gaussian-blur': [[1 / 16, 2 / 16, 1 / 16], [2 / 16, 4 / 16, 2 / 16], [1 / 16, 2 / 16, 1 / 16]],
   laplacian: [[0, 1, 0], [1, -4, 1], [0, 1, 0]],
   'high-pass': [[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]]
 };
@@ -162,8 +160,12 @@ export function convolveCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image');
+          showPluginBranding('Image', '../../package.json');
           return;
+        }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
         }
 
         let successCount = 0;
@@ -172,7 +174,7 @@ export function convolveCommand(imageCmd: Command): void {
         for (const [index, inputFile] of inputFiles.entries()) {
           const outputPath = outputPaths.get(inputFile)!;
           const fileName = getFileName(inputFile);
-          
+
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 
           try {
@@ -185,7 +187,7 @@ export function convolveCommand(imageCmd: Command): void {
                 offset: options.offset
               })
               .toFile(outputPath);
-            
+
             spinner.succeed(chalk.green(`✓ ${fileName} processed`));
             successCount++;
           } catch (error) {
@@ -202,7 +204,7 @@ export function convolveCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to apply convolution'));

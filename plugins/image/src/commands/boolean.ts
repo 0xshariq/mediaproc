@@ -3,11 +3,9 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
 import path from 'path';
 
 interface BooleanOptions extends ImageOptions {
@@ -152,7 +150,7 @@ export function booleanCommand(imageCmd: Command): void {
         console.log(chalk.green(`✓ Would perform ${operation.toUpperCase()} operation on ${inputFiles.length} file(s):`));
         inputFiles.forEach(f => console.log(chalk.dim(`  - ${f}`)));
         console.log(chalk.dim(`  Operand: ${options.operand}`));
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
         return;
       }
       if (options.explain) {
@@ -198,7 +196,7 @@ export function booleanCommand(imageCmd: Command): void {
       if (failCount > 0) {
         console.log(chalk.red(`  ✗ Failed: ${failCount}`));
       }
-      showPluginBranding('Image');
+      showPluginBranding('Image', '../../package.json');
 
     } catch (error) {
       spinner.fail(chalk.red('Processing failed'));

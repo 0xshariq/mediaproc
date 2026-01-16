@@ -3,12 +3,11 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import fs from 'fs';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
+import { ImageOptions } from '../types.js';
 
-interface MetadataCommandOptions {
+interface MetadataCommandOptions extends ImageOptions {
   input: string;
   remove?: boolean;
   removeAll?: boolean;
@@ -125,8 +124,12 @@ export function metadataCommand(imageCmd: Command): void {
             console.log(chalk.dim(`  [${index + 1}/${totalFiles}] ${file}`));
           });
           console.log(chalk.dim(`\n  Total files: ${totalFiles}`));
-          showPluginBranding('Image');
+          showPluginBranding('Image', '../../package.json');
           process.exit(0);
+        }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
         }
 
         spinner.succeed(chalk.green(`Found ${totalFiles} file${totalFiles > 1 ? 's' : ''} to process`));
@@ -174,7 +177,7 @@ export function metadataCommand(imageCmd: Command): void {
               console.log(chalk.dim(`  Original size: ${(inputStats.size / 1024).toFixed(2)}KB`));
               console.log(chalk.dim(`  New size: ${(outputStats.size / 1024).toFixed(2)}KB`));
               console.log(chalk.dim(`  Saved: ${(savedBytes / 1024).toFixed(2)}KB (${((savedBytes / inputStats.size) * 100).toFixed(1)}%)`));
-              
+
               successCount++;
             } catch (error) {
               failCount++;
@@ -219,7 +222,7 @@ export function metadataCommand(imageCmd: Command): void {
 
             try {
               const metadata = await createSharpInstance(inputFile).metadata();
-              
+
               const metadataObj = {
                 file: {
                   path: inputFile,
@@ -244,7 +247,7 @@ export function metadataCommand(imageCmd: Command): void {
                 xmp: metadata.xmp ? Buffer.from(metadata.xmp).toString('base64') : null
               };
 
-              const exportPath = totalFiles > 1 
+              const exportPath = totalFiles > 1
                 ? options.export.replace(/(\.json)?$/, `-${i + 1}.json`)
                 : options.export;
 
@@ -252,7 +255,7 @@ export function metadataCommand(imageCmd: Command): void {
 
               fileSpinner.succeed(chalk.green(`${fileNum} Metadata exported!`));
               console.log(chalk.dim(`  Exported to: ${exportPath}`));
-              
+
               successCount++;
             } catch (error) {
               failCount++;
@@ -329,12 +332,12 @@ export function metadataCommand(imageCmd: Command): void {
             console.log(chalk.dim(`  IPTC Data: ${metadata.iptc ? `${metadata.iptc.length} bytes` : 'None'}`));
             console.log(chalk.dim(`  XMP Data: ${metadata.xmp ? `${metadata.xmp.length} bytes` : 'None'}`));
 
-            const totalMetadataSize = 
-              (metadata.exif?.length || 0) + 
-              (metadata.icc?.length || 0) + 
-              (metadata.iptc?.length || 0) + 
+            const totalMetadataSize =
+              (metadata.exif?.length || 0) +
+              (metadata.icc?.length || 0) +
+              (metadata.iptc?.length || 0) +
               (metadata.xmp?.length || 0);
-            
+
             if (totalMetadataSize > 0) {
               console.log(chalk.dim(`  Total Metadata: ${(totalMetadataSize / 1024).toFixed(2)} KB (${((totalMetadataSize / fileStats.size) * 100).toFixed(1)}% of file)`));
             }
@@ -375,7 +378,7 @@ export function metadataCommand(imageCmd: Command): void {
         if (failCount > 0 && failCount === totalFiles) {
           process.exit(1);
         }
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to validate input'));

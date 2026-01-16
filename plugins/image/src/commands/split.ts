@@ -3,13 +3,12 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
 import path from 'path';
+import { ImageOptions } from '../types.js';
 
-interface SplitOptions {
+interface SplitOptions extends ImageOptions {
   input: string;
   tiles?: string;
   rows?: number;
@@ -157,8 +156,12 @@ export function splitCommand(imageCmd: Command): void {
           console.log(chalk.green(`✓ Would split ${inputFiles.length} file(s):`));
           inputFiles.forEach(f => console.log(chalk.dim(`  - ${f}`)));
           console.log(chalk.dim(`  Into: ${rows}x${columns} grid (${totalTiles} tiles each)`));
-          showPluginBranding('Image');
+          showPluginBranding('Image', '../../package.json');
           return;
+        }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
         }
 
         // Create output directory
@@ -171,9 +174,9 @@ export function splitCommand(imageCmd: Command): void {
           try {
             const fileName = getFileName(inputFile);
             const inputPath = path.parse(inputFile);
-            
+
             const metadata = await createSharpInstance(inputFile).metadata();
-            
+
             if (!metadata.width || !metadata.height) {
               spinner.fail(chalk.red(`Unable to read dimensions: ${fileName}`));
               failCount++;
@@ -186,23 +189,23 @@ export function splitCommand(imageCmd: Command): void {
             spinner.text = `Splitting ${fileName}...`;
 
             const imageBuffer = await createSharpInstance(inputFile).toBuffer();
-            
+
             // Create subdirectory for this file if multiple inputs
-            const fileOutputDir = inputFiles.length > 1 
+            const fileOutputDir = inputFiles.length > 1
               ? path.join(baseOutputDir, inputPath.name)
               : baseOutputDir;
-            
+
             if (!fs.existsSync(fileOutputDir)) {
               fs.mkdirSync(fileOutputDir, { recursive: true });
             }
-            
+
             for (let row = 0; row < rows; row++) {
               for (let col = 0; col < columns; col++) {
                 const left = col * tileWidth;
                 const top = row * tileHeight;
-                
+
                 const outputPath = path.join(fileOutputDir, `tile_${row}_${col}${inputPath.ext}`);
-                
+
                 await createSharpInstance(imageBuffer)
                   .extract({
                     left,
@@ -211,7 +214,7 @@ export function splitCommand(imageCmd: Command): void {
                     height: tileHeight
                   })
                   .toFile(outputPath);
-                
+
                 spinner.text = `Splitting ${fileName}... ${((row * columns + col + 1) / totalTiles * 100).toFixed(0)}%`;
               }
             }
@@ -233,7 +236,7 @@ export function splitCommand(imageCmd: Command): void {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
         console.log(chalk.dim(`  Tiles per image: ${totalTiles} (${rows}x${columns})`));
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
       } catch (error) {
         spinner.fail(chalk.red('Processing failed'));
         if (options.verbose) {

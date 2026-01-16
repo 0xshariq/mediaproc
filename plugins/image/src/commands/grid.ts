@@ -2,12 +2,11 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
+import { ImageOptions } from '../types.js';
 
-interface GridOptions {
+interface GridOptions extends ImageOptions {
   inputs: string[];
   output?: string;
   columns?: number;
@@ -168,8 +167,12 @@ export function gridCommand(imageCmd: Command): void {
           console.log(chalk.dim(`  Images: ${imageCount}`));
           console.log(chalk.dim(`  Layout: ${columns}x${rows}`));
           console.log(chalk.dim(`  Output size: ${gridWidth}x${gridHeight}`));
-          showPluginBranding('Image');
+          showPluginBranding('Image', '../../package.json');
           return;
+        }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
         }
 
         // Create base canvas
@@ -220,7 +223,7 @@ export function gridCommand(imageCmd: Command): void {
         console.log(chalk.dim(`  Cell size: ${cellWidth}x${cellHeight}`));
         console.log(chalk.dim(`  Output: ${outputPath} (${gridWidth}x${gridHeight})`));
         console.log(chalk.dim(`  File size: ${(outputStats.size / 1024).toFixed(2)}KB`));
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
       } catch (error) {
         spinner.fail(chalk.red('Failed to create grid'));
         if (options.verbose) {

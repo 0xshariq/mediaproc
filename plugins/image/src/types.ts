@@ -60,7 +60,7 @@ export interface TextOptions extends ImageOptions {
   left?: number;
 }
 
-export interface StatsOptions {
+export interface StatsOptions extends ImageOptions {
   input: string;
   detailed?: boolean;
   histogram?: boolean;

@@ -2,12 +2,11 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
+import { ImageOptions } from '../types.js';
 
-interface PaletteOptions {
+interface PaletteOptions extends ImageOptions {
   input: string;
   colors?: number;
   dryRun?: boolean;
@@ -103,8 +102,12 @@ export function paletteCommand(imageCmd: Command): void {
             console.log(chalk.dim(`  [${index + 1}/${totalFiles}] ${file}`));
           });
           console.log(chalk.dim(`\n  Total files: ${totalFiles}`));
-          showPluginBranding('Image');
+          showPluginBranding('Image', '../../package.json');
           process.exit(0);
+        }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
         }
 
         spinner.succeed(chalk.green(`Found ${totalFiles} file${totalFiles > 1 ? 's' : ''} to analyze`));
@@ -142,53 +145,53 @@ export function paletteCommand(imageCmd: Command): void {
             if (stats.dominant) {
               const { r, g, b } = stats.dominant;
               const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`.toUpperCase();
-              
+
               console.log(chalk.bold('  Primary Dominant Color:'));
-          console.log(`  ${chalk.rgb(r, g, b)('██████')} RGB(${r}, ${g}, ${b}) ${chalk.dim(hex)}`);
-          console.log('');
-        }
+              console.log(`  ${chalk.rgb(r, g, b)('██████')} RGB(${r}, ${g}, ${b}) ${chalk.dim(hex)}`);
+              console.log('');
+            }
 
-        // Get channel statistics for additional color information
-        if (stats.channels && stats.channels.length >= 3) {
-          console.log(chalk.bold('  Channel Analysis:'));
-          
-          const channels = ['Red', 'Green', 'Blue'];
-          stats.channels.slice(0, 3).forEach((channel, index) => {
-            const channelName = channels[index];
-            const avgValue = Math.round(channel.mean);
-            const color = index === 0 ? [avgValue, 0, 0] : index === 1 ? [0, avgValue, 0] : [0, 0, avgValue];
-            
-            console.log(`  ${channelName.padEnd(6)}: ${chalk.rgb(color[0], color[1], color[2])('██')} Avg: ${avgValue.toString().padStart(3)} (min: ${channel.min}, max: ${channel.max})`);
-          });
-          console.log('');
-        }
+            // Get channel statistics for additional color information
+            if (stats.channels && stats.channels.length >= 3) {
+              console.log(chalk.bold('  Channel Analysis:'));
 
-        // Calculate additional color info
-        if (stats.channels && stats.channels.length >= 3) {
-          const avgR = Math.round(stats.channels[0].mean);
-          const avgG = Math.round(stats.channels[1].mean);
-          const avgB = Math.round(stats.channels[2].mean);
-          
-          console.log(chalk.bold('  Average Image Tone:'));
-          const avgHex = `#${avgR.toString(16).padStart(2, '0')}${avgG.toString(16).padStart(2, '0')}${avgB.toString(16).padStart(2, '0')}`.toUpperCase();
-          console.log(`  ${chalk.rgb(avgR, avgG, avgB)('██████')} RGB(${avgR}, ${avgG}, ${avgB}) ${chalk.dim(avgHex)}`);
-          console.log('');
+              const channels = ['Red', 'Green', 'Blue'];
+              stats.channels.slice(0, 3).forEach((channel, index) => {
+                const channelName = channels[index];
+                const avgValue = Math.round(channel.mean);
+                const color = index === 0 ? [avgValue, 0, 0] : index === 1 ? [0, avgValue, 0] : [0, 0, avgValue];
 
-          // Determine overall tone
-          const brightness = (avgR + avgG + avgB) / 3;
-          const tone = brightness > 200 ? 'Very Light' : brightness > 150 ? 'Light' : brightness > 100 ? 'Medium' : brightness > 50 ? 'Dark' : 'Very Dark';
-          
-          console.log(chalk.dim(`  Overall Brightness: ${tone} (${Math.round(brightness)}/255)`));
-          
-          // Color temperature
-          const warmCool = avgR > avgB ? 'Warm' : avgR < avgB ? 'Cool' : 'Neutral';
-          console.log(chalk.dim(`  Color Temperature: ${warmCool}`));
-          
-          // Saturation estimate
-          const maxChannel = Math.max(avgR, avgG, avgB);
-          const minChannel = Math.min(avgR, avgG, avgB);
-          const saturation = maxChannel === 0 ? 0 : ((maxChannel - minChannel) / maxChannel) * 100;
-            console.log(chalk.dim(`  Saturation: ${saturation.toFixed(1)}%`));
+                console.log(`  ${channelName.padEnd(6)}: ${chalk.rgb(color[0], color[1], color[2])('██')} Avg: ${avgValue.toString().padStart(3)} (min: ${channel.min}, max: ${channel.max})`);
+              });
+              console.log('');
+            }
+
+            // Calculate additional color info
+            if (stats.channels && stats.channels.length >= 3) {
+              const avgR = Math.round(stats.channels[0].mean);
+              const avgG = Math.round(stats.channels[1].mean);
+              const avgB = Math.round(stats.channels[2].mean);
+
+              console.log(chalk.bold('  Average Image Tone:'));
+              const avgHex = `#${avgR.toString(16).padStart(2, '0')}${avgG.toString(16).padStart(2, '0')}${avgB.toString(16).padStart(2, '0')}`.toUpperCase();
+              console.log(`  ${chalk.rgb(avgR, avgG, avgB)('██████')} RGB(${avgR}, ${avgG}, ${avgB}) ${chalk.dim(avgHex)}`);
+              console.log('');
+
+              // Determine overall tone
+              const brightness = (avgR + avgG + avgB) / 3;
+              const tone = brightness > 200 ? 'Very Light' : brightness > 150 ? 'Light' : brightness > 100 ? 'Medium' : brightness > 50 ? 'Dark' : 'Very Dark';
+
+              console.log(chalk.dim(`  Overall Brightness: ${tone} (${Math.round(brightness)}/255)`));
+
+              // Color temperature
+              const warmCool = avgR > avgB ? 'Warm' : avgR < avgB ? 'Cool' : 'Neutral';
+              console.log(chalk.dim(`  Color Temperature: ${warmCool}`));
+
+              // Saturation estimate
+              const maxChannel = Math.max(avgR, avgG, avgB);
+              const minChannel = Math.min(avgR, avgG, avgB);
+              const saturation = maxChannel === 0 ? 0 : ((maxChannel - minChannel) / maxChannel) * 100;
+              console.log(chalk.dim(`  Saturation: ${saturation.toFixed(1)}%`));
             }
 
             if (options.verbose) {
@@ -222,7 +225,7 @@ export function paletteCommand(imageCmd: Command): void {
         if (failCount > 0 && failCount === totalFiles) {
           process.exit(1);
         }
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to validate input'));

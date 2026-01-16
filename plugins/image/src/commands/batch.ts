@@ -3,11 +3,9 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName,showPluginBranding,createStandardHelp } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
 import path from 'path';
-import { showPluginBranding } from '@mediaproc/core';
 
 interface BatchOptions {
   input: string;
@@ -245,7 +243,7 @@ export function batchCommand(imageCmd: Command): void {
         if (failed > 0) {
           console.log(chalk.yellow(`  Failed: ${failed}`));
         }
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Batch processing failed'));

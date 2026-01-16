@@ -2,11 +2,9 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import type { FilterOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
 import path from 'node:path';
 
 interface ModulateOptions extends FilterOptions {
@@ -136,8 +134,12 @@ export function modulateCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image');
+          showPluginBranding('Image', '../../package.json');
           return;
+        }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
         }
 
         let successCount = 0;
@@ -146,7 +148,7 @@ export function modulateCommand(imageCmd: Command): void {
         for (const [index, inputFile] of inputFiles.entries()) {
           const outputPath = outputPaths.get(inputFile)!;
           const fileName = getFileName(inputFile);
-          
+
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 
           try {
@@ -166,7 +168,7 @@ export function modulateCommand(imageCmd: Command): void {
             }
 
             await pipeline.toFile(outputPath);
-            
+
             spinner.succeed(chalk.green(`✓ ${fileName} processed`));
             successCount++;
           } catch (error) {
@@ -183,7 +185,7 @@ export function modulateCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to modulate image'));

@@ -3,11 +3,9 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import { stat } from 'node:fs/promises';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
 
 interface InfoOptions extends ImageOptions {
   help?: boolean;
@@ -148,12 +146,12 @@ export function infoCommand(imageCmd: Command): void {
               console.log();
               console.log(chalk.cyan.bold(`ℹ️  ${fileName}`));
               console.log(chalk.gray('━'.repeat(60)));
-              
+
               // File Information
               console.log(chalk.yellow.bold('\n📁 File Information'));
               console.log(chalk.gray(`   Path: ${inputPath}`));
               console.log(chalk.gray(`   Size: ${imageInfo.file.sizeFormatted}`));
-              
+
               // Format Information
               console.log(chalk.yellow.bold('\n🖼️  Image Details'));
               console.log(chalk.gray(`   Format: ${imageInfo.format.type.toUpperCase()}`));
@@ -163,11 +161,11 @@ export function infoCommand(imageCmd: Command): void {
               console.log(chalk.gray(`   Channels: ${imageInfo.format.channels}`));
               console.log(chalk.gray(`   Bit Depth: ${imageInfo.format.depth}`));
               console.log(chalk.gray(`   Alpha Channel: ${imageInfo.format.hasAlpha ? 'Yes' : 'No'}`));
-              
+
               if (imageInfo.format.density) {
                 console.log(chalk.gray(`   Density: ${imageInfo.format.density} DPI`));
               }
-              
+
               if (imageInfo.format.orientation !== 1) {
                 console.log(chalk.gray(`   Orientation: ${imageInfo.format.orientation}`));
               }
@@ -178,10 +176,19 @@ export function infoCommand(imageCmd: Command): void {
                 console.log(chalk.gray('   EXIF data is available (raw buffer)'));
                 console.log(chalk.gray('   Use a specialized EXIF tool to parse detailed camera data'));
               }
+              if (options.explain) {
+                console.log(chalk.gray('Explain mode is not yet available.'))
+                console.log(chalk.cyan('Planned for v0.8.x.'))
+              }
+              if (options.dryRun) {
+                spinner.info(chalk.yellow('Dry run mode - no changes will be made'));
+                console.log(chalk.green(`Information for ${fileName} displayed above.`));
+                continue;
+              }
 
               console.log();
             }
-            showPluginBranding('Image');
+            showPluginBranding('Image', '../../package.json');
           } catch (error) {
             console.error(chalk.red(`\n✗ Failed to read ${fileName}`));
             console.error(chalk.red(`   Error: ${(error as Error).message}`));

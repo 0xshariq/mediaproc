@@ -2,12 +2,11 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
-import { createStandardHelp } from '@mediaproc/core';
+import { ImageOptions } from '../types.js';
 
-interface MirrorOptions {
+interface MirrorOptions extends ImageOptions {
   input: string;
   mode?: 'horizontal' | 'vertical' | 'both' | 'quad';
   output?: string;
@@ -135,8 +134,12 @@ export function mirrorCommand(imageCmd: Command): void {
           spinner.info(chalk.yellow('Dry run mode - no changes will be made'));
           console.log(chalk.green(`✓ Would create ${mode} mirror effect for ${inputFiles.length} file(s):`));
           inputFiles.forEach(f => console.log(chalk.dim(`  - ${f}`)));
-          showPluginBranding('Image');
+          showPluginBranding('Image', '../../package.json');
           return;
+        }
+        if (options.explain) {
+          console.log(chalk.gray('Explain mode is not yet available.'))
+          console.log(chalk.cyan('Planned for v0.8.x.'))
         }
 
         // Process all files
@@ -161,7 +164,7 @@ export function mirrorCommand(imageCmd: Command): void {
             if (mode === 'horizontal') {
               const originalBuffer = await sharpInstance.toFormat(format as any).toBuffer();
               const flippedBuffer = await createSharpInstance(originalBuffer).flop().toFormat(format as any).toBuffer();
-              
+
               resultBuffer = await createSharpInstance({
                 create: {
                   width: width * 2,
@@ -170,17 +173,17 @@ export function mirrorCommand(imageCmd: Command): void {
                   background: { r: 0, g: 0, b: 0, alpha: 0 }
                 }
               })
-              .composite([
-                { input: originalBuffer, left: 0, top: 0 },
-                { input: flippedBuffer, left: width, top: 0 }
-              ])
-              .toFormat(format as any)
-              .toBuffer();
+                .composite([
+                  { input: originalBuffer, left: 0, top: 0 },
+                  { input: flippedBuffer, left: width, top: 0 }
+                ])
+                .toFormat(format as any)
+                .toBuffer();
 
             } else if (mode === 'vertical') {
               const originalBuffer = await sharpInstance.toFormat(format as any).toBuffer();
               const flippedBuffer = await createSharpInstance(originalBuffer).flip().toFormat(format as any).toBuffer();
-              
+
               resultBuffer = await createSharpInstance({
                 create: {
                   width: width,
@@ -189,19 +192,19 @@ export function mirrorCommand(imageCmd: Command): void {
                   background: { r: 0, g: 0, b: 0, alpha: 0 }
                 }
               })
-              .composite([
-                { input: originalBuffer, left: 0, top: 0 },
-                { input: flippedBuffer, left: 0, top: height }
-              ])
-              .toFormat(format as any)
-              .toBuffer();
+                .composite([
+                  { input: originalBuffer, left: 0, top: 0 },
+                  { input: flippedBuffer, left: 0, top: height }
+                ])
+                .toFormat(format as any)
+                .toBuffer();
 
             } else if (mode === 'both') {
               const originalBuffer = await sharpInstance.toFormat(format as any).toBuffer();
               const flopBuffer = await createSharpInstance(originalBuffer).flop().toFormat(format as any).toBuffer();
               const flipBuffer = await createSharpInstance(originalBuffer).flip().toFormat(format as any).toBuffer();
               const bothBuffer = await createSharpInstance(originalBuffer).flop().flip().toFormat(format as any).toBuffer();
-              
+
               resultBuffer = await createSharpInstance({
                 create: {
                   width: width * 2,
@@ -210,28 +213,28 @@ export function mirrorCommand(imageCmd: Command): void {
                   background: { r: 0, g: 0, b: 0, alpha: 0 }
                 }
               })
-              .composite([
-                { input: originalBuffer, left: 0, top: 0 },
-                { input: flopBuffer, left: width, top: 0 },
-                { input: flipBuffer, left: 0, top: height },
-                { input: bothBuffer, left: width, top: height }
-              ])
-              .toFormat(format as any)
-              .toBuffer();
+                .composite([
+                  { input: originalBuffer, left: 0, top: 0 },
+                  { input: flopBuffer, left: width, top: 0 },
+                  { input: flipBuffer, left: 0, top: height },
+                  { input: bothBuffer, left: width, top: height }
+                ])
+                .toFormat(format as any)
+                .toBuffer();
 
             } else { // quad
               const halfWidth = Math.floor(width / 2);
               const halfHeight = Math.floor(height / 2);
-              
+
               const centerBuffer = await sharpInstance
-                .extract({ left: halfWidth - Math.floor(halfWidth/2), top: halfHeight - Math.floor(halfHeight/2), width: halfWidth, height: halfHeight })
+                .extract({ left: halfWidth - Math.floor(halfWidth / 2), top: halfHeight - Math.floor(halfHeight / 2), width: halfWidth, height: halfHeight })
                 .toFormat(format as any)
                 .toBuffer();
-              
+
               const flopBuffer = await createSharpInstance(centerBuffer).flop().toFormat(format as any).toBuffer();
               const flipBuffer = await createSharpInstance(centerBuffer).flip().toFormat(format as any).toBuffer();
               const bothBuffer = await createSharpInstance(centerBuffer).flop().flip().toFormat(format as any).toBuffer();
-              
+
               resultBuffer = await createSharpInstance({
                 create: {
                   width: halfWidth * 2,
@@ -240,14 +243,14 @@ export function mirrorCommand(imageCmd: Command): void {
                   background: { r: 0, g: 0, b: 0, alpha: 0 }
                 }
               })
-              .composite([
-                { input: centerBuffer, left: 0, top: 0 },
-                { input: flopBuffer, left: halfWidth, top: 0 },
-                { input: flipBuffer, left: 0, top: halfHeight },
-                { input: bothBuffer, left: halfWidth, top: halfHeight }
-              ])
-              .toFormat(format as any)
-              .toBuffer();
+                .composite([
+                  { input: centerBuffer, left: 0, top: 0 },
+                  { input: flopBuffer, left: halfWidth, top: 0 },
+                  { input: flipBuffer, left: 0, top: halfHeight },
+                  { input: bothBuffer, left: halfWidth, top: halfHeight }
+                ])
+                .toFormat(format as any)
+                .toBuffer();
             }
 
             await createSharpInstance(resultBuffer).toFile(outputPath);
@@ -284,7 +287,7 @@ export function mirrorCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image');
+        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Processing failed'));
