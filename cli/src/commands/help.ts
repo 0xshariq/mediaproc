@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { getPluginsByCategory } from '../plugin-registry.js';
+import { showBranding } from '@mediaproc/core';
 
 export function helpCommand(program: Command): void {
   program
@@ -8,9 +9,9 @@ export function helpCommand(program: Command): void {
     .description('Show plugin registry and installation guide')
     .action(() => {
       console.log(chalk.bold('\n📦 MediaProc Plugin Registry\n'));
-      
+
       const grouped = getPluginsByCategory();
-      
+
       // Core plugins
       console.log(chalk.cyan.bold('■ Core Plugins') + chalk.dim(' (Essential media processing)'));
       console.log('');
@@ -22,7 +23,7 @@ export function helpCommand(program: Command): void {
         }
         console.log('');
       });
-      
+
       // Advanced plugins
       console.log(chalk.cyan.bold('■ Advanced Plugins') + chalk.dim(' (Production & enterprise features)'));
       console.log('');
@@ -34,7 +35,7 @@ export function helpCommand(program: Command): void {
         }
         console.log('');
       });
-      
+
       // Future-proof plugins
       console.log(chalk.cyan.bold('■ Future-Proof Plugins') + chalk.dim(' (AI & next-gen features)'));
       console.log('');
@@ -46,17 +47,18 @@ export function helpCommand(program: Command): void {
         }
         console.log('');
       });
-      
+
       console.log(chalk.bold('Installation:'));
       console.log(chalk.dim(`  mediaproc add <plugin-name>`));
       console.log(chalk.dim(`  mediaproc add image          # Install image processing`));
       console.log(chalk.dim(`  mediaproc add video          # Install video processing`));
       console.log(chalk.dim(`  mediaproc add doc            # Install document processing`));
       console.log('');
-      
+
       console.log(chalk.bold('Options:'));
       console.log(chalk.dim(`  -g, --global                 # Install globally`));
       console.log(chalk.dim(`  -l, --local                  # Install locally`));
       console.log('');
+      showBranding();
     });
 }

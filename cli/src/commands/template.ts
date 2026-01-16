@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { showBranding } from '@mediaproc/core';
 
 interface Template {
   name: string;
@@ -54,6 +55,7 @@ templateCommand
       console.log(`Parameters: ${params.join(', ')}`);
     }
     console.log('');
+    showBranding();
   });
 
 // Run template
@@ -95,6 +97,7 @@ templateCommand
     console.log(`   ${command}\n`);
     console.log('⚠️  Note: Actual command execution requires full implementation\n');
     console.log(`Run manually: mediaproc ${command}\n`);
+    showBranding();
   });
 
 // List templates
@@ -134,6 +137,7 @@ templateCommand
 
     console.log('\n' + '━'.repeat(70));
     console.log('\n💡 Run a template: mediaproc template run <name> [args]\n');
+    showBranding();
   });
 
 // Delete template
@@ -153,6 +157,7 @@ templateCommand
     saveTemplates(templates);
 
     console.log(`\n✓ Template "${name}" deleted\n`);
+    showBranding();
   });
 
 // Show template details
@@ -189,6 +194,7 @@ templateCommand
     }
 
     console.log('\n' + '━'.repeat(60) + '\n');
+    showBranding();
   });
 
 function loadTemplates(): Record<string, Template> {

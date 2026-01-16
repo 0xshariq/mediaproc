@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { getPluginsByCategory } from '../plugin-registry.js';
 import type { PluginManager } from '../plugin-manager.js';
+import { showBranding } from '@mediaproc/core';
 
 export function pluginsCommand(program: Command, pluginManager: PluginManager): void {
   program
@@ -18,22 +19,22 @@ export function pluginsCommand(program: Command, pluginManager: PluginManager): 
       // Core plugins
       if (grouped.core && grouped.core.length > 0) {
         console.log(chalk.bold('🎯 Core Media Plugins:\n'));
-        
+
         const seen = new Set<string>();
         grouped.core.forEach((entry) => {
           if (seen.has(entry.package)) return;
           seen.add(entry.package);
-          
+
           const isInstalled = loadedPlugins.has(entry.package);
           const status = isInstalled ? chalk.green('✓ INSTALLED') : chalk.dim('Not installed');
-          
+
           console.log(`${chalk.cyan(entry.name.padEnd(12))} ${status}`);
           console.log(chalk.dim(`  ${entry.description}`));
-          
+
           if (entry.systemRequirements && entry.systemRequirements.length > 0) {
             console.log(chalk.yellow(`  Requirements: ${entry.systemRequirements.join(', ')}`));
           }
-          
+
           console.log(chalk.dim(`  Install: ${chalk.white(`mediaproc add ${entry.name}`)}`));
           console.log('');
         });
@@ -42,22 +43,22 @@ export function pluginsCommand(program: Command, pluginManager: PluginManager): 
       // Advanced plugins
       if (grouped.advanced && grouped.advanced.length > 0) {
         console.log(chalk.bold('🚀 Advanced Plugins:\n'));
-        
+
         const seen = new Set<string>();
         grouped.advanced.forEach((entry) => {
           if (seen.has(entry.package)) return;
           seen.add(entry.package);
-          
+
           const isInstalled = loadedPlugins.has(entry.package);
           const status = isInstalled ? chalk.green('✓ INSTALLED') : chalk.dim('Not installed');
-          
+
           console.log(`${chalk.cyan(entry.name.padEnd(12))} ${status}`);
           console.log(chalk.dim(`  ${entry.description}`));
-          
+
           if (entry.systemRequirements && entry.systemRequirements.length > 0) {
             console.log(chalk.yellow(`  Requirements: ${entry.systemRequirements.join(', ')}`));
           }
-          
+
           console.log(chalk.dim(`  Install: ${chalk.white(`mediaproc add ${entry.name}`)}`));
           console.log('');
         });
@@ -66,22 +67,22 @@ export function pluginsCommand(program: Command, pluginManager: PluginManager): 
       // Future-proof plugins
       if (grouped['future-proof'] && grouped['future-proof'].length > 0) {
         console.log(chalk.bold('🔮 Future-Proof Plugins:\n'));
-        
+
         const seen = new Set<string>();
         grouped['future-proof'].forEach((entry) => {
           if (seen.has(entry.package)) return;
           seen.add(entry.package);
-          
+
           const isInstalled = loadedPlugins.has(entry.package);
           const status = isInstalled ? chalk.green('✓ INSTALLED') : chalk.dim('Not installed');
-          
+
           console.log(`${chalk.cyan(entry.name.padEnd(12))} ${status}`);
           console.log(chalk.dim(`  ${entry.description}`));
-          
+
           if (entry.systemRequirements && entry.systemRequirements.length > 0) {
             console.log(chalk.yellow(`  Requirements: ${entry.systemRequirements.join(', ')}`));
           }
-          
+
           console.log(chalk.dim(`  Install: ${chalk.white(`mediaproc add ${entry.name}`)}`));
           console.log('');
         });
@@ -94,5 +95,6 @@ export function pluginsCommand(program: Command, pluginManager: PluginManager): 
       console.log(chalk.dim('\n📥 Install any plugin: ') + chalk.white('mediaproc add <plugin-name>'));
       console.log(chalk.dim('📋 Show installed plugins: ') + chalk.white('mediaproc list'));
       console.log('');
+      showBranding();
     });
 }

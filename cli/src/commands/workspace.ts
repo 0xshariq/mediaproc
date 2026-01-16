@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
+import { showBranding } from '@mediaproc/core';
 
 interface WorkspaceConfig {
   name: string;
@@ -59,6 +60,7 @@ workspaceCommand
       console.log(`Using ${options.preset} preset settings`);
     }
     console.log('');
+    showBranding();
   });
 
 // Use workspace
@@ -68,7 +70,7 @@ workspaceCommand
   .argument('<name>', 'Workspace name')
   .action(async (name: string) => {
     const workspacePath = path.join(WORKSPACE_DIR, `${name}.json`);
-    
+
     if (!fs.existsSync(workspacePath)) {
       console.log(`\n❌ Workspace "${name}" not found\n`);
       return;
@@ -85,6 +87,7 @@ workspaceCommand
     );
 
     console.log(`\n✓ Workspace "${name}" is now active\n`);
+    showBranding();
   });
 
 // List workspaces
@@ -114,7 +117,7 @@ workspaceCommand
     workspaces.forEach((ws, index) => {
       const isActive = ws.name === active;
       const indicator = isActive ? '\x1b[32m●\x1b[0m' : ' ';
-      
+
       console.log(`\n${indicator} ${index + 1}. \x1b[36m${ws.name}\x1b[0m${isActive ? ' (active)' : ''}`);
       if (ws.description) {
         console.log(`   ${ws.description}`);
@@ -124,6 +127,7 @@ workspaceCommand
     });
 
     console.log('\n' + '━'.repeat(60) + '\n');
+    showBranding();
   });
 
 // Add rule
@@ -136,14 +140,14 @@ workspaceCommand
   .option('--args <json>', 'Command arguments as JSON')
   .action(async (workspace: string, options) => {
     const workspacePath = path.join(WORKSPACE_DIR, `${workspace}.json`);
-    
+
     if (!fs.existsSync(workspacePath)) {
       console.log(`\n❌ Workspace "${workspace}" not found\n`);
       return;
     }
 
     const config: WorkspaceConfig = JSON.parse(fs.readFileSync(workspacePath, 'utf-8'));
-    
+
     const rule: WorkspaceRule = {
       pattern: options.pattern,
       command: options.command,
@@ -156,6 +160,7 @@ workspaceCommand
     console.log(`\n✓ Rule added to workspace "${workspace}"\n`);
     console.log(`Pattern: ${rule.pattern}`);
     console.log(`Command: ${rule.command}\n`);
+    showBranding();
   });
 
 // Process with workspace
@@ -167,7 +172,7 @@ workspaceCommand
   .option('--dry-run', 'Show what would be processed without executing')
   .action(async (directory: string, options) => {
     const workspaceName = options.workspace || getActiveWorkspace();
-    
+
     if (!workspaceName) {
       console.log('\n❌ No active workspace. Set one with: mediaproc workspace use <name>\n');
       return;
@@ -190,6 +195,7 @@ workspaceCommand
     } else {
       console.log('⚠️  Note: Actual processing requires full implementation\n');
     }
+    showBranding();
   });
 
 // Delete workspace
@@ -199,7 +205,7 @@ workspaceCommand
   .argument('<name>', 'Workspace name')
   .action(async (name: string) => {
     const workspacePath = path.join(WORKSPACE_DIR, `${name}.json`);
-    
+
     if (!fs.existsSync(workspacePath)) {
       console.log(`\n❌ Workspace "${name}" not found\n`);
       return;
@@ -207,6 +213,7 @@ workspaceCommand
 
     fs.unlinkSync(workspacePath);
     console.log(`\n✓ Workspace "${name}" deleted\n`);
+    showBranding();
   });
 
 function ensureWorkspaceDirectory(): void {

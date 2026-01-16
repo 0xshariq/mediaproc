@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import * as os from 'os';
+import { showBranding } from '@mediaproc/core';
 
 interface BenchmarkResult {
   operation: string;
@@ -30,6 +31,7 @@ export const benchmarkCommand = new Command()
 
     console.log('\n⚠️  Please specify --system or --plugin + --operation\n');
     benchmarkCommand.help();
+    showBranding();
   });
 
 async function runSystemBenchmark(json: boolean): Promise<void> {
@@ -77,10 +79,10 @@ async function runSystemBenchmark(json: boolean): Promise<void> {
   console.log(`   Architecture: ${sysInfo.arch}`);
 
   console.log('\n💡 Recommendations:');
-  
+
   const recommendedWorkers = Math.max(1, sysInfo.cpu.cores - 2);
   console.log(`   Recommended workers: ${recommendedWorkers}`);
-  
+
   if (sysInfo.memory.free < 1024 * 1024 * 1024) {
     console.log(`   ⚠️  Low memory - consider closing other apps`);
   }
@@ -113,11 +115,11 @@ async function runOperationBenchmark(
 
   // Simulated results
   const results: BenchmarkResult[] = [];
-  
+
   for (let i = 0; i < iterations; i++) {
     const duration = 200 + Math.random() * 100; // Simulated
     const memoryUsed = process.memoryUsage().heapUsed;
-    
+
     results.push({
       operation: `${plugin} ${operation}`,
       duration,

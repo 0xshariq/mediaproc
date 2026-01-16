@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { getHistory } from './history.js';
+import { showBranding } from '@mediaproc/core';
 
 const STATS_FILE = path.join(os.homedir(), '.mediaproc', 'stats.json');
 
@@ -42,12 +43,13 @@ export const statsCommand = new Command()
     } else {
       displayOverallStats(stats, parseInt(options.period));
     }
+    showBranding();
   });
 
 function calculateStats(days: number): Stats {
   const history = getHistory();
   const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
-  
+
   const recentHistory = history.filter(entry => entry.timestamp >= cutoff);
 
   const pluginUsage: Record<string, number> = {};
@@ -59,11 +61,11 @@ function calculateStats(days: number): Stats {
     const plugin = entry.command.split(' ')[0];
     pluginUsage[plugin] = (pluginUsage[plugin] || 0) + 1;
     commandUsage[entry.command] = (commandUsage[entry.command] || 0) + 1;
-    
+
     if (entry.duration) {
       totalTime += entry.duration;
     }
-    
+
     if (entry.success) {
       successCount++;
     }
@@ -84,12 +86,12 @@ function displayOverallStats(stats: Stats, days: number): void {
   console.log('\n📊 MediaProc Statistics\n');
   console.log('━'.repeat(60));
   console.log(`\nPeriod: Last ${days} days\n`);
-  
+
   console.log('📈 Overview:');
   console.log(`   Total files processed: ${stats.totalFiles.toLocaleString()}`);
   console.log(`   Success rate: ${stats.successRate.toFixed(1)}%`);
   console.log(`   Total processing time: ${formatDuration(stats.totalTime)}`);
-  
+
   if (stats.totalFiles > 0) {
     console.log(`   Average per file: ${formatDuration(stats.totalTime / stats.totalFiles)}`);
   }
@@ -141,7 +143,7 @@ function displayPluginStats(plugin: string, stats: Stats): void {
 
   console.log(`\n📊 ${plugin.charAt(0).toUpperCase() + plugin.slice(1)} Plugin Statistics\n`);
   console.log('━'.repeat(60));
-  
+
   console.log(`\nTotal uses: ${pluginCount}`);
   console.log(`Percentage of total: ${((pluginCount / stats.totalFiles) * 100).toFixed(1)}%`);
 

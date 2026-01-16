@@ -1,6 +1,7 @@
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
+import { showBranding } from '@mediaproc/core';
 
 interface FileComparison {
   file1: string;
@@ -44,6 +45,7 @@ export const compareCommand = new Command()
     if (options.preview) {
       console.log('\n⚠️  Visual preview requires full implementation\n');
     }
+    showBranding();
   });
 
 async function compareFiles(file1: string, file2: string, detailed: boolean): Promise<FileComparison> {
@@ -83,7 +85,7 @@ function displayComparison(comparison: FileComparison, detailed: boolean): void 
   console.log('\n📏 Size:');
   console.log(`   Original:  ${formatBytes(comparison.size1)}`);
   console.log(`   Processed: ${formatBytes(comparison.size2)}`);
-  
+
   if (comparison.sizeDiff < 0) {
     const saved = Math.abs(comparison.sizeDiff);
     console.log(`   \x1b[32m✓ Saved:    ${formatBytes(saved)} (${comparison.sizeReduction.toFixed(1)}% reduction)\x1b[0m`);
@@ -106,7 +108,7 @@ function displayComparison(comparison: FileComparison, detailed: boolean): void 
   }
 
   console.log('\n' + '━'.repeat(60));
-  
+
   if (comparison.sizeReduction > 0) {
     console.log('\n✅ Processing resulted in smaller file size\n');
   } else if (comparison.sizeReduction < 0) {

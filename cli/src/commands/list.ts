@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { detectPluginType } from '../plugin-registry.js';
 import type { PluginManager } from '../plugin-manager.js';
+import { showBranding } from '@mediaproc/core';
 
 export function listCommand(program: Command, pluginManager: PluginManager): void {
   program
@@ -40,17 +41,17 @@ export function listCommand(program: Command, pluginManager: PluginManager): voi
       // Show official plugins
       if (official.length > 0) {
         console.log(chalk.bold('\u2728 Official Plugins:\n'));
-        
+
         official.forEach((pluginName, index) => {
           const shortName = pluginName.replace('@mediaproc/', '');
           const plugin = pluginManager.getPlugin(pluginName);
-          
+
           console.log(`${chalk.green('✓')} ${chalk.cyan(shortName)} ${chalk.dim(`(${pluginName})`)} ${chalk.blue('★ OFFICIAL')}`);
-          
+
           if (plugin) {
             console.log(chalk.dim(`  Version: ${plugin.version || 'unknown'}`));
           }
-          
+
           if (index < official.length - 1) {
             console.log('');
           }
@@ -60,17 +61,17 @@ export function listCommand(program: Command, pluginManager: PluginManager): voi
       // Show community plugins
       if (community.length > 0) {
         console.log(chalk.bold('\n🌐 Community Plugins:\n'));
-        
+
         community.forEach((pluginName, index) => {
           const shortName = pluginName.replace('mediaproc-', '');
           const plugin = pluginManager.getPlugin(pluginName);
-          
+
           console.log(`${chalk.green('✓')} ${chalk.cyan(shortName)} ${chalk.dim(`(${pluginName})`)}`);
-          
+
           if (plugin) {
             console.log(chalk.dim(`  Version: ${plugin.version || 'unknown'}`));
           }
-          
+
           if (index < community.length - 1) {
             console.log('');
           }
@@ -80,16 +81,16 @@ export function listCommand(program: Command, pluginManager: PluginManager): voi
       // Show third-party plugins
       if (thirdParty.length > 0) {
         console.log(chalk.bold('\n📦 Third-Party Plugins:\n'));
-        
+
         thirdParty.forEach((pluginName, index) => {
           const plugin = pluginManager.getPlugin(pluginName);
-          
+
           console.log(`${chalk.green('✓')} ${chalk.cyan(pluginName)}`);
-          
+
           if (plugin) {
             console.log(chalk.dim(`  Version: ${plugin.version || 'unknown'}`));
           }
-          
+
           if (index < thirdParty.length - 1) {
             console.log('');
           }
@@ -104,5 +105,6 @@ export function listCommand(program: Command, pluginManager: PluginManager): voi
       console.log(chalk.dim('   Remove: ') + chalk.white('mediaproc remove <plugin-name>'));
       console.log(chalk.dim('   Browse all: ') + chalk.white('mediaproc plugins'));
       console.log('');
+      showBranding();
     });
 }

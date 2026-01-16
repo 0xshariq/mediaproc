@@ -4,6 +4,7 @@ import ora from 'ora';
 import { execa } from 'execa';
 import { resolvePluginPackage, PLUGIN_REGISTRY, detectPluginType } from '../plugin-registry.js';
 import type { PluginManager } from '../plugin-manager.js';
+import { showBranding } from '@mediaproc/core';
 
 type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'deno';
 
@@ -211,7 +212,7 @@ export function addCommand(program: Command, pluginManager: PluginManager): void
               break;
           }
         }
-
+        showBranding();
       } catch (error) {
         if (error instanceof Error && error.message.includes('Unknown plugin')) {
           console.error(chalk.red(`\n${error.message}`));

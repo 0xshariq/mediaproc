@@ -3,6 +3,7 @@ import ora from 'ora';
 import { execSync } from 'child_process';
 import type { Command } from 'commander';
 import { PluginManager } from '../plugin-manager';
+import { showBranding } from '@mediaproc/core';
 
 /**
  * Plugin type detection
@@ -76,22 +77,22 @@ function detectPackageManager(): string {
   try {
     execSync('bun --version', { stdio: 'ignore' });
     return 'bun';
-  } catch {}
+  } catch { }
 
   try {
     execSync('pnpm --version', { stdio: 'ignore' });
     return 'pnpm';
-  } catch {}
+  } catch { }
 
   try {
     execSync('yarn --version', { stdio: 'ignore' });
     return 'yarn';
-  } catch {}
+  } catch { }
 
   try {
     execSync('deno --version', { stdio: 'ignore' });
     return 'deno';
-  } catch {}
+  } catch { }
 
   return 'npm';
 }
@@ -146,7 +147,7 @@ export function deleteCommand(program: Command, pluginManager: PluginManager): v
     .option('-l, --local', 'Delete plugin locally')
     .option('--verbose', 'Show detailed output')
     .option('-y, --yes', 'Skip confirmation prompt')
-    .action(async (plugin: string, options: { 
+    .action(async (plugin: string, options: {
       global?: boolean;
       local?: boolean;
       verbose?: boolean;
@@ -210,7 +211,7 @@ export function deleteCommand(program: Command, pluginManager: PluginManager): v
           console.log(chalk.white(`  Plugin: ${pluginInfo.name} ${getPluginTypeBadge(pluginInfo.type)}`));
           console.log(chalk.white(`  Scope: ${scope}`));
           console.log(chalk.dim('\nPress Ctrl+C to cancel, or run with --yes to skip confirmation\n'));
-          
+
           // Wait 2 seconds for user to cancel
           await new Promise(resolve => setTimeout(resolve, 2000));
         }
@@ -248,7 +249,7 @@ export function deleteCommand(program: Command, pluginManager: PluginManager): v
         }
 
         // Execute the delete command
-        execSync(deleteCmd, { 
+        execSync(deleteCmd, {
           stdio: options.verbose ? 'inherit' : 'ignore',
           cwd: isGlobal ? undefined : process.cwd()
         });
@@ -266,7 +267,7 @@ export function deleteCommand(program: Command, pluginManager: PluginManager): v
         );
 
         console.log(chalk.dim('\n💡 View remaining plugins: ') + chalk.white('mediaproc list'));
-
+        showBranding();
       } catch (error) {
         spinner.fail(chalk.red('Failed to delete plugin'));
         if (error instanceof Error) {

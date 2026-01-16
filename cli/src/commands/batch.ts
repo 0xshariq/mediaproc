@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { showBranding } from '@mediaproc/core';
 
 interface BatchJob {
   id: string;
@@ -67,6 +68,7 @@ batchCommand
     console.log(`  Command: mediaproc ${command} ${job.args.join(' ')}`);
     console.log(`  Files: ${job.files.join(', ')}`);
     console.log(`  Priority: ${job.priority}\n`);
+    showBranding();
   });
 
 // Start processing queue
@@ -95,7 +97,7 @@ batchCommand
 
     console.log(`\n🚀 Starting batch processor with ${workers} workers\n`);
     console.log('━'.repeat(60));
-    
+
     displayQueueStatus(queue);
 
     console.log('\n💡 Commands:');
@@ -105,6 +107,7 @@ batchCommand
 
     // In real implementation, this would spawn workers and process jobs
     console.log('⚠️  Note: Actual job processing requires full implementation\n');
+    showBranding();
   });
 
 // Show queue status
@@ -122,10 +125,11 @@ batchCommand
 
     console.log('\n📊 Batch Queue Status\n');
     console.log('━'.repeat(60));
-    
+
     displayQueueStatus(queue);
-    
+
     console.log('\n');
+    showBranding();
   });
 
 // Pause queue
@@ -145,6 +149,7 @@ batchCommand
 
     console.log('\n⏸️  Batch queue paused\n');
     console.log('💡 Resume with: mediaproc batch resume\n');
+    showBranding();
   });
 
 // Resume queue
@@ -163,6 +168,7 @@ batchCommand
     saveQueue(queue);
 
     console.log('\n▶️  Batch queue resumed\n');
+    showBranding();
   });
 
 // Cancel all jobs
@@ -187,6 +193,7 @@ batchCommand
       queue.status = 'idle';
       saveQueue(queue);
       console.log('\n✓ All jobs cancelled\n');
+      showBranding();
     }
   });
 
@@ -225,6 +232,7 @@ batchCommand
     });
 
     console.log('\n' + '━'.repeat(70) + '\n');
+    showBranding();
   });
 
 // Clear completed jobs
@@ -240,6 +248,7 @@ batchCommand
 
     const removed = before - queue.jobs.length;
     console.log(`\n✓ Cleared ${removed} completed/failed jobs\n`);
+    showBranding();
   });
 
 function loadQueue(): BatchQueue {
@@ -287,7 +296,7 @@ function displayQueueStatus(queue: BatchQueue): void {
 
   console.log(`\nQueue Status: ${getQueueStatusColor(queue.status)}${queue.status.toUpperCase()}\x1b[0m`);
   console.log(`Workers: ${queue.workers}`);
-  
+
   console.log(`\nJobs: ${totalJobs} total`);
   console.log(`  Pending: ${pending}`);
   console.log(`  Running: ${running}`);
@@ -302,7 +311,7 @@ function displayQueueStatus(queue: BatchQueue): void {
 
     console.log(`\nFiles: ${completedFiles}/${totalFiles} (${progress.toFixed(1)}%)`);
     console.log(`[${bar}]`);
-    
+
     if (failedFiles > 0) {
       console.log(`Failed: ${failedFiles}`);
     }
