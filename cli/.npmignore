@@ -1,0 +1,88 @@
+# Documentation
+docs/
+*.md
+!README.md
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+STRUCTURE.md
+SECURITY.md
+info.md
+CHANGELOG.md
+internal-docs/
+
+# Source files (we publish dist/)
+src/
+tsconfig*.json
+pnpm-workspace.yaml
+
+# Development files
+.git/
+.gitignore
+.gitattributes
+.vscode/
+.idea/
+*.sublime-*
+.DS_Store
+Thumbs.db
+node_modules/
+
+# Plugins directory (will publish separately)
+plugins/
+
+# Build artifacts
+*.log
+*.tsbuildinfo
+.turbo/
+.cache/
+coverage/
+.nyc_output/
+
+# Test files
+test/
+tests/
+*.test.ts
+*.test.js
+*.spec.ts
+*.spec.js
+src/__tests__/
+plugins/**/__tests__/
+jest.config.js
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+circle.yml
+azure-pipelines.yml
+
+# Examples and samples
+examples/
+samples/
+demo/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Lock files
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+*~
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+
+input/
+output/
