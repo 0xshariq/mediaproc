@@ -23,13 +23,13 @@ export function thumbnailCommand(imageCmd: Command): void {
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
-    .option('--help', 'Display help for thumbnail command')
+    .option('--help', 'Show detailed help for thumbnail command')
     .action(async (input: string, options: ThumbnailOptions) => {
       if (options.help) {
         createStandardHelp({
           commandName: 'thumbnail',
           emoji: '🖼️',
-          description: 'Generate thumbnails from images. Perfect for creating preview images, avatar sizes, or gallery thumbnails.',
+          description: 'Generate thumbnails from images. Supports advanced fit modes and quality settings. Perfect for preview images, avatars, or gallery thumbnails.',
           usage: ['thumbnail <input>', 'thumbnail <input> -s <size>', 'thumbnail <input> -s 200 --fit contain'],
           options: [
             { flag: '-s, --size <size>', description: 'Thumbnail size in pixels (default: 150, creates 150x150)' },
@@ -75,7 +75,7 @@ export function thumbnailCommand(imageCmd: Command): void {
             'Use WebP format for smaller file sizes'
           ]
         });
-        process.exit(0);
+        return;
       }
 
       const spinner = ora('Validating inputs...').start();

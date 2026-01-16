@@ -5,6 +5,7 @@ import ora from 'ora';
 import fs from 'fs';
 import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
+import { normalizeColor } from '../utils/colorUtils.js';
 import { ImageOptions } from '../types.js';
 
 interface DominantColorOptions extends ImageOptions {
@@ -14,6 +15,7 @@ interface DominantColorOptions extends ImageOptions {
   dryRun?: boolean;
   verbose?: boolean;
   help?: boolean;
+  colorFormat?: 'hex' | 'rgb' | 'rgba' | 'name' | 'ascii';
 }
 
 export function dominantColorCommand(imageCmd: Command): void {
@@ -25,17 +27,18 @@ export function dominantColorCommand(imageCmd: Command): void {
     .option('--dry-run', 'Show what would be analyzed without executing')
     .option('-v, --verbose', 'Show detailed color information')
     .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
-    .option('--help', 'Display help for dominant-color command')
+    .option('--help', 'Show detailed help for dominant-color command')
     .action(async (input: string, options: DominantColorOptions) => {
       if (options.help) {
         createStandardHelp({
           commandName: 'dominant-color',
           emoji: '🎨',
-          description: 'Quickly extract the most dominant colors from an image. Perfect for color palette generation, theme creation, and color analysis.',
+          description: 'Extract the most dominant colors from an image. Supports hex, rgb(a), named, and ascii color formats. Useful for palette generation, theme creation, and color analysis.',
           usage: ['dominant-color <input>', 'dominant-color <input> --count 3', 'dominant-color photo.jpg --export colors.json'],
           options: [
             { flag: '-c, --count <number>', description: 'Number of dominant colors to extract (default: 5, max: 10)' },
             { flag: '--export <path>', description: 'Export color palette to JSON file' },
+            { flag: '--color-format', description: 'Accepted formats: hex (#ff6600), rgb(255,0,0), rgba(255,0,0,0.5), named (red), ascii (255,0,0)' },
             { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
             { flag: '-v, --verbose', description: 'Show detailed RGB/HSL values' }
           ],
@@ -47,14 +50,13 @@ export function dominantColorCommand(imageCmd: Command): void {
           ],
           additionalSections: [
             {
-              title: 'Use Cases',
+              title: 'Color Formats',
               items: [
-                'Generate color palettes for design',
-                'Brand color extraction from logos',
-                'Theme generation for websites',
-                'Color scheme for UI/UX design',
-                'Quick color analysis',
-                'Match colors across images'
+                'Hex: #ff0000 or #f00 (red)',
+                'RGB: rgb(255, 0, 0) (red)',
+                'RGBA: rgba(255, 0, 0, 0.5)',
+                'Names: red, blue, green, yellow, etc.',
+                'ASCII: 255,0,0 or 255,0,0,0.5'
               ]
             },
             {
@@ -74,7 +76,7 @@ export function dominantColorCommand(imageCmd: Command): void {
             'Works best with high-contrast images'
           ]
         });
-        process.exit(0);
+        return;
       }
 
       const spinner = ora('Validating input...').start();
@@ -216,8 +218,20 @@ export function dominantColorCommand(imageCmd: Command): void {
             console.log(chalk.bold.cyan(`🎨 Top ${dominantColors.length} Dominant Colors:\n`));
 
             dominantColors.forEach((color, index) => {
+              let displayColor = color.hex;
+              if (options.colorFormat) {
+                try {
+                  displayColor = String(normalizeColor(color.hex, options.colorFormat));
+                } catch (err) {
+                  if (err instanceof Error) {
+                    console.log(chalk.red('Error normalizing color:'), err.message);
+                  } else {
+                    console.log(chalk.red('Error normalizing color:'), String(err));
+                  }
+                }
+              }
               const colorPreview = chalk.bgHex(color.hex)('    ');
-              console.log(colorPreview + ' ' + chalk.bold(color.hex) + chalk.dim(` (${color.percentage}%)`));
+              console.log(colorPreview + ' ' + chalk.bold(displayColor) + chalk.dim(` (${color.percentage}%)`));
 
               if (options.verbose) {
                 console.log(chalk.dim(`   RGB: (${color.rgb.r}, ${color.rgb.g}, ${color.rgb.b})`));

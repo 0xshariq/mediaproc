@@ -5,6 +5,7 @@ import ora from 'ora';
 import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import type { BorderOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
+import { normalizeColor } from '../utils/colorUtils.js';
 
 interface BorderOptionsExtended extends BorderOptions {
   help?: boolean;
@@ -20,21 +21,22 @@ export function borderCommand(imageCmd: Command): void {
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
-    .option('--help', 'Display help for border command')
+    .option('--help', 'Show detailed help for border command')
     .action(async (input: string, options: BorderOptionsExtended) => {
       if (options.help) {
         createStandardHelp({
           commandName: 'border',
           emoji: '🖼️',
-          description: 'Add solid color borders or decorative frames around images. Perfect for presentations, galleries, and social media posts.',
+          description: 'Add solid color borders or decorative frames around images. Accepts hex, rgb(a), named, and ascii color formats.',
           usage: ['border <input>', 'border <input> --width 20 --color white', 'border <input> -w 50 --color "#FF0000"'],
           options: [
             { flag: '-w, --width <pixels>', description: 'Border width in pixels (default: 10)' },
-            { flag: '--color <color>', description: 'Border color - hex (#FF0000), rgb (rgb(255,0,0)), or name (red) (default: #000000)' },
+            { flag: '--color <color>', description: 'Border color - hex (#FF0000), rgb (rgb(255,0,0)), rgba(255,0,0,0.5), name (red), ascii (255,0,0)' },
             { flag: '-o, --output <path>', description: 'Output file path' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
-            { flag: '-v, --verbose', description: 'Show detailed output' }
+            { flag: '-v, --verbose', description: 'Show detailed output' },
+            { flag: '--help', description: 'Display help for border command' }
           ],
           examples: [
             { command: 'border photo.jpg', description: 'Add default 10px black border' },
@@ -47,10 +49,11 @@ export function borderCommand(imageCmd: Command): void {
             {
               title: 'Color Formats',
               items: [
-                'Hex: #FF0000 (red), #00FF00 (green), #0000FF (blue)',
-                'RGB: rgb(255, 0, 0) or rgba(255, 0, 0, 0.5)',
+                'Hex: #FF0000, #00FF00, #0000FF',
+                'RGB: rgb(255,0,0), rgba(255,0,0,0.5)',
                 'Named: white, black, red, blue, gold, silver, etc.',
-                'Transparent: rgba(0, 0, 0, 0) for transparent border'
+                'ASCII: 255,0,0 or 255,0,0,0.5',
+                'Transparent: rgba(0,0,0,0) for transparent border'
               ]
             },
             {
@@ -71,7 +74,7 @@ export function borderCommand(imageCmd: Command): void {
             'Larger borders create emphasis'
           ]
         });
-        process.exit(0);
+        return;
       }
 
       const spinner = ora('Validating inputs...').start();
@@ -135,7 +138,7 @@ export function borderCommand(imageCmd: Command): void {
                 bottom: options.width || 10,
                 left: options.width || 10,
                 right: options.width || 10,
-                background: options.color || '#000000'
+                background: normalizeColor(options.color || '#000000', 'auto')
               })
               .toFile(outputPath);
 

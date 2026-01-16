@@ -5,6 +5,7 @@ import ora from 'ora';
 import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
 import type { FilterOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
+import { normalizeColor } from '../utils/colorUtils.js';
 import path from 'node:path';
 
 interface TintOptions extends FilterOptions {
@@ -22,21 +23,22 @@ export function tintCommand(imageCmd: Command): void {
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
-    .option('--help', 'Display help for tint command')
+    .option('--help', 'Show detailed help for tint command')
     .action(async (input: string, options: TintOptions) => {
       if (options.help) {
         createStandardHelp({
           commandName: 'tint',
           emoji: '🎨',
-          description: 'Apply color tint overlay to images. Great for creating artistic effects, mood adjustments, or brand color filters.',
+          description: 'Apply color tint overlay to images. Accepts hex, rgb(a), named, and ascii color formats.',
           usage: ['tint <input>', 'tint <input> -c <color>', 'tint <input> -c "#ff6600"'],
           options: [
-            { flag: '-c, --color <color>', description: 'Tint color as hex (#ff0000), rgb (rgb(255,0,0)), or name (red)' },
+            { flag: '-c, --color <color>', description: 'Tint color as hex (#ff0000), rgb (rgb(255,0,0)), rgba(255,0,0,0.5), name (red), ascii (255,0,0)' },
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-tinted.<ext>)' },
             { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
-            { flag: '-v, --verbose', description: 'Show detailed output' }
+            { flag: '-v, --verbose', description: 'Show detailed output' },
+            { flag: '--help', description: 'Display help for tint command' }
           ],
           examples: [
             { command: 'tint photo.jpg -c blue', description: 'Apply blue tint' },
@@ -48,9 +50,10 @@ export function tintCommand(imageCmd: Command): void {
             {
               title: 'Color Formats',
               items: [
-                'Hex: #ff0000 or #f00 (red)',
-                'RGB: rgb(255, 0, 0) (red)',
-                'Names: red, blue, green, yellow, etc.',
+                'Hex: #ff0000, #f00',
+                'RGB: rgb(255,0,0), rgba(255,0,0,0.5)',
+                'Named: red, blue, green, yellow, etc.',
+                'ASCII: 255,0,0 or 255,0,0,0.5',
                 'Popular: sepia (#704214), cyan (#00ffff)'
               ]
             },
@@ -72,7 +75,7 @@ export function tintCommand(imageCmd: Command): void {
             'Orange/red tints add warmth to photos'
           ]
         });
-        process.exit(0);
+        return;
       }
 
       const spinner = ora('Validating inputs...').start();
@@ -131,7 +134,7 @@ export function tintCommand(imageCmd: Command): void {
 
           try {
             const metadata = await createSharpInstance(inputFile).metadata();
-            const pipeline = createSharpInstance(inputFile).tint(options.color || '#0000ff');
+            const pipeline = createSharpInstance(inputFile).tint(normalizeColor(options.color || '#0000ff', 'auto'));
 
             const outputExt = path.extname(outputPath).toLowerCase();
             if (outputExt === '.jpg' || outputExt === '.jpeg') {
