@@ -1,6 +1,6 @@
 import { spawn } from 'child_process';
 import { resolve } from 'path';
-import { fileExists } from './pathValidator.js';
+import { fileExists } from '@mediaproc/core';
 
 export interface VideoMetadata {
   duration: number;

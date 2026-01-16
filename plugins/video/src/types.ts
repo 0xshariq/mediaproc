@@ -29,6 +29,7 @@ export interface TranscodeOptions extends VideoOptions {
   format?: 'mp4' | 'webm' | 'mkv' | 'avi';
   audioCodec?: string;
   audioBitrate?: string;
+  help?: boolean;
 }
 
 export interface ExtractOptions extends VideoOptions {

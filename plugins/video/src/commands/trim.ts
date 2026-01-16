@@ -8,10 +8,8 @@ import {
   formatDuration,
   parseTimeToSeconds,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
-import { showPluginBranding } from '@mediaproc/core';
-import { createStandardHelp } from '@mediaproc/core';
 
 export function trimCommand(videoCmd: Command): void {
   videoCmd
@@ -200,6 +198,7 @@ export function trimCommand(videoCmd: Command): void {
             console.log(chalk.cyan('\nFFmpeg command:'));
             console.log(chalk.gray('ffmpeg ' + args.join(' ')));
             console.log();
+            showPluginBranding('Video', '../../package.json');
             continue;
           }
 
@@ -224,7 +223,7 @@ export function trimCommand(videoCmd: Command): void {
 
         if (!options.dryRun) {
           console.log(chalk.green.bold(`\n✨ Successfully trimmed ${inputFiles.length} video(s)!`));
-          showPluginBranding('Video');
+          showPluginBranding('Video', '../../package.json');
         }
       } catch (error) {
         spinner.fail(chalk.red(`Error: ${(error as Error).message}`));

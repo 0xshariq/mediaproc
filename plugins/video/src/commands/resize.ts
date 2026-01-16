@@ -7,10 +7,8 @@ import {
   checkFFmpeg,
   formatFileSize,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
-import { createStandardHelp } from '@mediaproc/core';
-import { showPluginBranding } from '@mediaproc/core';
 import ora from 'ora';
 
 export function resizeCommand(videoCmd: Command): void {
@@ -280,7 +278,7 @@ export function resizeCommand(videoCmd: Command): void {
 
         if (!options.dryRun) {
           console.log(chalk.green.bold(`\n✨ Successfully resized ${inputFiles.length} video(s)!`));
-          showPluginBranding('Video');
+          showPluginBranding('Video', '../../package.json');
         }
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));

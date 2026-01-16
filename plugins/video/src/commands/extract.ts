@@ -1,301 +1,90 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
-import { mkdir, stat } from 'fs/promises';
-import { join, resolve } from 'path';
-import type { ExtractOptions } from '../types.js';
-import {
-  runFFmpeg,
-  getVideoMetadata,
-  checkFFmpeg,
-  formatFileSize,
-  formatDuration,
-  parseTimeToSeconds,
-} from '../utils/ffmpeg.js';
-import { showPluginBranding } from '@mediaproc/core';
-import { validatePaths, resolveOutputPaths } from '@mediaproc/core';
-import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
+import { runFFmpeg, checkFFmpeg, generateOutputPath } from '../utils/ffmpeg.js';
+import ora from 'ora';
+import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 
 export function extractCommand(videoCmd: Command): void {
-  // Extract audio
-  videoCmd
-    .command('extract-audio <input>')
-    .description('Extract audio from video')
-    .option('-o, --output <path>', 'Output audio file')
-    .option('--format <format>', 'Audio format: mp3, aac, wav, opus', 'mp3')
-    .option('--bitrate <bitrate>', 'Audio bitrate (e.g., 192k)', '192k')
-    .option('--dry-run', 'Show what would be done')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
-    .option('-v, --verbose', 'Verbose output')
-    .option('--help', 'Display help for command')
+  const extract = videoCmd.command('extract').description('Extract audio, frames, or thumbnails from video');
+
+  // Extract audio subcommand
+  extract
+    .command('audio <input>')
+    .description('Extract audio from video file')
+    .option('-o, --output <path>', 'Output audio file path')
+    .option('-f, --format <format>', 'Audio format (mp3, wav, etc.)', 'mp3')
+    .option('-b, --bitrate <bitrate>', 'Audio bitrate (e.g., 192k)', '192k')
     .action(async (input: string, options: any) => {
+      const spinner = ora('Extracting audio...').start();
       try {
-        console.log(chalk.blue.bold('🎬 Audio Extraction\n'));
-
-        const ffmpegAvailable = await checkFFmpeg();
-        if (!ffmpegAvailable) {
-          throw new Error('ffmpeg is not installed or not in PATH');
-        }
-
-        const validation = validatePaths(input, options.output);
-        if (validation.errors.length > 0) {
-          throw new Error(validation.errors.join('\n'));
-        }
-        const inputPath = validation.inputFiles[0];
-
-        console.log(chalk.dim('📊 Analyzing video...'));
-        const metadata = await getVideoMetadata(inputPath);
-        console.log(chalk.gray(`   Duration: ${formatDuration(metadata.duration)}`));
-        console.log();
-
-        const format = options.format || 'mp3';
-        const outputMap = resolveOutputPaths(
-          validation.inputFiles,
-          validation.outputPath,
-          { newExtension: `.${format}` }
-        );
-        const output = outputMap.get(inputPath)!;
-
-        const codecMap: Record<string, string> = {
-          mp3: 'libmp3lame',
-          aac: 'aac',
-          wav: 'pcm_s16le',
-          opus: 'libopus',
-        };
-
-        const audioCodec = codecMap[format] || 'libmp3lame';
-        const args = ['-i', inputPath, '-vn', '-c:a', audioCodec];
-
-        if (format !== 'wav') {
-          args.push('-b:a', options.bitrate || '192k');
-        }
-
-        args.push('-y', output);
-
-        if (options.dryRun) {
-          console.log(chalk.yellow('🏃 Dry run mode - no files will be created\n'));
-          console.log(chalk.dim('Command:'));
-          console.log(chalk.gray(`  ffmpeg ${args.join(' ')}\n`));
-          console.log(chalk.green('✓ Dry run complete'));
-          return;
-        }
-
-        if (options.explain) {
-          console.log(chalk.gray('Explain mode is not yet available.'))
-          console.log(chalk.cyan('Planned for v0.8.x.'))
-        }
-        console.log(chalk.dim('🎵 Extracting audio...'));
-        if (options.verbose) {
-          console.log(chalk.dim(`ffmpeg ${args.join(' ')}\n`));
-        }
-
-        await runFFmpeg(args, options.verbose, (line) => {
-          if (shouldDisplayLine(line, options.verbose || false)) {
-            console.log(styleFFmpegOutput(line));
-          }
-        });
-
-        const outputStat = await stat(output);
-
-        console.log();
-        console.log(chalk.green.bold('✓ Extraction Complete!\n'));
-        console.log(chalk.gray(`   Format: ${format}`));
-        console.log(chalk.gray(`   Size: ${formatFileSize(outputStat.size)}`));
-        console.log(chalk.dim(`\n   ${output}`));
-      } catch (error) {
-        console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
-        process.exit(1);
+        if (!(await checkFFmpeg())) throw new Error('FFmpeg not found.');
+        const output = options.output || generateOutputPath(input, 'audio', options.format);
+        const args = [
+          '-i', input,
+          '-vn',
+          '-acodec', options.format,
+          '-b:a', options.bitrate,
+          '-y', output
+        ];
+        await runFFmpeg(args, options.verbose, logFFmpegOutput);
+        spinner.succeed(`Audio extracted to ${output}`);
+      } catch (err: any) {
+        spinner.fail(err.message);
       }
     });
 
-  // Extract frames
-  videoCmd
-    .command('extract-frames <input>')
-    .description('Extract frames from video as images')
-    .option('-o, --output <dir>', 'Output directory', './frames')
-    .option('--start <time>', 'Start time (HH:MM:SS or seconds)')
-    .option('--end <time>', 'End time (HH:MM:SS or seconds)')
-    .option('--fps <fps>', 'Extract N frames per second', parseFloat, 1)
-    .option('--format <format>', 'Image format: jpg, png', 'jpg')
-    .option('--quality <quality>', 'JPEG quality (1-31, lower is better)', parseInt, 2)
-    .option('--dry-run', 'Show what would be done')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
-    .option('-v, --verbose', 'Verbose output')
-    .option('--help', 'Display help for command')
-    .action(async (input: string, options: ExtractOptions) => {
+  // Extract frame subcommand
+  extract
+    .command('frame <input>')
+    .description('Extract a single frame from video file')
+    .option('-o, --output <path>', 'Output image file path')
+    .option('-t, --time <timestamp>', 'Timestamp to extract frame (e.g., 00:00:10)', '00:00:01')
+    .option('-f, --format <format>', 'Image format (jpg, png, etc.)', 'jpg')
+    .action(async (input: string, options: any) => {
+      const spinner = ora('Extracting frame...').start();
       try {
-        console.log(chalk.blue.bold('🎬 Frame Extraction\n'));
-
-        const ffmpegAvailable = await checkFFmpeg();
-        if (!ffmpegAvailable) {
-          throw new Error('ffmpeg is not installed or not in PATH');
-        }
-
-        const validation = validatePaths(input, options.output);
-        if (validation.errors.length > 0) {
-          throw new Error(validation.errors.join('\n'));
-        }
-        const inputPath = validation.inputFiles[0];
-
-        console.log(chalk.dim('📊 Analyzing video...'));
-        const metadata = await getVideoMetadata(inputPath);
-        console.log(chalk.gray(`   Duration: ${formatDuration(metadata.duration)}`));
-        console.log(chalk.gray(`   Resolution: ${metadata.width}x${metadata.height}`));
-        console.log(chalk.gray(`   FPS: ${metadata.fps.toFixed(2)}`));
-        console.log();
-
-        const outputDir = resolve(validation.outputPath || './frames');
-        await mkdir(outputDir, { recursive: true });
-
-        const format = options.format || 'jpg';
-        const outputPattern = join(outputDir, `frame_%04d.${format}`);
-
-        const args = ['-i', inputPath];
-
-        // Add start time if specified
-        if (options.start) {
-          args.push('-ss', parseTimeToSeconds(options.start).toString());
-        }
-
-        // Add end time if specified
-        if (options.end) {
-          args.push('-to', parseTimeToSeconds(options.end).toString());
-        }
-
-        // Set frame rate
-        args.push('-vf', `fps=${options.fps || 1}`);
-
-        // Image quality for JPEG
-        if (format === 'jpg') {
-          args.push('-q:v', (options.quality || 2).toString());
-        }
-
-        args.push('-y', outputPattern);
-
-        // Estimate number of frames
-        const duration = options.end ? parseTimeToSeconds(options.end) - (options.start ? parseTimeToSeconds(options.start) : 0) : metadata.duration - (options.start ? parseTimeToSeconds(options.start) : 0);
-        const estimatedFrames = Math.ceil(duration * (options.fps || 1));
-
-        console.log(chalk.dim('Extraction settings:'));
-        console.log(chalk.gray(`   FPS: ${options.fps || 1}`));
-        console.log(chalk.gray(`   Format: ${format}`));
-        console.log(chalk.gray(`   Estimated frames: ~${estimatedFrames}`));
-        console.log(chalk.gray(`   Output: ${outputDir}`));
-        console.log();
-
-        if (options.dryRun) {
-          console.log(chalk.yellow('🏃 Dry run mode - no files will be created\n'));
-          console.log(chalk.dim('Command:'));
-          console.log(chalk.gray(`  ffmpeg ${args.join(' ')}\n`));
-          console.log(chalk.green('✓ Dry run complete'));
-          return;
-        }
-
-        if (options.explain) {
-          console.log(chalk.gray('Explain mode is not yet available.'))
-          console.log(chalk.cyan('Planned for v0.8.x.'))
-        }
-        console.log(chalk.dim('📸 Extracting frames...'));
-        if (options.verbose) {
-          console.log(chalk.dim(`ffmpeg ${args.join(' ')}\n`));
-        }
-
-        await runFFmpeg(args, options.verbose, (line) => {
-          if (shouldDisplayLine(line, options.verbose || false)) {
-            console.log(styleFFmpegOutput(line));
-          }
-        });
-
-        console.log();
-        console.log(chalk.green.bold('✓ Extraction Complete!\n'));
-        console.log(chalk.gray(`   Frames saved to: ${outputDir}`));
-        console.log(chalk.gray(`   Pattern: frame_####.${format}`));
-      } catch (error) {
-        console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
-        process.exit(1);
+        if (!(await checkFFmpeg())) throw new Error('FFmpeg not found.');
+        const output = options.output || generateOutputPath(input, 'frame', options.format);
+        const args = [
+          '-i', input,
+          '-ss', options.time,
+          '-frames:v', '1',
+          '-q:v', '2',
+          '-y', output
+        ];
+        await runFFmpeg(args, options.verbose, logFFmpegOutput);
+        spinner.succeed(`Frame extracted to ${output}`);
+      } catch (err: any) {
+        spinner.fail(err.message);
       }
     });
 
-  // Extract thumbnail
-  videoCmd
-    .command('extract-thumbnail <input>')
-    .description('Extract a single thumbnail from video')
-    .option('-o, --output <path>', 'Output image file')
-    .option('--time <time>', 'Time to extract (HH:MM:SS or seconds)', '00:00:01')
-    .option('--format <format>', 'Image format: jpg, png', 'jpg')
-    .option('--width <width>', 'Thumbnail width in pixels', parseInt)
-    .option('--dry-run', 'Show what would be done')
-    .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
-    .option('--help', 'Display help for command')
+  // Extract thumbnail subcommand
+  extract
+    .command('thumbnail <input>')
+    .description('Extract a thumbnail image from video file')
+    .option('-o, --output <path>', 'Output thumbnail file path')
+    .option('-t, --time <timestamp>', 'Timestamp for thumbnail (e.g., 00:00:05)', '00:00:01')
+    .option('-f, --format <format>', 'Thumbnail format (jpg, png, etc.)', 'jpg')
+    .option('--size <size>', 'Thumbnail size (e.g., 320x180)', '320x180')
     .action(async (input: string, options: any) => {
+      const spinner = ora('Extracting thumbnail...').start();
       try {
-        console.log(chalk.blue.bold('🎬 Thumbnail Extraction\n'));
-
-        const ffmpegAvailable = await checkFFmpeg();
-        if (!ffmpegAvailable) {
-          throw new Error('ffmpeg is not installed or not in PATH');
-        }
-
-        const validation = validatePaths(input, options.output);
-        if (validation.errors.length > 0) {
-          throw new Error(validation.errors.join('\n'));
-        }
-        const inputPath = validation.inputFiles[0];
-
-        console.log(chalk.dim('📊 Analyzing video...'));
-        const metadata = await getVideoMetadata(inputPath);
-        console.log(chalk.gray(`   Resolution: ${metadata.width}x${metadata.height}`));
-        console.log();
-
-        const format = options.format || 'jpg';
-        const output = options.output || inputPath.replace(/\.[^.]+$/, `_thumb.${format}`);
-
-        const timeSeconds = parseTimeToSeconds(options.time || '1');
-
-        const args = ['-i', inputPath, '-ss', timeSeconds.toString(), '-vframes', '1'];
-
-        // Resize if width specified
-        if (options.width) {
-          args.push('-vf', `scale=${options.width}:-1`);
-        }
-
-        args.push('-y', output);
-
-        if (options.dryRun) {
-          console.log(chalk.yellow('🏃 Dry run mode - no files will be created\n'));
-          console.log(chalk.dim('Command:'));
-          console.log(chalk.gray(`  ffmpeg ${args.join(' ')}\n`));
-          console.log(chalk.green('✓ Dry run complete'));
-          showPluginBranding('Video');
-          return;
-        }
-        if (options.explain) {
-          console.log(chalk.gray('Explain mode is not yet available.'))
-          console.log(chalk.cyan('Planned for v0.8.x.'))
-        }
-
-        console.log(chalk.dim('📸 Extracting thumbnail...'));
-        if (options.verbose) {
-          console.log(chalk.dim(`ffmpeg ${args.join(' ')}\n`));
-        }
-
-        await runFFmpeg(args, options.verbose, (line) => {
-          if (shouldDisplayLine(line, options.verbose || false)) {
-            console.log(styleFFmpegOutput(line));
-          }
-        });
-
-        const outputStat = await stat(output);
-
-        console.log();
-        console.log(chalk.green.bold('✓ Extraction Complete!\n'));
-        console.log(chalk.gray(`   Time: ${formatDuration(timeSeconds)}`));
-        console.log(chalk.gray(`   Size: ${formatFileSize(outputStat.size)}`));
-        console.log(chalk.dim(`\n   ${output}`));
-        showPluginBranding('Video');
-      } catch (error) {
-        console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
-        process.exit(1);
+        if (!(await checkFFmpeg())) throw new Error('FFmpeg not found.');
+        const output = options.output || generateOutputPath(input, 'thumbnail', options.format);
+        const [width, height] = options.size.split('x');
+        const args = [
+          '-i', input,
+          '-ss', options.time,
+          '-vframes', '1',
+          '-vf', `scale=${width}:${height}`,
+          '-q:v', '2',
+          '-y', output
+        ];
+        await runFFmpeg(args, options.verbose, logFFmpegOutput);
+        spinner.succeed(`Thumbnail extracted to ${output}`);
+      } catch (err: any) {
+        spinner.fail(err.message);
       }
     });
 }

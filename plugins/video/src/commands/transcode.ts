@@ -11,7 +11,7 @@ import {
   formatFileSize,
   formatDuration,
 } from '../utils/ffmpeg.js';
-import { showPluginBranding } from '@mediaproc/core';
+import { createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
 
 export function transcodeCommand(videoCmd: Command): void {
@@ -29,6 +29,35 @@ export function transcodeCommand(videoCmd: Command): void {
     .option('-v, --verbose', 'Verbose output')
     .option('--help', 'Display help for command')
     .action(async (input: string, options: TranscodeOptions) => {
+      if (options.help || !input) {
+        createStandardHelp({
+          commandName: 'transcode',
+          emoji: '🎬',
+          description: 'Transcode video files to different formats and codecs. Supports popular formats like MP4, WebM, MKV, and AVI with various codec options.',
+          usage: [
+            'transcode <input> [options]',
+            'transcode video.mp4 -f webm --codec vp9',
+            'transcode videos/ -o output/ --format mkv'
+          ],
+          options: [
+            { flag: '-o, --output <path>', description: 'Output file path (default: <input>-transcoded.<ext>)' },
+            { flag: '-f, --format <format>', description: 'Output format: mp4, webm, mkv, avi (default: mp4)' },
+            { flag: '--codec <codec>', description: 'Video codec: h264 (default), h265, vp9, av1' },
+            { flag: '--bitrate <bitrate>', description: 'Target video bitrate (e.g., 2M, 5000k)' },
+            { flag: '--audio-codec <codec>', description: 'Audio codec: aac (default), opus, mp3' },
+            { flag: '--audio-bitrate <bitrate>', description: 'Audio bitrate: 128k (default), 192k, 256k' },
+            { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
+            { flag: '-v, --verbose', description: 'Show detailed FFmpeg output and progress' }
+          ],
+          examples: [
+            { command: 'transcode video.mp4 -f webm --codec vp9', description: 'Transcode MP4 to WebM using VP9 codec' },
+            { command: 'transcode video.mkv -f mp4 --codec h264 --bitrate 3M', description: 'Transcode MKV to MP4 with H.264 at 3Mbps' },
+            { command: 'transcode video.avi -f mkv --codec h265 --audio-codec aac', description: 'Transcode AVI to MKV with H.265 video and AAC audio' },
+            { command: 'transcode videos/ -o output/ --format mp4', description: 'Batch transcode all videos in folder to MP4 format' }
+          ],
+        })
+      }
       try {
         console.log(chalk.blue.bold('🎬 Video Transcoding\n'));
 
@@ -103,7 +132,7 @@ export function transcodeCommand(videoCmd: Command): void {
           console.log(chalk.gray(`  Video codec: ${options.codec || 'h264'}`));
           console.log(chalk.gray(`  Audio codec: ${audioCodec}`));
           console.log(chalk.green('\n✓ Dry run complete'));
-          showPluginBranding('Video');
+          showPluginBranding('Video', '../../package.json');
           return;
         }
 
@@ -132,7 +161,7 @@ export function transcodeCommand(videoCmd: Command): void {
         console.log(chalk.gray(`   Codec: ${metadata.codec} → ${options.codec || 'h264'}`));
         console.log(chalk.gray(`   Size: ${formatFileSize(inputStat.size)} → ${formatFileSize(outputStat.size)}`));
         console.log(chalk.dim(`\n   ${output}`));
-        showPluginBranding('Video');
+        showPluginBranding('Video', '../../package.json');
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
         process.exit(1);
