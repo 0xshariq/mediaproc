@@ -86,31 +86,14 @@ historyCommand
       const searchText = `${entry.command} ${entry.args.join(' ')}`.toLowerCase();
       return searchText.includes(queryLower);
     });
-    // Removed legacy helper functions
-    // The displayHistory and summarizeHistory functions have been removed
-    // as they are no longer needed. HistoryManager methods are now used instead.
 
-    console.log('\n📊 History Statistics\n');
-    console.log('━'.repeat(50));
-    console.log(`\nTotal commands: ${history.length}`);
-    console.log(`Success rate: ${((successCount / history.length) * 100).toFixed(1)}%`);
-    console.log(`Successful: ${successCount}`);
-    console.log(`Failed: ${failCount}`);
-
-    console.log('\n📈 Most used commands:\n');
-    sortedCommands.forEach(([command, count], index) => {
-      const bar = '▓'.repeat(Math.ceil((count / sortedCommands[0][1]) * 20));
-      console.log(`${index + 1}. ${command.padEnd(15)} ${bar} ${count}`);
-    });
-
-    // Calculate average duration if available
-    const withDuration = history.filter(e => e.duration !== undefined);
-    if (withDuration.length > 0) {
-      const avgDuration = withDuration.reduce((sum, e) => sum + (e.duration || 0), 0) / withDuration.length;
-      console.log(`\n⏱️  Average duration: ${(avgDuration / 1000).toFixed(2)}s`);
+    if (matches.length === 0) {
+      console.log('\nNo matching history entries found.');
+      showBranding();
+      return;
     }
 
-    console.log('\n' + '─'.repeat(50));
-
+    console.log(`\nTotal matching history entries: ${matches.length}`);
+    historyManager.summarizeHistory(matches);
     showBranding();
   });
