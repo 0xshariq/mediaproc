@@ -1,6 +1,6 @@
 {
   "name": "@mediaproc/cli",
-  "version": "0.8.0",
+  "version": "0.7.0",
   "description": "Universal media processing CLI with plugin architecture",
   "type": "module",
   "main": "./dist/index.js",
@@ -50,7 +50,7 @@
   },
   "homepage": "https://github.com/0xshariq/mediaproc-cli#readme",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "dependencies": {
     "@gltf-transform/cli": "^4.2.1",
