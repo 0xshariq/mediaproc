@@ -10,12 +10,15 @@
  */
 
 // Export all utilities
-export * from './branding.js';
-export * from './helpFormatter.js';
-export * from './pathValidator.js';
-export * from './explainFormatter.js';
-export * from './supportedExtensions.js';
-export * from './exitCodes.js';
+
+export * from './branding/branding.js';
+export * from './formatters/helpFormatter.js';
+export * from './validators/pathValidator.js';
+export * from './formatters/explainFormatter.js';
+export * from './types/explainTypes.js';
+export * from './explainFlag.js';
+export * from './validators/supportedExtensions.js';
+export * from './errors/exitCodes.js';
 
 // Re-export types for convenience
 export type {
@@ -23,4 +26,4 @@ export type {
   HelpExample,
   HelpSection,
   CommandHelpConfig
-} from './helpFormatter.js';
+} from './types/helpTypes.js';
