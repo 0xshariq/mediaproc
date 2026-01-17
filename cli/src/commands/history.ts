@@ -1,46 +1,37 @@
 import { Command } from 'commander';
-import * as fs from 'fs';
-import * as path from 'path';
 import { showBranding } from '@mediaproc/core';
-import * as os from 'os';
+import { HistoryManager } from '../history-manager.js';
 
-interface HistoryEntry {
-  id: number;
-  timestamp: number;
-  command: string;
-  args: string[];
-  cwd: string;
-  success: boolean;
-  duration?: number;
-}
-
-const HISTORY_FILE = path.join(os.homedir(), '.mediaproc', 'history.json');
-const MAX_HISTORY_ENTRIES = 1000;
+const historyManager = new HistoryManager();
 
 export const historyCommand = new Command()
   .name('history')
-  .description('Show command history and replay previous commands')
+  .description('Show your personal MediaProc command usage history')
   .option('-n, --limit <number>', 'Number of entries to show', '20')
   .option('--clear', 'Clear history')
-  .option('--export <file>', 'Export history as shell script')
-  .option('--json', 'Output as JSON')
+  .option('--export', 'Export sanitized usage summary as JSON')
   .action(async (options) => {
     if (options.clear) {
-      clearHistory();
+      historyManager.clearHistory();
       console.log('✓ History cleared');
       showBranding();
       return;
     }
 
+    const history = historyManager.loadHistory();
+    const limit = parseInt(options.limit);
+
     if (options.export) {
-      exportHistory(options.export);
-      console.log(`✓ History exported to ${options.export}`);
+      const summary = historyManager.summarizeHistory(history);
+      const exportFile = 'history-summary.json';
+      require('fs').writeFileSync(exportFile, JSON.stringify(summary, null, 2));
+      console.log(`\n✓ History summary exported to ${exportFile}`);
+      console.log('\nTip: You can help improve MediaProc by sharing anonymized usage insights.');
+      console.log('Your data is never sent automatically.');
+      console.log('Use: mediaproc history --export');
       showBranding();
       return;
     }
-
-    const history = loadHistory();
-    const limit = parseInt(options.limit);
 
     if (history.length === 0) {
       console.log('\n📝 No command history yet');
@@ -48,12 +39,13 @@ export const historyCommand = new Command()
       return;
     }
 
-    if (options.json) {
-      console.log(JSON.stringify(history.slice(-limit), null, 2));
-      return;
-    }
+    historyManager.displayHistory(history, limit);
+    // Gentle, optional tip
+    console.log('\nTip:');
+    console.log('You can help improve MediaProc by sharing anonymized usage insights.');
+    console.log('Your data is never sent automatically.');
+    console.log('Use: mediaproc history --export');
 
-    displayHistory(history, limit);
   });
 
 // Add replay subcommand
@@ -62,7 +54,7 @@ historyCommand
   .description('Replay a command from history')
   .argument('<id>', 'History entry ID')
   .action(async (id: string) => {
-    const history = loadHistory();
+    const history = historyManager.loadHistory();
     const entryId = parseInt(id);
     const entry = history.find(e => e.id === entryId);
 
@@ -77,7 +69,7 @@ historyCommand
     // In a real implementation, this would actually execute the command
     console.log('⚠️  Note: Command replay requires full implementation');
     console.log(`   Run manually: mediaproc ${entry.command} ${entry.args.join(' ')}`);
-    
+
     showBranding();
   });
 
@@ -87,48 +79,16 @@ historyCommand
   .description('Search command history')
   .argument('<query>', 'Search query')
   .action(async (query: string) => {
-    const history = loadHistory();
+    const history = historyManager.loadHistory();
     const queryLower = query.toLowerCase();
 
     const matches = history.filter(entry => {
       const searchText = `${entry.command} ${entry.args.join(' ')}`.toLowerCase();
       return searchText.includes(queryLower);
     });
-
-    if (matches.length === 0) {
-      console.log(`\n❌ No commands found matching "${query}"\n`);
-      return;
-    }
-
-    console.log(`\n🔍 Found ${matches.length} matching commands:\n`);
-    displayHistory(matches, matches.length);
-    
-    showBranding();
-  });
-
-// Add stats subcommand
-historyCommand
-  .command('stats')
-  .description('Show history statistics')
-  .action(async () => {
-    const history = loadHistory();
-
-    if (history.length === 0) {
-      console.log('\n📊 No history data available\n');
-      return;
-    }
-
-    const commandCounts: Record<string, number> = {};
-    const successCount = history.filter(e => e.success).length;
-    const failCount = history.length - successCount;
-
-    history.forEach(entry => {
-      commandCounts[entry.command] = (commandCounts[entry.command] || 0) + 1;
-    });
-
-    const sortedCommands = Object.entries(commandCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10);
+    // Removed legacy helper functions
+    // The displayHistory and summarizeHistory functions have been removed
+    // as they are no longer needed. HistoryManager methods are now used instead.
 
     console.log('\n📊 History Statistics\n');
     console.log('━'.repeat(50));
@@ -151,115 +111,6 @@ historyCommand
     }
 
     console.log('\n' + '─'.repeat(50));
-    
+
     showBranding();
   });
-
-function loadHistory(): HistoryEntry[] {
-  try {
-    ensureHistoryDirectory();
-    
-    if (!fs.existsSync(HISTORY_FILE)) {
-      return [];
-    }
-
-    const data = fs.readFileSync(HISTORY_FILE, 'utf-8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Error loading history:', error);
-    return [];
-  }
-}
-
-export function getHistory(): HistoryEntry[] {
-  return loadHistory();
-}
-
-export function saveHistoryEntry(entry: Omit<HistoryEntry, 'id' | 'timestamp'>): void {
-  try {
-    ensureHistoryDirectory();
-    
-    const history = loadHistory();
-    const newEntry: HistoryEntry = {
-      ...entry,
-      id: history.length > 0 ? Math.max(...history.map(e => e.id)) + 1 : 1,
-      timestamp: Date.now()
-    };
-
-    history.push(newEntry);
-
-    // Keep only last MAX_HISTORY_ENTRIES
-    const trimmedHistory = history.slice(-MAX_HISTORY_ENTRIES);
-
-    fs.writeFileSync(HISTORY_FILE, JSON.stringify(trimmedHistory, null, 2));
-  } catch (error) {
-    // Silently fail - history is not critical
-  }
-}
-
-function clearHistory(): void {
-  try {
-    if (fs.existsSync(HISTORY_FILE)) {
-      fs.unlinkSync(HISTORY_FILE);
-    }
-  } catch (error) {
-    console.error('Error clearing history:', error);
-  }
-}
-
-function exportHistory(filename: string): void {
-  const history = loadHistory();
-  const script = history
-    .map(entry => `# ${new Date(entry.timestamp).toLocaleString()}`)
-    .map((comment, index) => `${comment}\nmediaproc ${history[index].command} ${history[index].args.join(' ')}`)
-    .join('\n\n');
-
-  fs.writeFileSync(filename, `#!/bin/bash\n\n${script}\n`);
-  fs.chmodSync(filename, '755');
-}
-
-function displayHistory(history: HistoryEntry[], limit: number): void {
-  console.log('\n📝 Command History\n');
-  console.log('━'.repeat(70));
-
-  const entries = history.slice(-limit).reverse();
-
-  entries.forEach(entry => {
-    const status = entry.success ? '\x1b[32m✓\x1b[0m' : '\x1b[31m✗\x1b[0m';
-    const time = formatTimestamp(entry.timestamp);
-    const duration = entry.duration ? `(${(entry.duration / 1000).toFixed(2)}s)` : '';
-    
-    console.log(`\n${status} \x1b[36m#${entry.id}\x1b[0m ${time} ${duration}`);
-    console.log(`   mediaproc ${entry.command} ${entry.args.join(' ')}`);
-    console.log(`   \x1b[90mDirectory: ${entry.cwd}\x1b[0m`);
-  });
-
-  console.log('\n' + '━'.repeat(70));
-  console.log(`\nShowing last ${Math.min(limit, history.length)} of ${history.length} commands`);
-  console.log('\n💡 Commands:');
-  console.log('   mediaproc history replay <id>  - Replay a command');
-  console.log('   mediaproc history search <q>   - Search history');
-  console.log('   mediaproc history stats        - Show statistics');
-  console.log('   mediaproc history --export <f> - Export as script\n');
-}
-
-function formatTimestamp(timestamp: number): string {
-  const now = Date.now();
-  const diff = now - timestamp;
-  const seconds = Math.floor(diff / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
-
-  if (days > 0) return `${days}d ago`;
-  if (hours > 0) return `${hours}h ago`;
-  if (minutes > 0) return `${minutes}m ago`;
-  return `${seconds}s ago`;
-}
-
-function ensureHistoryDirectory(): void {
-  const dir = path.dirname(HISTORY_FILE);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-}

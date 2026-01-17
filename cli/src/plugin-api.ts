@@ -10,20 +10,19 @@ import type { Command } from 'commander';
  * ```ts
  * import type { Command } from 'commander';
  * 
- * export const name = '@mediaproc/image';
+ * export const name = 'plugin-name';
  * export const version = '1.0.0';
  * 
  * export function register(program: Command): void {
  *   const imageCmd = program
- *     .command('image')
- *     .description('Image processing commands');
+ *     .command('plugin')
+ *     .description('plugin description');
  *   
  *   imageCmd
- *     .command('resize <input>')
- *     .option('-w, --width <width>', 'Width')
- *     .option('-h, --height <height>', 'Height')
+ *     .command('plugin-command <parameters>')
+ *     .option('--flags', 'Flag description')
  *     .action(async (input, options) => {
- *       // Implementation
+ *        // Implementation
  *     });
  * }
  * ```

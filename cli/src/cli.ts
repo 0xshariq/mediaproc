@@ -8,7 +8,6 @@ import { fileURLToPath } from 'url';
 import { PluginManager } from './plugin-manager.js';
 import { addCommand } from './commands/add.js';
 import { removeCommand } from './commands/remove.js';
-import { deleteCommand } from './commands/delete.js';
 import { listCommand } from './commands/list.js';
 import { pluginsCommand } from './commands/plugins.js';
 import { helpCommand } from './commands/help.js';
@@ -17,7 +16,6 @@ import { doctorCommand } from './commands/doctor.js';
 import { searchCommand } from './commands/search.js';
 import { historyCommand } from './commands/history.js';
 import { batchCommand } from './commands/batch.js';
-import { statsCommand } from './commands/stats.js';
 import { compareCommand } from './commands/compare.js';
 import { templateCommand } from './commands/template.js';
 import { workspaceCommand } from './commands/workspace.js';
@@ -57,7 +55,6 @@ export async function cli(): Promise<void> {
   // Plugin management commands
   addCommand(program, pluginManager);
   removeCommand(program, pluginManager);
-  deleteCommand(program, pluginManager);
   listCommand(program, pluginManager);
   pluginsCommand(program, pluginManager);
   updateCommand(program);
@@ -68,7 +65,6 @@ export async function cli(): Promise<void> {
   program.addCommand(searchCommand);
   program.addCommand(historyCommand);
   program.addCommand(batchCommand);
-  program.addCommand(statsCommand);
   program.addCommand(compareCommand);
   program.addCommand(templateCommand);
   program.addCommand(workspaceCommand);

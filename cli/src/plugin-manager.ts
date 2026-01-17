@@ -97,4 +97,32 @@ export class PluginManager {
     }
     return false;
   }
+
+}
+// Export a singleton PluginManager instance
+export const pluginManager = new PluginManager();
+
+/**
+ * Get the plugin name for a given command name.
+ * Checks loaded plugins for a command match, otherwise returns 'core'.
+ */
+export function getPluginNameForCommand(commandName: string): string {
+  for (const [pluginName, plugin] of pluginManager['plugins'].entries()) {
+    // If plugin has a 'commands' array property (non-standard, but some plugins may add it)
+    if (plugin && (plugin as any).commands && Array.isArray((plugin as any).commands)) {
+      if ((plugin as any).commands.includes(commandName)) {
+        return pluginName;
+      }
+    }
+    // If plugin has a 'getCommands' method (non-standard, but some plugins may add it)
+    if (plugin && typeof (plugin as any).getCommands === 'function') {
+      try {
+        const cmds = (plugin as any).getCommands();
+        if (Array.isArray(cmds) && cmds.includes(commandName)) {
+          return pluginName;
+        }
+      } catch {}
+    }
+  }
+  return 'core';
 }
