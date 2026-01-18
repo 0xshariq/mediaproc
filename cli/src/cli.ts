@@ -21,6 +21,7 @@ import { templateCommand } from './commands/template.js';
 import { workspaceCommand } from './commands/workspace.js';
 import { watchCommand } from './commands/watch.js';
 import { benchmarkCommand } from './commands/benchmark.js';
+import { explainPreActionHook } from '@mediaproc/core';
 
 const program = new Command();
 const pluginManager = new PluginManager();
@@ -81,6 +82,7 @@ export async function cli(): Promise<void> {
   if (!process.argv.slice(2).length) {
     program.outputHelp();
   }
+  program.hook('preAction', explainPreActionHook);
 }
 
 // Run CLI if this is the main module
