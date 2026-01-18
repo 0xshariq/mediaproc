@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp, explainFlag } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { ImageOptions } from '../types.js';
 
@@ -23,10 +23,10 @@ export function autoEnhanceCommand(imageCmd: Command): void {
     .option('-o, --output <path>', 'Output file path')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
+    .option('--explain', 'Explain the proper flow of this command in detail.')
     .option('--help', 'Display help for auto-enhance command')
-    .action(async (input: string, options: AutoEnhanceOptions) => {
-      if (options.help) {
+    .action(async function (input: string, options: AutoEnhanceOptions) {
+      if (options.help || !input) {
         createStandardHelp({
           commandName: 'auto-enhance',
           emoji: '✨',
@@ -36,7 +36,7 @@ export function autoEnhanceCommand(imageCmd: Command): void {
             { flag: '-l, --level <level>', description: 'Enhancement level: low, medium, high (default: medium)' },
             { flag: '-o, --output <path>', description: 'Output file path' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
@@ -129,8 +129,11 @@ export function autoEnhanceCommand(imageCmd: Command): void {
           return;
         }
         if (options.explain) {
-          console.log(chalk.gray('Explain mode is not yet available.'))
-          console.log(chalk.cyan('Planned for v0.8.x.'))
+          explainFlag({
+            command: this,
+            args: { input, output: options.output },
+            options
+          });
         }
 
         let successCount = 0;

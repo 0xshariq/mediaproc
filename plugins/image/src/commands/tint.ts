@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp, explainFlag } from '@mediaproc/core';
 import type { FilterOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { normalizeColor } from '../utils/colorUtils.js';
@@ -22,10 +22,10 @@ export function tintCommand(imageCmd: Command): void {
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
+    .option('--explain', 'Explain the proper flow of this command in detail.')
     .option('--help', 'Show detailed help for tint command')
-    .action(async (input: string, options: TintOptions) => {
-      if (options.help) {
+    .action(async function (input: string, options: TintOptions) {
+      if (options.help || !input) {
         createStandardHelp({
           commandName: 'tint',
           emoji: '🎨',
@@ -36,7 +36,7 @@ export function tintCommand(imageCmd: Command): void {
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-tinted.<ext>)' },
             { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
             { flag: '-v, --verbose', description: 'Show detailed output' },
             { flag: '--help', description: 'Display help for tint command' }
           ],
@@ -119,8 +119,11 @@ export function tintCommand(imageCmd: Command): void {
           return;
         }
         if (options.explain) {
-          console.log(chalk.gray('Explain mode is not yet available.'))
-          console.log(chalk.cyan('Planned for v0.8.x.'))
+          explainFlag({
+            command: this,
+            args: { input, output: options.output },
+            options
+          });
         }
 
         let successCount = 0;

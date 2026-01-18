@@ -3,11 +3,12 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName,showPluginBranding,createStandardHelp } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp, explainFlag } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import path from 'path';
+import { ImageOptions } from '../types.js';
 
-interface BatchOptions {
+interface BatchOptions extends ImageOptions {
   input: string;
   operation: string;
   output?: string;
@@ -34,10 +35,10 @@ export function batchCommand(imageCmd: Command): void {
     .option('-q, --quality <quality>', 'Quality for optimization', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
+    .option('--explain', 'Explain the proper flow of this command in detail.')
     .option('--help', 'Display help for batch command')
-    .action(async (directory: string, options: BatchOptions) => {
-      if (options.help) {
+    .action(async function (directory: string, options: BatchOptions) {
+      if (options.help || !directory) {
         createStandardHelp({
           commandName: 'batch',
           emoji: '📦',
@@ -53,7 +54,7 @@ export function batchCommand(imageCmd: Command): void {
             { flag: '-f, --format <format>', description: 'Output format for convert operations' },
             { flag: '-q, --quality <quality>', description: 'Quality for optimization/conversion' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
@@ -145,8 +146,11 @@ export function batchCommand(imageCmd: Command): void {
           return;
         }
         if (options.explain) {
-          console.log(chalk.gray('Explain mode is not yet available.'))
-          console.log(chalk.cyan('Planned for v0.8.x.'))
+          explainFlag({
+            command: this,
+            args: { directory, output: options.output },
+            options
+          });
         }
 
         // Create output directory

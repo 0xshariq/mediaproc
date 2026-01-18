@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { showPluginBranding } from '@mediaproc/core';
+import { explainFlag, showPluginBranding } from '@mediaproc/core';
 import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { ImageOptions } from '../types.js';
@@ -28,10 +28,10 @@ export function smartCropCommand(imageCmd: Command): void {
     .option('-o, --output <path>', 'Output file path')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
+    .option('--explain', 'Explain the proper flow of this command in detail.')
     .option('--help', 'Display help for smart-crop command')
-    .action(async (input: string, options: SmartCropOptions) => {
-      if (options.help) {
+    .action(async function (input: string, options: SmartCropOptions) {
+      if (options.help || !input) {
         createStandardHelp({
           commandName: 'smart-crop',
           emoji: '🎯',
@@ -43,7 +43,7 @@ export function smartCropCommand(imageCmd: Command): void {
             { flag: '-s, --strategy <type>', description: 'Cropping strategy: entropy (edges/details) or attention (center-weighted) (default: entropy)' },
             { flag: '-o, --output <path>', description: 'Output file path' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
@@ -138,8 +138,11 @@ export function smartCropCommand(imageCmd: Command): void {
           return;
         }
         if (options.explain) {
-          console.log(chalk.gray('Explain mode is not yet available.'))
-          console.log(chalk.cyan('Planned for v0.8.x.'))
+          explainFlag({
+            command: this,
+            args: { input, output: options.output },
+            options
+          });
         }
 
         const strategy = options.strategy === 'attention' ? 'attention' : 'entropy';

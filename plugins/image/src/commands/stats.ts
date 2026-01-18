@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
 import type { StatsOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 
@@ -20,10 +20,10 @@ export function statsCommand(imageCmd: Command): void {
     .option('--histogram', 'Calculate and display color histogram')
     .option('--dry-run', 'Show what would be analyzed without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
+    .option('--explain', 'Explain the proper flow of this command in detail.')
     .option('--help', 'Display help for stats command')
-    .action(async (input: string, options: StatsOptionsExtended) => {
-      if (options.help) {
+    .action(async function (input: string, options: StatsOptionsExtended) {
+      if (options.help || !input) {
         createStandardHelp({
           commandName: 'stats',
           emoji: '📊',
@@ -32,7 +32,7 @@ export function statsCommand(imageCmd: Command): void {
           options: [
             { flag: '-d, --detailed', description: 'Show detailed EXIF and metadata information' },
             { flag: '--histogram', description: 'Calculate and display color channel statistics' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
             { flag: '-v, --verbose', description: 'Show extra verbose output' }
           ],
           examples: [
@@ -109,8 +109,11 @@ export function statsCommand(imageCmd: Command): void {
           process.exit(0);
         }
         if (options.explain) {
-          console.log(chalk.gray('Explain mode is not yet available.'))
-          console.log(chalk.cyan('Planned for v0.8.x.'))
+          explainFlag({
+            command: this,
+            args: { input, output: options.output },
+            options
+          });
         }
 
         spinner.succeed(chalk.green(`Found ${totalFiles} file${totalFiles > 1 ? 's' : ''} to analyze`));

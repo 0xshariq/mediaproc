@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
 import type { BorderOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { normalizeColor } from '../utils/colorUtils.js';
@@ -20,10 +20,10 @@ export function borderCommand(imageCmd: Command): void {
     .option('-o, --output <path>', 'Output file path')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
+    .option('--explain', 'Explain the proper flow of this command in detail.')
     .option('--help', 'Show detailed help for border command')
-    .action(async (input: string, options: BorderOptionsExtended) => {
-      if (options.help) {
+    .action(async function (input: string, options: BorderOptionsExtended) {
+      if (options.help || !input) {
         createStandardHelp({
           commandName: 'border',
           emoji: '🖼️',
@@ -34,7 +34,7 @@ export function borderCommand(imageCmd: Command): void {
             { flag: '--color <color>', description: 'Border color - hex (#FF0000), rgb (rgb(255,0,0)), rgba(255,0,0,0.5), name (red), ascii (255,0,0)' },
             { flag: '-o, --output <path>', description: 'Output file path' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
             { flag: '-v, --verbose', description: 'Show detailed output' },
             { flag: '--help', description: 'Display help for border command' }
           ],
@@ -118,8 +118,11 @@ export function borderCommand(imageCmd: Command): void {
           return;
         }
         if (options.explain) {
-          console.log(chalk.gray('Explain mode is not yet available.'))
-          console.log(chalk.cyan('Planned for v0.8.x.'))
+          explainFlag({
+            command: this,
+            args: { input, output: options.output },
+            options
+          });
         }
 
         let successCount = 0;

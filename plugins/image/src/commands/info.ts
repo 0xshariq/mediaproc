@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import { stat } from 'node:fs/promises';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 
@@ -18,10 +18,10 @@ export function infoCommand(imageCmd: Command): void {
     .description('Display comprehensive image information and metadata')
     .option('--json', 'Output information in JSON format')
     .option('-v, --verbose', 'Verbose output with all available metadata')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
+    .option('--explain', 'Explain the proper flow of this command in detail.')
     .option('--help', 'Display help for info command')
-    .action(async (input: string, options: InfoOptions) => {
-      if (options.help) {
+    .action(async function (input: string, options: InfoOptions) {
+      if (options.help || !input) {
         createStandardHelp({
           commandName: 'info',
           emoji: 'ℹ️',
@@ -29,7 +29,7 @@ export function infoCommand(imageCmd: Command): void {
           usage: ['info <input>', 'info <input> --json', 'info <input> -v'],
           options: [
             { flag: '--json', description: 'Output data in JSON format for scripting' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
             { flag: '-v, --verbose', description: 'Show all available metadata including EXIF' }
           ],
           examples: [
@@ -177,8 +177,11 @@ export function infoCommand(imageCmd: Command): void {
                 console.log(chalk.gray('   Use a specialized EXIF tool to parse detailed camera data'));
               }
               if (options.explain) {
-                console.log(chalk.gray('Explain mode is not yet available.'))
-                console.log(chalk.cyan('Planned for v0.8.x.'))
+                explainFlag({
+                  command: this,
+                  args: { input, output: options.output },
+                  options
+                });
               }
               if (options.dryRun) {
                 spinner.info(chalk.yellow('Dry run mode - no changes will be made'));

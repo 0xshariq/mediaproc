@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import type { ResizeOptions } from '../types.js';
 import { createSharpInstance, sharp } from '../utils/sharp.js';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp, explainFlag } from '@mediaproc/core';
 import path from 'node:path';
 
 
@@ -22,12 +22,12 @@ export function resizeCommand(imageCmd: Command): void {
     .option('--background <color>', 'Background color for contain/outside (hex, rgb, or named)', '#ffffff')
     .option('--kernel <kernel>', 'Kernel for resizing: nearest, cubic, mitchell, lanczos2, lanczos3', 'lanczos3')
     .option('--dry-run', 'Show what would be done without executing')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
+    .option('--explain', 'Explain the proper flow of this command in detail.')
     .option('-v, --verbose', 'Verbose output')
     .option('--help', 'Display help for resize command')
-    .action(async (input: string, options: ResizeOptions) => {
+    .action(async function (input: string, options: ResizeOptions) {
       // Show help if requested
-      if (options.help) {
+      if (options.help || !input) {
         createStandardHelp({
           commandName: 'resize',
           emoji: '📐',
@@ -49,7 +49,7 @@ export function resizeCommand(imageCmd: Command): void {
             { flag: '--background <color>', description: 'Background color for contain/outside (default: #ffffff)' },
             { flag: '--kernel <kernel>', description: 'Resize kernel: nearest, cubic, mitchell, lanczos2, lanczos3 (default: lanczos3)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain the proper flow of this command in detail (Coming Soon...)' },
+            { flag: '--explain', description: 'Explain the proper flow of this command in detail.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
@@ -140,8 +140,11 @@ export function resizeCommand(imageCmd: Command): void {
           return;
         }
         if (options.explain) {
-          console.log(chalk.gray('Explain mode is not yet available.'))
-          console.log(chalk.cyan('Planned for v0.8.x.'))
+          explainFlag({
+            command: this,
+            args: { input, output: options.output },
+            options
+          });
         }
 
         // Process each input file

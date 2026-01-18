@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { ImageOptions } from '../types.js';
 
@@ -29,10 +29,10 @@ export function stackCommand(imageCmd: Command): void {
     .option('-o, --output <path>', 'Output file path (default: stacked.png)')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
+    .option('--explain', 'Explain the proper flow of this command in detail.')
     .option('--help', 'Display help for stack command')
-    .action(async (images: string[], options: StackOptions) => {
-      if (options.help) {
+    .action(async function (images: string[], options: StackOptions) {
+      if (options.help || !images) {
         createStandardHelp({
           commandName: 'stack',
           emoji: '📚',
@@ -45,7 +45,7 @@ export function stackCommand(imageCmd: Command): void {
             { flag: '-b, --background <color>', description: 'Background color for gaps (default: transparent)' },
             { flag: '-o, --output <path>', description: 'Output file path (default: stacked.png)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
@@ -174,8 +174,11 @@ export function stackCommand(imageCmd: Command): void {
           return;
         }
         if (options.explain) {
-          console.log(chalk.gray('Explain mode is not yet available.'))
-          console.log(chalk.cyan('Planned for v0.8.x.'))
+          explainFlag({
+            command: this,
+            args: { images, output: options.output },
+            options
+          });
         }
 
         // Create canvas
