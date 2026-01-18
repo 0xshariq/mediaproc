@@ -6,6 +6,9 @@ export function explainHumanTemplate(context: ExplainContext): string {
     output += chalk.bold.bgBlueBright.white('╔════════════════════════════════════════════════════════════════╗') + '\n';
     output += chalk.bold.bgBlueBright.white('║                        EXPLANATION                           ║') + '\n';
     output += chalk.bold.bgBlueBright.white('╚════════════════════════════════════════════════════════════════╝') + '\n';
+    if (context.explainOnly) {
+        output += chalk.bgYellow.black(' [EXPLAIN-ONLY MODE: No command will be executed] ') + '\n';
+    }
 
     // Friendly, conversational summary
     if (context.plugin) {

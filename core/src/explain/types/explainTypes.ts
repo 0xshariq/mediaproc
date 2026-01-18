@@ -11,6 +11,8 @@ export interface ExplainDecision {
 
 
 export interface ExplainContext {
+  // If true, this is an explain-only run (no command execution)
+  explainOnly?: boolean;
   // Command and plugin info
   command: string;
   plugin?: string;

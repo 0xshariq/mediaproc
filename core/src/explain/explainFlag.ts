@@ -1,6 +1,6 @@
 import chalk from 'chalk';
-import { explainFormatter, ExplainFormat } from './formatters/explainFormatter.js';
-import { getCliVersion, getVersion } from './branding/branding.js';
+import { explainFormatter, ExplainFormat } from './formatter/explainFormatter.js';
+import { getCliVersion, getVersion } from '../branding/branding.js';
 import { ExplainContext } from './types/explainTypes.js';
 import os from 'os';
 
@@ -48,13 +48,16 @@ export function explainFlag({
 
   // Gather used flags
   let explainValue: string | undefined = undefined;
+  let explainOnly = false;
   if (typeof options.explain === 'string') {
     explainValue = options.explain;
+    if (explainValue === 'only') explainOnly = true;
   } else if (Array.isArray(args._) && args._.length > 0) {
     // Check for --explain details as positional
     const idx = args._.findIndex((v: any) => v === 'explain');
     if (idx !== -1 && args._[idx + 1]) {
       explainValue = args._[idx + 1];
+      if (explainValue === 'only') explainOnly = true;
     }
   }
   if (explainValue === 'details' || explainValue === 'json' || explainValue === 'human') {
@@ -149,6 +152,7 @@ export function explainFlag({
       '6. Show summary and any errors encountered.'
     ],
     environment,
+    explainOnly,
     technical: {
       library: 'sharp',
       tool: 'mediaproc',
