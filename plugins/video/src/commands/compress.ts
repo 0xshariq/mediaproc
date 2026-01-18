@@ -8,7 +8,7 @@ import {
   checkFFmpeg,
   formatFileSize,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, createStandardHelp, showPluginBranding, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 
 export function compressCommand(videoCmd: Command): void {
@@ -119,7 +119,7 @@ export function compressCommand(videoCmd: Command): void {
         }
 
         // Parse input files
-        const inputFiles = parseInputPaths(input);
+        const inputFiles = parseInputPaths(input, VIDEO_EXTENSIONS);
 
         if (inputFiles.length === 0) {
           spinner.fail(chalk.red('No valid video files found'));

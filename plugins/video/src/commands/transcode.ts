@@ -6,12 +6,11 @@ import {
   runFFmpeg,
   getVideoMetadata,
   checkFFmpeg,
-  validateInputFile,
   generateOutputPath,
   formatFileSize,
-  formatDuration,
+  formatDuration
 } from '../utils/ffmpeg.js';
-import { createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { createStandardHelp, parseInputPaths, showPluginBranding, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
 
 export function transcodeCommand(videoCmd: Command): void {
@@ -68,7 +67,9 @@ export function transcodeCommand(videoCmd: Command): void {
         }
 
         // Validate input
-        const inputPath = validateInputFile(input);
+        const inputPaths = parseInputPaths(input, VIDEO_EXTENSIONS);
+
+        const inputPath = Array.isArray(inputPaths) ? inputPaths[0] : inputPaths;
 
         // Get input metadata
         console.log(chalk.dim('📊 Analyzing video...'));

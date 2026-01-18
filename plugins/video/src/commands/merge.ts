@@ -11,7 +11,7 @@ import {
   formatFileSize,
   formatDuration,
 } from '../utils/ffmpeg.js';
-import { fileExists, validatePaths, resolveOutputPaths, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { fileExists, validatePaths, resolveOutputPaths, createStandardHelp, showPluginBranding, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 
 export function mergeCommand(videoCmd: Command): void {
@@ -118,7 +118,7 @@ export function mergeCommand(videoCmd: Command): void {
         let totalSize = 0;
 
         for (let i = 0; i < inputs.length; i++) {
-          const validation = validatePaths(inputs[i], undefined);
+          const validation = validatePaths(inputs[i], undefined, { allowedExtensions: VIDEO_EXTENSIONS});
           if (validation.errors.length > 0) {
             throw new Error(`Input ${i + 1}: ${validation.errors.join(', ')}`);
           }
@@ -159,7 +159,7 @@ export function mergeCommand(videoCmd: Command): void {
 
         // Validate and resolve output path
         const outputValidation = validatePaths(inputPaths[0], options.output, {
-          newExtension: '.mp4'
+          allowedExtensions: VIDEO_EXTENSIONS
         });
         if (outputValidation.errors.length > 0) {
           throw new Error(`Output path invalid: ${outputValidation.errors.join(', ')}`);

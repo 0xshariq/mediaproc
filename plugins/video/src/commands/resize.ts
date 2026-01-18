@@ -7,7 +7,7 @@ import {
   checkFFmpeg,
   formatFileSize,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import ora from 'ora';
 
@@ -135,7 +135,7 @@ export function resizeCommand(videoCmd: Command): void {
 
         // Parse input files
         spinner.text = 'Finding video files...';
-        const inputFiles = parseInputPaths(input);
+        const inputFiles = parseInputPaths(input, VIDEO_EXTENSIONS);
 
         if (inputFiles.length === 0) {
           spinner.fail(chalk.red('No valid video files found'));

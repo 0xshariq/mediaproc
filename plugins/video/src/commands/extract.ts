@@ -1,7 +1,7 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
 import { runFFmpeg, checkFFmpeg } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import ora from 'ora';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 
@@ -52,7 +52,7 @@ export function extractCommand(videoCmd: Command): void {
         });
         return;
       }
-      const inputPaths = await parseInputPaths(input, ['.mp4', '.mkv', '.avi', '.mov', '.webm', '.flv', '.wmv', '.m4v', '.mpg', '.mpeg', '.3gp']);
+      const inputPaths = await parseInputPaths(input, VIDEO_EXTENSIONS);
       const outputPathsMap = resolveOutputPaths(inputPaths, options.output, { suffix: '-audio', newExtension: options.format });
       const outputPaths = Array.from(outputPathsMap.values());
       for (let i = 0; i < inputPaths.length; i++) {
@@ -128,7 +128,7 @@ export function extractCommand(videoCmd: Command): void {
         });
         return;
       }
-      const inputPaths = await parseInputPaths(input, ['.mp4', '.mkv', '.avi', '.mov', '.webm', '.flv', '.wmv', '.m4v', '.mpg', '.mpeg', '.3gp']);
+      const inputPaths = await parseInputPaths(input, VIDEO_EXTENSIONS);
       const outputPathsMap = resolveOutputPaths(inputPaths, options.output, { suffix: '-frame', newExtension: options.format });
       const outputPaths = Array.from(outputPathsMap.values());
       for (let i = 0; i < inputPaths.length; i++) {
@@ -203,7 +203,7 @@ export function extractCommand(videoCmd: Command): void {
         });
         return;
       }
-      const inputPaths = await parseInputPaths(input, ['.mp4', '.mkv', '.avi', '.mov', '.webm', '.flv', '.wmv', '.m4v', '.mpg', '.mpeg', '.3gp']);
+      const inputPaths = await parseInputPaths(input, VIDEO_EXTENSIONS);
       const outputPathsMap = resolveOutputPaths(inputPaths, options.output, { suffix: '-thumbnail', newExtension: options.format });
       const outputPaths = Array.from(outputPathsMap.values());
       for (let i = 0; i < inputPaths.length; i++) {

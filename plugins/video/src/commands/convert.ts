@@ -8,7 +8,7 @@ import {
     formatFileSize,
     formatDuration,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import ora from 'ora';
 
@@ -112,7 +112,7 @@ export function convertCommand(videoCmd: Command): void {
                 }
 
                 // Parse input paths
-                const inputPaths = await parseInputPaths(input, ['.mp4', '.mkv', '.avi', '.mov', '.webm', '.flv', '.wmv', '.m4v', '.mpg', '.mpeg', '.3gp']);
+                const inputPaths = await parseInputPaths(input, VIDEO_EXTENSIONS);
 
                 if (inputPaths.length === 0) {
                     console.log(chalk.red('❌ No valid video files found'));
