@@ -9,18 +9,23 @@
  * - Supported extensions registry
  */
 
-// Export all utilities
+// Branding
+export * from './branding/index.js';
 
-export * from './branding/branding.js';
-export * from './validators/pathValidator.js';
-export * from './utils/supportedExtensions.js';
-export * from './formatters/helpFormatter.js';
-export * from './types/helpTypes.js';
-export * from './types/explainTypes.js';
-export * from './formatters/explainFormatter.js';
-export * from './explain/templates/explainHumanTemplate.js';
-export * from './explain/templates/explainDetailsTemplate.js';
-export * from './explain/explainFlag.js';
-export * from './explain/hook/explainPreActionHook.js';
-export * from './errors/errorTypes.js';
-export * from './errors/exitCodes.js';
+// Path Validator
+export * from './validators/index.js';
+
+// Utils
+export * from './utils/index.js';
+
+// Formatters (Help & Explain)
+export * from './formatters/index.js';
+
+// Types & Interfaces (Help & Explain)
+export * from './types/index.js';
+
+// Explain System (Templates, Flag, Hook)
+export * from './explain/index.js';
+
+// Errors & Exit Codes
+export * from './errors/index.js';
