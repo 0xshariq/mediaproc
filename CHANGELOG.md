@@ -26,6 +26,51 @@ MediaProc is organized as a monorepo with the following packages:
 
 ---
 
+## [@mediaproc/core@1.3.0] - 2026-01-18
+
+### Added
+
+**🚀 Explain Flag System Overhaul**
+
+- **Context Enrichment:**
+  - The ExplainContext now includes timestamp, user, platform, and mode (ExplainMode enum) for every explain output.
+  - Output is more transparent and traceable for both users and developers.
+
+- **ExplainMode Enum:**
+  - Replaces previous format string with a robust enum (Human, Details, Json) for output mode.
+  - All logic, templates, and types updated for extensibility and clarity.
+
+- **Custom Sections & Extensibility:**
+  - ExplainContext supports customSections for plugin authors and advanced use cases.
+  - Designed for future extensibility without breaking changes.
+
+- **Improved Templates:**
+  - Human and Details templates now show enriched context (timestamp, user, platform, mode).
+  - Details template groups flags by source (user, default, system) and provides a technical workflow.
+
+- **Unit Tests:**
+  - Added comprehensive Vitest test coverage for explainFlag logic and templates.
+  - Tests verify context enrichment, mode handling, and template rendering.
+
+### Changed
+
+- **Refactored explainFlag logic** to use ExplainMode and populate all new context fields.
+- **Updated all explain-related types and templates** for consistency and developer experience.
+- **Project structure:** All explain logic, templates, and types are now cleanly exported and tested.
+
+### Fixed
+
+- **Test runner integration:**
+  - Added Vitest scripts and fixed test files for ESM/TypeScript compatibility.
+  - Removed legacy test runner issues and ensured all tests pass in workspace setup.
+- **Node_modules sharing:**
+  - Documented and enforced pnpm workspace best practices for single node_modules usage across all packages and plugins.
+
+### Notes
+
+- This release is fully backward compatible for all CLI and plugin consumers.
+- All previous logs and changelog entries are preserved below.
+
 ## [@mediaproc/core@1.0.0] - 2026-01-16
 
 ### Added
@@ -120,6 +165,7 @@ Created `@mediaproc/core` package to centralize common utilities used across CLI
 ### Technical Details
 
 **Package Information:**
+
 - Package: `@mediaproc/core`
 - Version: `1.0.0`
 - License: MIT
@@ -128,6 +174,7 @@ Created `@mediaproc/core` package to centralize common utilities used across CLI
 - Published: npm registry
 
 **Why Version 1.0.0?**
+
 - Stable API for core utilities
 - Breaking change from previous architecture
 - Foundation for MediaProc v1.0 release
@@ -160,7 +207,6 @@ Created `@mediaproc/core` package to centralize common utilities used across CLI
 #### CLI Features
 
 - ✨ **CLI Branding System** - Dynamic version display across all commands
-
   - Created `/src/utils/branding.ts` with dynamic version detection
   - Reads version from `package.json` automatically using `import.meta.url`
   - Added `showBranding()` footer to CLI commands:
@@ -179,7 +225,6 @@ Created `@mediaproc/core` package to centralize common utilities used across CLI
 #### Web Documentation
 
 - ✨ **Enhanced Search Functionality** - Fixed and improved search component
-
   - Shows all pages on open (Ctrl+K / Cmd+K)
   - Real-time filtering as you type
   - Fuzzy search with relevance scoring
@@ -198,7 +243,6 @@ Created `@mediaproc/core` package to centralize common utilities used across CLI
 #### Documentation Structure
 
 - 📚 **Root README Enhancements**
-
   - Organized documentation section into logical categories
   - Added references to all `/docs` folder markdown files:
     - Getting Started section
@@ -217,7 +261,6 @@ Created `@mediaproc/core` package to centralize common utilities used across CLI
 ### Fixed
 
 - 🐛 **TypeScript Compilation Errors**
-
   - Fixed async return type in `benchmark.ts` (Promise<void>)
   - Removed unused imports across multiple command files
   - Fixed variable access before declaration in Search component
