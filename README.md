@@ -36,6 +36,8 @@ mediaproc audio normalize podcast.mp3 --target -16
 
 ## Why MediaProc?
 
+## Why MediaProc?
+
 **The Problem:** Modern development workflows require multiple tools for media processing:
 
 - FFmpeg for videos
@@ -299,6 +301,7 @@ See [Plugin Integration Guide](docs/plugin-integration-guide.md) for complete do
 
 - [Architecture Decisions](docs/architecture-decisions.md) - Design decisions and rationale
 - [Upcoming Features](docs/upcoming-features.md) - Planned features and roadmap
+- [--explain flag: Command Transparency, Debugging, and Education](./docs/explain-flag.md)
 
 ### Project Guidelines
 
