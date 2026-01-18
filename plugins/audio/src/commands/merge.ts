@@ -4,7 +4,7 @@ import { stat, writeFile, unlink } from 'fs/promises';
 import { join, dirname } from 'path';
 import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuration } from '../utils/ffmpeg.js';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
-import { AUDIO_EXTENSIONS, parseInputPaths, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { AUDIO_EXTENSIONS, parseInputPaths, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
 import ora from 'ora';
 
 export function mergeCommand(audioCmd: Command): void {
@@ -18,9 +18,9 @@ export function mergeCommand(audioCmd: Command): void {
     .option('--normalize', 'Normalize audio levels before merging')
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
+    .option('--explain', 'Explain the proper flow of this command in detail.')
     .option('-h, --help', 'Display help for merge command')
-    .action(async (inputs: string[], options: any) => {
+    .action(async function (inputs: string[], options: any) {
       if (options.help || !inputs || inputs.length === 0) {
         createStandardHelp({
           commandName: 'merge',
@@ -38,7 +38,7 @@ export function mergeCommand(audioCmd: Command): void {
             { flag: '--crossfade <seconds>', description: 'Crossfade duration between files in seconds (0-10)' },
             { flag: '--normalize', description: 'Normalize audio levels before merging for consistent volume' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output and progress' }
           ],
           examples: [
@@ -132,8 +132,11 @@ export function mergeCommand(audioCmd: Command): void {
           return;
         }
         if (options.explain) {
-          console.log(chalk.gray('Explain mode is not yet available.'))
-          console.log(chalk.cyan('Planned for v0.8.x.'))
+          explainFlag({
+            command: this,
+            args: { inputs, output: options.output },
+            options
+          });
         }
 
         const spinner = ora('Merging audio files...').start();
