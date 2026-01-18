@@ -11,7 +11,7 @@ import {
   formatFileSize,
   formatDuration,
 } from '../utils/ffmpeg.js';
-import { fileExists, validatePaths, resolveOutputPaths, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { fileExists, validatePaths, resolveOutputPaths, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 
 export function mergeCommand(videoCmd: Command): void {
@@ -30,11 +30,11 @@ export function mergeCommand(videoCmd: Command): void {
     .option('--normalize-audio', 'Normalize audio levels across videos')
     .option('--format <format>', 'Output format: mp4, mkv, avi, webm (default: mp4)', 'mp4')
     .option('--dry-run', 'Preview command without executing')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
+    .option('--explain', 'Explain the proper flow of this command in detail.')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('-h, --help', 'Display help for merge command')
-    .action(async (inputs: string[], options: any) => {
-      if (options.help) {
+    .action(async function (inputs: string[], options: any) {
+      if (options.help || !inputs) {
         createStandardHelp({
           commandName: 'merge',
           emoji: '🔗',
@@ -57,7 +57,7 @@ export function mergeCommand(videoCmd: Command): void {
             { flag: '--normalize-audio', description: 'Normalize audio levels across videos' },
             { flag: '--format <format>', description: 'Output format: mp4, mkv, avi, webm (default: mp4)' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output' }
           ],
           examples: [
@@ -125,7 +125,7 @@ export function mergeCommand(videoCmd: Command): void {
           const inputPath = validation.inputFiles[0];
 
           // Check if input file exists
-          if (!(await fileExists(inputPath))) {
+          if (!(fileExists(inputPath))) {
             throw new Error(`Input ${i + 1} does not exist: ${inputPath}`);
           }
 
@@ -171,7 +171,7 @@ export function mergeCommand(videoCmd: Command): void {
         const output = outputMap.get(inputPaths[0])!;
 
         // Check if output file already exists
-        if (await fileExists(output) && !options.dryRun) {
+        if (fileExists(output) && !options.dryRun) {
           console.log(chalk.yellow(`⚠️  Output file exists and will be overwritten: ${output}\n`));
         }
 
@@ -208,8 +208,11 @@ export function mergeCommand(videoCmd: Command): void {
         }
 
         if (options.explain) {
-          console.log(chalk.gray('Explain mode is not yet available.'))
-          console.log(chalk.cyan('Planned for v0.8.x.'))
+          explainFlag({
+            command: this,
+            args: { inputs, output: options.output },
+            options
+          });
         }
         // Run merge
         console.log(chalk.dim(`🔗 Merging videos (${needsReEncode ? 're-encoding' : 'fast mode'})...`));

@@ -8,7 +8,7 @@ import {
   formatDuration,
   parseTimeToSeconds,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp, explainFlag } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 
 export function trimCommand(videoCmd: Command): void {
@@ -30,10 +30,10 @@ export function trimCommand(videoCmd: Command): void {
     .option('--quality <crf>', 'CRF quality if re-encoding (default: 23)', parseInt, 23)
     .option('--no-audio', 'Remove audio track from output')
     .option('--dry-run', 'Preview command without executing')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
+    .option('--explain', 'Explain the proper flow of this command in detail.')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('-h, --help', 'Display help for trim command')
-    .action(async (input: string | undefined, options: any) => {
+    .action(async function (input: string | undefined, options: any) {
       // Show help if requested
       if (options.help || !input) {
         createStandardHelp({
@@ -61,7 +61,7 @@ export function trimCommand(videoCmd: Command): void {
             { flag: '--quality <crf>', description: 'CRF quality if re-encoding (default: 23)' },
             { flag: '--no-audio', description: 'Remove audio track from output' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output' }
           ],
           examples: [
@@ -203,8 +203,11 @@ export function trimCommand(videoCmd: Command): void {
           }
 
           if (options.explain) {
-            console.log(chalk.gray('Explain mode is not yet available.'))
-            console.log(chalk.cyan('Planned for v0.8.x.'))
+            explainFlag({
+              command: this,
+              args: { input, output: options.output },
+              options
+            });
           }
           // Run trim
           await runFFmpeg(args, options.verbose, (line) => {

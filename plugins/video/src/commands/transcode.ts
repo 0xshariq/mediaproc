@@ -11,7 +11,7 @@ import {
   formatFileSize,
   formatDuration,
 } from '../utils/ffmpeg.js';
-import { createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { createStandardHelp, explainFlag, showPluginBranding } from '@mediaproc/core';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
 
 export function transcodeCommand(videoCmd: Command): void {
@@ -25,10 +25,10 @@ export function transcodeCommand(videoCmd: Command): void {
     .option('--audio-codec <codec>', 'Audio codec: aac, opus, mp3', 'aac')
     .option('--audio-bitrate <bitrate>', 'Audio bitrate (e.g., 128k)', '128k')
     .option('--dry-run', 'Show what would be done')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
+    .option('--explain', 'Explain the proper flow of this command in detail.')
     .option('-v, --verbose', 'Verbose output')
     .option('--help', 'Display help for command')
-    .action(async (input: string, options: TranscodeOptions) => {
+    .action(async function (input: string, options: TranscodeOptions) {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'transcode',
@@ -47,7 +47,7 @@ export function transcodeCommand(videoCmd: Command): void {
             { flag: '--audio-codec <codec>', description: 'Audio codec: aac (default), opus, mp3' },
             { flag: '--audio-bitrate <bitrate>', description: 'Audio bitrate: 128k (default), 192k, 256k' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output and progress' }
           ],
           examples: [
@@ -137,8 +137,11 @@ export function transcodeCommand(videoCmd: Command): void {
         }
 
         if (options.explain) {
-          console.log(chalk.gray('Explain mode is not yet available.'))
-          console.log(chalk.cyan('Planned for v0.8.x.'))
+          explainFlag({
+            command: this,
+            args: { input, output: options.output },
+            options
+          });
         }
         // Run transcode
         console.log(chalk.dim('🔄 Transcoding video...'));

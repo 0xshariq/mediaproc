@@ -8,7 +8,7 @@ import {
   checkFFmpeg,
   formatFileSize,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 
 export function compressCommand(videoCmd: Command): void {
@@ -34,9 +34,9 @@ export function compressCommand(videoCmd: Command): void {
     .option('--two-pass', 'Use two-pass encoding for better quality')
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
-    .option('--explain', 'Explain the proper flow of this command in detail (Coming Soon...)')
+    .option('--explain', 'Explain the proper flow of this command in detail.')
     .option('-h, --help', 'Display help for compress command')
-    .action(async (input: string | undefined, options: any) => {
+    .action(async function (input: string | undefined, options: any) {
       // Show help if requested (before input validation)
       if (options.help || !input) {
         createStandardHelp({
@@ -67,7 +67,7 @@ export function compressCommand(videoCmd: Command): void {
             { flag: '--strip-metadata', description: 'Remove all metadata from output' },
             { flag: '--two-pass', description: 'Enable two-pass encoding for better quality' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (Coming Soon...)' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output' }
           ],
           examples: [
@@ -197,8 +197,11 @@ export function compressCommand(videoCmd: Command): void {
             continue;
           }
           if (options.explain) {
-            console.log(chalk.gray('Explain mode is not yet available.'))
-            console.log(chalk.cyan('Planned for v0.8.x.'))
+            explainFlag({
+              command: this,
+              args: { input, output: options.output },
+              options
+            });
           }
 
           // Run compression
