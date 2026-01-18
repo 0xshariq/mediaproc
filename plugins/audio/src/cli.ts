@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { register } from './register.js';
+import { getVersion } from '@mediaproc/core';
 
 const program = new Command();
 program
   .name('mediaproc-audio')
   .description(`
-🎵 Audio Processing Plugin v1.0.0
+🎵 Audio Processing Plugin
 
 Professional audio processing powered by FFmpeg/FFprobe. Convert, normalize, trim, merge, and extract audio with 5 powerful commands.
 
@@ -94,7 +95,7 @@ Professional audio processing powered by FFmpeg/FFprobe. Convert, normalize, tri
 📚 Detailed Help:
   Use 'mediaproc-audio <command> --help' for comprehensive documentation on each command.
   `)
-  .version('1.0.0');
+  .version(getVersion('../package.json'));
 
 register(program);
 program.parse(process.argv);

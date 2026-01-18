@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { register } from './register.js';
+import { getVersion } from '@mediaproc/core';
 
 const program = new Command();
 program
   .name('mediaproc-video')
   .description(`
-🎬 Video Processing Plugin v1.0.0
+🎬 Video Processing Plugin
 
 Professional video processing powered by FFmpeg. Compress, transcode, edit, and extract media with 7 commands.
 
@@ -36,7 +37,7 @@ Professional video processing powered by FFmpeg. Compress, transcode, edit, and 
 
 📚 Use 'mediaproc-video <command> --help' for detailed command documentation.
   `)
-  .version('1.0.0');
+  .version(getVersion('../package.json'));
 
 register(program);
 program.parse(process.argv);

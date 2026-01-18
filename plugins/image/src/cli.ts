@@ -51,13 +51,14 @@ import { linearCommand } from './commands/linear.js';
 import { recombCommand } from './commands/recomb.js';
 import { compressCommand } from './commands/compress.js';
 import { infoCommand } from './commands/info.js';
+import { explainPreActionHook, getVersion } from '@mediaproc/core';
 
 const program = new Command();
 
 program
   .name('mediaproc-image')
   .description(`
-🌄 Image Processing Plugin v1.0.0
+🌄 Image Processing Plugin
 
 Professional image processing powered by Sharp. Transform, optimize, and enhance images with 49+ commands.
 
@@ -82,7 +83,7 @@ Professional image processing powered by Sharp. Transform, optimize, and enhance
 
 📚 Use 'mediaproc-image <command> --help' for detailed command documentation.
   `)
-  .version('1.0.0');
+  .version(getVersion('../package.json'));
 
 // Register all commands directly (no "image" prefix in standalone mode)
 resizeCommand(program);
@@ -136,6 +137,8 @@ linearCommand(program);
 recombCommand(program);
 compressCommand(program);
 infoCommand(program);
+
+program.hook('preAction', explainPreActionHook);
 
 program.parse(process.argv);
 
