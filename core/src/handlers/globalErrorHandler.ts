@@ -3,7 +3,7 @@ import {
   ErrorSeverity,
   isMediaProcError,
   EXIT_CODES,
-} from '../errors/index';
+} from '../errors/index.js';
 
 type ErrorHandlerOptions = {
   debug?: boolean;
