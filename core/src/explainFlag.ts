@@ -2,6 +2,8 @@ import chalk from 'chalk';
 import { explainFormatter, ExplainFormat } from './formatters/explainFormatter.js';
 import { getCliVersion, getVersion } from './branding/branding.js';
 import { ExplainContext } from './types/explainTypes.js';
+import os from 'os';
+
 
 /**
  * explainFlag - Automatically gathers command context, prints explanation, then runs the handler.
@@ -24,7 +26,12 @@ export function explainFlag({
 }) {
   // Auto-detect command name
   const commandName = command?.name?.() || command?._name || 'unknown';
-
+  const environment = {
+    cwd: process.cwd(),
+    os: `${os.type()} ${os.release()} (${os.platform()})`,
+    nodeVersion: process.version,
+    shell: process.env.SHELL || process.env.TERM || 'unknown',
+  };
   // Detect input/output paths
   let inputPath = '';
   let outputPath = '';
@@ -38,6 +45,19 @@ export function explainFlag({
   }
 
   // Gather used flags
+  let explainValue: string | undefined = undefined;
+  if (typeof options.explain === 'string') {
+    explainValue = options.explain;
+  } else if (Array.isArray(args._) && args._.length > 0) {
+    // Check for --explain details as positional
+    const idx = args._.findIndex((v: any) => v === 'explain');
+    if (idx !== -1 && args._[idx + 1]) {
+      explainValue = args._[idx + 1];
+    }
+  }
+  if (explainValue === 'details' || explainValue === 'json' || explainValue === 'human') {
+    format = explainValue;
+  }
   const usedFlags: Record<string, { value: any; source: 'user' | 'system' }> = {};
   for (const [key, value] of Object.entries(options)) {
     if (key === 'explain') continue;
@@ -57,7 +77,9 @@ export function explainFlag({
       const pluginPath = `../../plugins/${pluginName}/package.json`;
       pluginVersion = getVersion(pluginPath);
     }
-  } catch {}
+  } catch (error) {
+    console.error(chalk.red('Error retrieving version information:'), error);
+  }
 
   const context: ExplainContext = {
     command: commandName,
@@ -79,6 +101,8 @@ export function explainFlag({
         'Image processing is performed using the selected options and flags.',
         'Results and logs are displayed after processing each file.'
       ],
+      errors: [], // Placeholder for error reporting
+      warnings: [], // Placeholder for warning reporting
     },
     explainFlow: [
       '1. Parse and validate all user-provided flags and arguments.',
@@ -87,7 +111,17 @@ export function explainFlag({
       '4. For each input file, process and apply transformations.',
       '5. Save output files and display results.',
       '6. Show summary and any errors encountered.'
-    ]
+    ],
+    environment,
+    technical: {
+      library: 'sharp',
+      tool: 'mediaproc',
+      performance: 'optimized for batch image processing',
+      fileFormats: ['jpg', 'png', 'webp'],
+      compressionRatio: 'varies by format and quality',
+      estimatedTime: 'depends on input size and options',
+      memoryUsage: 'depends on batch size and image dimensions',
+    },
   };
 
   // Print explanation only
