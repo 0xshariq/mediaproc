@@ -280,6 +280,18 @@ node dist/cli.js
 
 See [Plugin Integration Guide](docs/plugin-integration-guide.md) for complete documentation on creating your own plugins.
 
+## Professional Support
+
+MediaProc is free and open source.
+
+If you need:
+
+- help integrating MediaProc into your workflow
+- custom pipelines or automation
+- priority fixes or guidance
+
+you can reach out via GitHub Discussions or email me at [khanshariq92213@gmail.com](mailto:khanshariq92213@gmail.com).
+
 ## Documentation
 
 ### Getting Started
