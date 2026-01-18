@@ -32,16 +32,18 @@ export function explainFlag({
     nodeVersion: process.version,
     shell: process.env.SHELL || process.env.TERM || 'unknown',
   };
-  // Detect input/output paths
+  // Detect input/output paths and gather all input/output arguments
   let inputPath = '';
   let outputPath = '';
+  let allInputs: Record<string, any> = {};
+  let allOutputs: Record<string, any> = {};
   for (const k of inputKeys) {
-    if (args[k]) inputPath = args[k];
-    if (options[k]) inputPath = options[k];
+    if (args[k]) { inputPath = args[k]; allInputs[k] = args[k]; }
+    if (options[k]) { inputPath = options[k]; allInputs[k] = options[k]; }
   }
   for (const k of outputKeys) {
-    if (args[k]) outputPath = args[k];
-    if (options[k]) outputPath = options[k];
+    if (args[k]) { outputPath = args[k]; allOutputs[k] = args[k]; }
+    if (options[k]) { outputPath = options[k]; allOutputs[k] = options[k]; }
   }
 
   // Gather used flags
@@ -57,11 +59,43 @@ export function explainFlag({
   }
   if (explainValue === 'details' || explainValue === 'json' || explainValue === 'human') {
     format = explainValue;
+  } else if (explainValue) {
+    // fallback for unknown explain values
+    console.warn(chalk.yellow(`Unknown explain format: ${explainValue}, using 'human' mode.`));
+    format = 'human';
   }
-  const usedFlags: Record<string, { value: any; source: 'user' | 'system' }> = {};
-  for (const [key, value] of Object.entries(options)) {
-    if (key === 'explain') continue;
-    usedFlags[key] = { value, source: value !== undefined ? 'user' : 'system' };
+  // Gather all possible flags from command (Commander.js API)
+  const usedFlags: Record<string, { value: any; source: 'user' | 'system' | 'default' } > = {};
+  const omittedFlags: Record<string, { defaultValue: any; source: 'default' }> = {};
+  if (command && typeof command.options === 'object') {
+    for (const opt of command.options) {
+      const flagName = opt.attributeName || opt.long?.replace(/^--/, '') || opt.short?.replace(/^-/, '');
+      if (!flagName) continue;
+      let userValue = options[flagName];
+      // Handle boolean flags
+      if (typeof userValue === 'boolean') userValue = userValue ? 'enabled' : 'disabled';
+      // Handle array flags
+      if (Array.isArray(userValue)) userValue = userValue.join(', ');
+      if (userValue !== undefined) {
+        usedFlags[flagName] = { value: userValue, source: 'user' };
+      } else if (Object.prototype.hasOwnProperty.call(opt, 'defaultValue')) {
+        let defVal = opt.defaultValue;
+        if (typeof defVal === 'boolean') defVal = defVal ? 'enabled' : 'disabled';
+        if (Array.isArray(defVal)) defVal = defVal.join(', ');
+        usedFlags[flagName] = { value: defVal, source: 'default' };
+        omittedFlags[flagName] = { defaultValue: defVal, source: 'default' };
+      } else {
+        usedFlags[flagName] = { value: undefined, source: 'system' };
+      }
+    }
+  } else {
+    for (const [key, value] of Object.entries(options)) {
+      if (key === 'explain') continue;
+      let val = value;
+      if (typeof val === 'boolean') val = val ? 'enabled' : 'disabled';
+      if (Array.isArray(val)) val = val.join(', ');
+      usedFlags[key] = { value: val, source: val !== undefined ? 'user' : 'system' };
+    }
   }
 
   // Build ExplainContext with plugin/command info and version
@@ -86,12 +120,14 @@ export function explainFlag({
     plugin: command?.parent?.name?.() || undefined,
     cliVersion,
     pluginVersion,
-    inputs: { inputPath, outputPath },
+    inputs: { inputPath, outputPath, ...allInputs },
+    outputs: Object.keys(allOutputs).length > 0 ? allOutputs : undefined,
     usedFlags,
+    omittedFlags: Object.keys(omittedFlags).length > 0 ? omittedFlags : undefined,
     decisions: Object.entries(usedFlags).map(([key, v]) => ({
       key,
       value: v.value,
-      reason: v.source === 'user' ? 'user specified' : 'default',
+      reason: v.source === 'user' ? 'user specified' : (v.source === 'default' ? 'default' : 'system'),
     })),
     outcome: {
       result: outputPath ? `A new file will be created at ${outputPath}` : 'Operation will complete',

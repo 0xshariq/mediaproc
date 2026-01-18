@@ -25,7 +25,7 @@ export function cropCommand(imageCmd: Command): void {
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain', 'Explain the proper flow of this command in detail. (human, details, json)', 'human')
     .option('--help', 'Display help for crop command')
     .action(async function (input: string, options: CropOptions) {
       if (options.help || !input) {
@@ -42,7 +42,7 @@ export function cropCommand(imageCmd: Command): void {
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-cropped.<ext>)' },
             { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail (default: human, details, json).' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [

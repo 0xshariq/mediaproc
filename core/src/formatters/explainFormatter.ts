@@ -1,6 +1,9 @@
 
+
 import { ExplainContext } from '../types/explainTypes.js';
-import chalk from 'chalk';
+import { explainHumanTemplate } from '../templates/explainHumanTemplate.js';
+import { explainDetailsTemplate } from '../templates/explainDetailsTemplate.js';
+
 
 export type ExplainFormat = 'human' | 'details' | 'json';
 
@@ -9,230 +12,17 @@ export type ExplainFormat = 'human' | 'details' | 'json';
  */
 export function explainFormatter(
 	context: ExplainContext,
-	format: ExplainFormat = 'human',
-	tense: 'will' | 'would' | 'did' = 'will'
+	format: ExplainFormat = 'human'
 ): string | object {
 	if (format === 'json') {
 		// Return raw context for machine use
 		return context;
 	}
-
-	// Tense helpers
-	const tenseMap = {
-		will: { what: 'will', result: 'will be', why: 'Why' },
-		would: { what: 'would', result: 'would be', why: 'Why' },
-		did: { what: 'was', result: 'was', why: 'Why' },
-	}[tense];
-
-	let output = '';
 	if (format === 'human') {
-		output += chalk.bold.bgBlueBright.white('╔════════════════════════════════════════════════════════════════╗') + '\n';
-		output += chalk.bold.bgBlueBright.white('║                        EXPLANATION                           ║') + '\n';
-		output += chalk.bold.bgBlueBright.white('╚════════════════════════════════════════════════════════════════╝') + '\n';
-		if (context.plugin || context.cliVersion || context.pluginVersion) {
-			output += chalk.bold(`Plugin: ${context.plugin || 'N/A'} | CLI Version: ${context.cliVersion || 'N/A'} | Plugin Version: ${context.pluginVersion || 'N/A'}`) + '\n';
-		}
-		output += chalk.bold.underline(`\n${chalk.cyan('What ' + tenseMap.what + ' happen:')}`) + '\n';
-		for (const d of context.decisions) {
-			let valueStr = (d.value === undefined || Number.isNaN(d.value)) ? 'N/A' : d.value;
-			output += chalk.green(`• ${decisionToHuman({ ...d, value: valueStr })}`);
-			if (d.provenance) output += chalk.gray(` [${d.provenance}]`);
-			if (d.omitted) output += chalk.gray(' (omitted)');
-			output += '\n';
-		}
-		if (context.outcome && context.outcome.result) {
-			output += chalk.bold.underline(`\n${chalk.cyan('Result:')}`) + '\n';
-			output += chalk.yellow(`• ${context.outcome.result}`) + '\n';
-			if (context.outcome.sideEffects && context.outcome.sideEffects.length > 0) {
-				for (const s of context.outcome.sideEffects) {
-					output += chalk.yellow(`• ${s}`) + '\n';
-				}
-			}
-			// Error/warning reporting
-			if (context.outcome.errors && context.outcome.errors.length > 0) {
-				output += chalk.redBright.bold(`\nErrors:`) + '\n';
-				for (const err of context.outcome.errors) {
-					output += chalk.redBright(`• ${err}`) + '\n';
-				}
-			}
-			if (context.outcome.warnings && context.outcome.warnings.length > 0) {
-				output += chalk.yellowBright.bold(`\nWarnings:`) + '\n';
-				for (const warn of context.outcome.warnings) {
-					output += chalk.yellowBright(`• ${warn}`) + '\n';
-				}
-			}
-		}
-		output += chalk.bold.underline(`\n${chalk.cyan(tenseMap.why + ':')}`) + '\n';
-		for (const d of context.decisions) {
-			let valueStr = (d.value === undefined || Number.isNaN(d.value)) ? 'N/A' : d.value;
-			output += chalk.magenta(`• ${decisionToWhy({ ...d, value: valueStr })}`);
-			if (d.provenance) output += chalk.gray(` [${d.provenance}]`);
-			if (d.omitted) output += chalk.gray(' (omitted)');
-			output += '\n';
-		}
-		// Show omitted flags
-		if (context.omittedFlags && Object.keys(context.omittedFlags).length > 0) {
-			output += chalk.bold.underline(`\n${chalk.cyan('Omitted Flags:')}`) + '\n';
-			for (const [k, v] of Object.entries(context.omittedFlags)) {
-				output += chalk.gray(`• ${k}: ${v.defaultValue} (${v.source})`) + '\n';
-			}
-		}
-		// Show deprecated flags
-		if (context.deprecatedFlags && context.deprecatedFlags.length > 0) {
-			output += chalk.bold.underline(`\n${chalk.cyan('Deprecated Flags:')}`) + '\n';
-			for (const k of context.deprecatedFlags) {
-				output += chalk.redBright(`• ${k}`) + '\n';
-			}
-		}
-		// Show ignored flags
-		if (context.ignoredFlags && context.ignoredFlags.length > 0) {
-			output += chalk.bold.underline(`\n${chalk.cyan('Ignored Flags:')}`) + '\n';
-			for (const k of context.ignoredFlags) {
-				output += chalk.gray(`• ${k}`) + '\n';
-			}
-		}
-		// Show custom sections for plugin extensibility
-		if (context.customSections && context.customSections.length > 0) {
-			for (const section of context.customSections) {
-				output += chalk.bold.underline(`\n${chalk.cyan(section.title)}`) + '\n';
-				for (const item of section.items) {
-					output += chalk.whiteBright(`• ${item}`) + '\n';
-				}
-			}
-		}
-		// Technical details
-		if (context.technical) {
-			output += chalk.bold.underline(`\n${chalk.cyan('Technical details:')}`) + '\n';
-			for (const [k, v] of Object.entries(context.technical)) {
-				let valueStr = (v === undefined || Number.isNaN(v)) ? 'N/A' : v;
-				output += chalk.gray(`• ${k}: ${valueStr}`) + '\n';
-			}
-		}
-	} else if (format === 'details') {
-		output += chalk.bold.bgMagenta.white('╔════════════════════════════════════════════════════════════════╗') + '\n';
-		output += chalk.bold.bgMagenta.white('║                  EXPLANATION (DETAILS)                       ║') + '\n';
-		output += chalk.bold.bgMagenta.white('╚════════════════════════════════════════════════════════════════╝') + '\n';
-		if (context.plugin || context.cliVersion || context.pluginVersion) {
-			output += chalk.bold(`Plugin: ${context.plugin || 'N/A'} | CLI Version: ${context.cliVersion || 'N/A'} | Plugin Version: ${context.pluginVersion || 'N/A'}`) + '\n';
-		}
-		output += chalk.bold.underline(`\n${chalk.cyan('What ' + tenseMap.what + ' happen:')}`) + '\n';
-		for (const d of context.decisions) {
-			let valueStr = (d.value === undefined || Number.isNaN(d.value)) ? 'N/A' : d.value;
-			output += chalk.greenBright(`• ${decisionToHuman({ ...d, value: valueStr })}`);
-			if (d.provenance) output += chalk.gray(` [${d.provenance}]`);
-			if (d.omitted) output += chalk.gray(' (omitted)');
-			output += '\n';
-		}
-		if (context.outcome && context.outcome.result) {
-			output += chalk.bold.underline(`\n${chalk.cyan('Result:')}`) + '\n';
-			output += chalk.yellowBright(`• ${context.outcome.result}`) + '\n';
-			if (context.outcome.sideEffects && context.outcome.sideEffects.length > 0) {
-				for (const s of context.outcome.sideEffects) {
-					output += chalk.yellowBright(`• ${s}`) + '\n';
-				}
-			}
-			// Error/warning reporting
-			if (context.outcome.errors && context.outcome.errors.length > 0) {
-				output += chalk.redBright.bold(`\nErrors:`) + '\n';
-				for (const err of context.outcome.errors) {
-					output += chalk.redBright(`• ${err}`) + '\n';
-				}
-			}
-			if (context.outcome.warnings && context.outcome.warnings.length > 0) {
-				output += chalk.yellowBright.bold(`\nWarnings:`) + '\n';
-				for (const warn of context.outcome.warnings) {
-					output += chalk.yellowBright(`• ${warn}`) + '\n';
-				}
-			}
-		}
-		output += chalk.bold.underline(`\n${chalk.cyan(tenseMap.why + ':')}`) + '\n';
-		for (const d of context.decisions) {
-			let valueStr = (d.value === undefined || Number.isNaN(d.value)) ? 'N/A' : d.value;
-			output += chalk.magentaBright(`• ${decisionToWhy({ ...d, value: valueStr })}`);
-			if (d.provenance) output += chalk.gray(` [${d.provenance}]`);
-			if (d.omitted) output += chalk.gray(' (omitted)');
-			output += '\n';
-		}
-		// Show omitted flags
-		if (context.omittedFlags && Object.keys(context.omittedFlags).length > 0) {
-			output += chalk.bold.underline(`\n${chalk.cyan('Omitted Flags:')}`) + '\n';
-			for (const [k, v] of Object.entries(context.omittedFlags)) {
-				output += chalk.gray(`• ${k}: ${v.defaultValue} (${v.source})`) + '\n';
-			}
-		}
-		// Show deprecated flags
-		if (context.deprecatedFlags && context.deprecatedFlags.length > 0) {
-			output += chalk.bold.underline(`\n${chalk.cyan('Deprecated Flags:')}`) + '\n';
-			for (const k of context.deprecatedFlags) {
-				output += chalk.redBright(`• ${k}`) + '\n';
-			}
-		}
-		// Show ignored flags
-		if (context.ignoredFlags && context.ignoredFlags.length > 0) {
-			output += chalk.bold.underline(`\n${chalk.cyan('Ignored Flags:')}`) + '\n';
-			for (const k of context.ignoredFlags) {
-				output += chalk.gray(`• ${k}`) + '\n';
-			}
-		}
-		// Show custom sections for plugin extensibility
-		if (context.customSections && context.customSections.length > 0) {
-			for (const section of context.customSections) {
-				output += chalk.bold.underline(`\n${chalk.cyan(section.title)}`) + '\n';
-				for (const item of section.items) {
-					output += chalk.whiteBright(`• ${item}`) + '\n';
-				}
-			}
-		}
-		// Technical details
-		if (context.technical) {
-			output += chalk.bold.underline(`\n${chalk.cyan('Technical details:')}`) + '\n';
-			for (const [k, v] of Object.entries(context.technical)) {
-				output += chalk.gray(`• ${k}: ${v}`) + '\n';
-			}
-		}
-		if (context.inferred) {
-			for (const [k, v] of Object.entries(context.inferred)) {
-				output += chalk.gray(`• ${k}: ${v}`) + '\n';
-			}
-		}
-		if (context.usedFlags) {
-			output += chalk.bold.underline(`\n${chalk.cyan('Flags used:')}`) + '\n';
-			for (const [k, v] of Object.entries(context.usedFlags)) {
-				let valueStr = (v.value === undefined || Number.isNaN(v.value)) ? 'N/A' : v.value;
-				output += chalk.gray(`• ${k}: ${valueStr} (${v.source})`) + '\n';
-			}
-		}
-		// Add extra info for developers
-		output += chalk.bold.underline(`\n${chalk.cyan('Execution flow:')}`) + '\n';
-		output += chalk.whiteBright('• Input validation, output path resolution, image processing, result summary') + '\n';
-		output += chalk.whiteBright('• All steps are performed in sequence for each input file') + '\n';
-		if (context.environment) {
-			output += chalk.bold(`Environment: cwd=${context.environment.cwd}, OS=${context.environment.os}, Node=${context.environment.nodeVersion}, Shell=${context.environment.shell}`) + '\n';
-		}
+		return explainHumanTemplate(context);
 	}
-	return output.trim();
-}
-
-
-// Helper: turn a decision into a human sentence
-function decisionToHuman(d: { key: string; value: any; reason: string }): string {
-	// You can expand this for more natural language
-	if (d.reason === 'user specified') {
-		return `Set ${d.key} to ${d.value} (user choice)`;
+	if (format === 'details') {
+		return explainDetailsTemplate(context);
 	}
-	if (d.reason === 'preserve proportions') {
-		return `${d.key} set to ${d.value} to keep proportions`;
-	}
-	return `${d.key}: ${d.value} (${d.reason})`;
-}
-
-// Helper: turn a decision into a why sentence
-function decisionToWhy(d: { key: string; value: any; reason: string }): string {
-	if (d.reason === 'user specified') {
-		return `${d.key} was set because you specified it`;
-	}
-	if (d.reason === 'preserve proportions') {
-		return `${d.key} was set to keep the image undistorted`;
-	}
-	return `${d.key}: ${d.reason}`;
+	return '';
 }
