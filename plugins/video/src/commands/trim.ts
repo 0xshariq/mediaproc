@@ -8,7 +8,7 @@ import {
   formatDuration,
   parseTimeToSeconds,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp, explainFlag } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 
 export function trimCommand(videoCmd: Command): void {
@@ -30,7 +30,7 @@ export function trimCommand(videoCmd: Command): void {
     .option('--quality <crf>', 'CRF quality if re-encoding (default: 23)', parseInt, 23)
     .option('--no-audio', 'Remove audio track from output')
     .option('--dry-run', 'Preview command without executing')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('-h, --help', 'Display help for trim command')
     .action(async function (input: string | undefined, options: any) {
@@ -61,7 +61,7 @@ export function trimCommand(videoCmd: Command): void {
             { flag: '--quality <crf>', description: 'CRF quality if re-encoding (default: 23)' },
             { flag: '--no-audio', description: 'Remove audio track from output' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output' }
           ],
           examples: [
@@ -202,13 +202,6 @@ export function trimCommand(videoCmd: Command): void {
             continue;
           }
 
-          if (options.explain) {
-            explainFlag({
-              command: this,
-              args: { input, output: options.output },
-              options
-            });
-          }
           // Run trim
           await runFFmpeg(args, options.verbose, (line) => {
             if (options.verbose) {

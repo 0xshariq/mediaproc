@@ -1,7 +1,7 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
 import { runFFmpeg, checkFFmpeg } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp, explainFlag } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp } from '@mediaproc/core';
 import ora from 'ora';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 
@@ -21,9 +21,9 @@ export function extractCommand(videoCmd: Command): void {
     .option('--volume <db>', 'Adjust output volume in dB (e.g., -3 for -3dB)')
     .option('--metadata <key=value>', 'Set custom metadata (repeatable)', (val: string, acc: string[] = []) => { acc.push(val); return acc; }, [] as string[])
     .option('--force', 'Overwrite output files without prompt')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for extract audio command')
-    .action(async function (input: string, options: any) {
+    .action(async (input: string, options: any) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'extract audio',
@@ -38,7 +38,7 @@ export function extractCommand(videoCmd: Command): void {
             { flag: '--start <time>', description: 'Start time (HH:MM:SS or seconds)' },
             { flag: '--duration <time>', description: 'Duration from start (HH:MM:SS or seconds)' },
             { flag: '--volume <db>', description: 'Adjust output volume in dB' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '--metadata <key=value>', description: 'Set custom metadata (repeatable)' },
             { flag: '--force', description: 'Overwrite output files without prompt' },
             { flag: '--help', description: 'Display help for extract audio command' }
@@ -87,13 +87,6 @@ export function extractCommand(videoCmd: Command): void {
           spinner.fail(chalk.red.bold(`✗ ${err.message}`));
         }
       }
-      if (options.explain) {
-        explainFlag({
-          command: this,
-          args: { input, output: options.output },
-          options
-        });
-      }
       showPluginBranding('Video', '../../package.json');
     });
 
@@ -107,7 +100,7 @@ export function extractCommand(videoCmd: Command): void {
     .option('--frames <range>', 'Extract multiple frames: <start>:<end>:<step> (e.g., 0:100:10)')
     .option('--vf <filter>', 'Apply custom video filter (repeatable)', (val: string, acc: string[] = []) => { acc.push(val); return acc; }, [] as string[])
     .option('--force', 'Overwrite output files without prompt')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for extract frame command')
     .action(async function (input: string, options: any) {
       if (options.help || !input) {
@@ -167,13 +160,6 @@ export function extractCommand(videoCmd: Command): void {
           spinner.fail(chalk.red.bold(`✗ ${err.message}`));
         }
       }
-      if (options.explain) {
-        explainFlag({
-          command: this,
-          args: { input, output: options.output },
-          options
-        });
-      }
       showPluginBranding('Video', '../../package.json');
     });
 
@@ -188,7 +174,7 @@ export function extractCommand(videoCmd: Command): void {
     .option('--quality <q>', 'JPEG/PNG quality (1-31)', '2')
     .option('--vf <filter>', 'Apply custom video filter (repeatable)', (val: string, acc: string[] = []) => { acc.push(val); return acc; }, [] as string[])
     .option('--force', 'Overwrite output files without prompt')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for extract thumbnail command')
     .action(async function (input: string, options: any) {
       if (options.help || !input) {
@@ -243,13 +229,6 @@ export function extractCommand(videoCmd: Command): void {
         } catch (err: any) {
           spinner.fail(chalk.red.bold(`✗ ${err.message}`));
         }
-      }
-      if (options.explain) {
-        explainFlag({
-          command: this,
-          args: { input, output: options.output },
-          options
-        });
       }
       showPluginBranding('Video', '../../package.json');
     });

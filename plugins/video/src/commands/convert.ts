@@ -8,7 +8,7 @@ import {
     formatFileSize,
     formatDuration,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp, explainFlag } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import ora from 'ora';
 
@@ -42,9 +42,9 @@ export function convertCommand(videoCmd: Command): void {
         .option('--fast', 'Fast conversion (remux when possible, no re-encode)')
         .option('--dry-run', 'Preview command without executing')
         .option('-v, --verbose', 'Show detailed FFmpeg output')
-        .option('--explain', 'Explain the proper flow of this command in detail.')
+        .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
         .option('-h, --help', 'Display help for convert command')
-        .action(async function (input: string | undefined, options: any) {
+        .action(async (input: string | undefined, options: any) => {
             // Show help if requested
             if (options.help || !input) {
                 createStandardHelp({
@@ -70,7 +70,7 @@ export function convertCommand(videoCmd: Command): void {
                         { flag: '--hw-accel', description: 'Enable hardware acceleration (GPU)' },
                         { flag: '--fast', description: 'Fast mode: remux when possible (no re-encode)' },
                         { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
-                        { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+                        { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
                         { flag: '-v, --verbose', description: 'Show detailed FFmpeg output' }
                     ],
                     examples: [
@@ -234,13 +234,6 @@ export function convertCommand(videoCmd: Command): void {
                         continue;
                     }
 
-                    if (options.explain) {
-                        explainFlag({
-                            command: this,
-                            args: { input, output: options.output },
-                            options
-                        });
-                    }
                     // Execute conversion
                     const spinner = ora('Converting...').start();
 
