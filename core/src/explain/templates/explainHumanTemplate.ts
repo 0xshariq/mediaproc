@@ -10,11 +10,13 @@ export function explainHumanTemplate(context: ExplainContext): string {
         output += chalk.bgYellow.black(' [EXPLAIN-ONLY MODE: No command will be executed] ') + '\n';
     }
 
+    // Context enrichment (timestamp, user, platform, mode)
+    output += chalk.gray(`Timestamp: ${context.timestamp ?? 'N/A'} | User: ${context.user ?? 'N/A'} | Platform: ${context.platform ?? 'N/A'} | Mode: ${context.mode ?? 'N/A'}`) + '\n';
+
     // Friendly, conversational summary
     if (context.plugin) {
         output += chalk.bold(`This command uses the "${context.plugin}" plugin.`) + '\n';
     }
-
 
     // What will happen
     output += chalk.bold.underline(`\nWhat will happen:`) + '\n';

@@ -1,7 +1,7 @@
 import chalk from 'chalk';
-import { explainFormatter, ExplainFormat } from '../formatters/explainFormatter.js';
+import { explainFormatter } from '../formatters/explainFormatter.js';
 import { getCliVersion, getVersion } from '../branding/branding.js';
-import { ExplainContext } from '../types/explainTypes.js';
+import { ExplainContext, ExplainMode } from '../types/explainTypes.js';
 import os from 'os';
 
 
@@ -15,14 +15,14 @@ export function explainFlag({
   options = {},
   inputKeys = ['input', 'inputPath'],
   outputKeys = ['output', 'outputPath', 'o'],
-  format = 'human',
+  mode = ExplainMode.Human,
 }: {
   command: any;
   args?: Record<string, any>;
   options?: Record<string, any>;
   inputKeys?: string[];
   outputKeys?: string[];
-  format?: ExplainFormat;
+  mode?: ExplainMode;
 }) {
   // Auto-detect command name
   const commandName = command?.name?.() || command?._name || 'unknown';
@@ -60,15 +60,19 @@ export function explainFlag({
       if (explainValue === 'only') explainOnly = true;
     }
   }
-  if (explainValue === 'details' || explainValue === 'json' || explainValue === 'human') {
-    format = explainValue;
+  if (explainValue === 'details') {
+    mode = ExplainMode.Details;
+  } else if (explainValue === 'json') {
+    mode = ExplainMode.Json;
+  } else if (explainValue === 'human') {
+    mode = ExplainMode.Human;
   } else if (explainValue) {
     // fallback for unknown explain values
-    console.warn(chalk.yellow(`Unknown explain format: ${explainValue}, using 'human' mode.`));
-    format = 'human';
+    console.warn(chalk.yellow(`Unknown explain mode: ${explainValue}, using 'human' mode.`));
+    mode = ExplainMode.Human;
   }
   // Gather all possible flags from command (Commander.js API)
-  const usedFlags: Record<string, { value: any; source: 'user' | 'system' | 'default' } > = {};
+  const usedFlags: Record<string, { value: any; source: 'user' | 'system' | 'default' }> = {};
   const omittedFlags: Record<string, { defaultValue: any; source: 'default' }> = {};
   if (command && typeof command.options === 'object') {
     for (const opt of command.options) {
@@ -123,6 +127,11 @@ export function explainFlag({
     plugin: command?.parent?.name?.() || undefined,
     cliVersion,
     pluginVersion,
+    // Context enrichment
+    timestamp: new Date().toISOString(),
+    user: process.env.USER || process.env.USERNAME || 'unknown',
+    platform: `${os.platform()} ${os.arch()}`,
+    mode,
     inputs: { inputPath, outputPath, ...allInputs },
     outputs: Object.keys(allOutputs).length > 0 ? allOutputs : undefined,
     usedFlags,
@@ -165,8 +174,8 @@ export function explainFlag({
   };
 
   // Print explanation only
-  const explanation = explainFormatter(context, format);
-  if (format === 'json') {
+  const explanation = explainFormatter(context, mode);
+  if (mode === ExplainMode.Json) {
     // Add a styled header for JSON output
     // Print JSON with a clear header
     console.log(chalk.bold.bgBlueBright.white(' EXPLANATION (JSON) '));

@@ -1,6 +1,13 @@
 // Shared types for the explain engine
 
 export type ExplainFlagSource = 'user' | 'system' | 'default' | 'deprecated' | 'ignored';
+
+// Enum for explain output format
+export enum ExplainMode {
+  Human = 'human',
+  Details = 'details',
+  Json = 'json',
+}
 export interface ExplainDecision {
   key: string;
   value: any;
@@ -19,6 +26,12 @@ export interface ExplainContext {
   commandGroup?: string;
   cliVersion?: string;
   pluginVersion?: string;
+
+  // Context enrichment
+  timestamp?: string; // ISO string
+  user?: string; // Username or user id
+  platform?: string; // OS/platform info
+  mode?: ExplainMode; // Output mode (enum)
 
   // Inputs/outputs
   inputs: {

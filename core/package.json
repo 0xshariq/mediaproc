@@ -39,6 +39,8 @@
     "build": "tsc",
     "clean": "rm -rf dist",
     "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prepublishOnly": "pnpm clean && pnpm build"
   },
   "keywords": [

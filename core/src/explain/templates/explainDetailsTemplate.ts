@@ -9,6 +9,8 @@ export function explainDetailsTemplate(context: ExplainContext): string {
     if (context.explainOnly) {
         output += chalk.bgYellow.black(' [EXPLAIN-ONLY MODE: No command will be executed] ') + '\n';
     }
+    // Context enrichment (timestamp, user, platform, mode)
+    output += chalk.gray(`Timestamp: ${context.timestamp ?? 'N/A'} | User: ${context.user ?? 'N/A'} | Platform: ${context.platform ?? 'N/A'} | Mode: ${context.mode ?? 'N/A'}`) + '\n';
     if (context.plugin || context.cliVersion || context.pluginVersion) {
         output += chalk.bold(`Plugin: ${context.plugin || 'N/A'} | CLI Version: ${context.cliVersion || 'N/A'} | Plugin Version: ${context.pluginVersion || 'N/A'}`) + '\n';
     }

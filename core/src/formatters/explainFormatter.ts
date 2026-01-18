@@ -1,28 +1,28 @@
 
 
-import { ExplainContext } from '../types/explainTypes.js';
+import { ExplainContext, ExplainMode } from '../types/explainTypes.js';
 import { explainHumanTemplate } from '../explain/templates/explainHumanTemplate.js';
 import { explainDetailsTemplate } from '../explain/templates/explainDetailsTemplate.js';
 
 
-export type ExplainFormat = 'human' | 'details' | 'json';
+
 
 /**
- * Main explain formatter. Returns a string (or JSON) for the given context and format.
+ * Main explain formatter. Returns a string (or JSON) for the given context and mode.
  */
 export function explainFormatter(
-	context: ExplainContext,
-	format: ExplainFormat = 'human'
+  context: ExplainContext,
+  mode: ExplainMode = ExplainMode.Human
 ): string | object {
-	if (format === 'json') {
-		// Return raw context for machine use
-		return context;
-	}
-	if (format === 'human') {
-		return explainHumanTemplate(context);
-	}
-	if (format === 'details') {
-		return explainDetailsTemplate(context);
-	}
-	return '';
+  if (mode === ExplainMode.Json) {
+    // Return raw context for machine use
+    return context;
+  }
+  if (mode === ExplainMode.Human) {
+    return explainHumanTemplate(context);
+  }
+  if (mode === ExplainMode.Details) {
+    return explainDetailsTemplate(context);
+  }
+  return '';
 }
