@@ -1,5 +1,6 @@
 
 import { ExplainContext } from '../types/explainTypes.js';
+import chalk from 'chalk';
 
 export type ExplainFormat = 'human' | 'details' | 'json';
 
@@ -23,42 +24,72 @@ export function explainFormatter(
 		did: { what: 'was', result: 'was', why: 'Why' },
 	}[tense];
 
-	// Human-first (default)
 	let output = '';
-	output += `What ${tenseMap.what} happen:\n`;
-	for (const d of context.decisions) {
-		output += `• ${decisionToHuman(d)}\n`;
-	}
-	if (context.outcome && context.outcome.result) {
-		output += `\nResult:\n• ${context.outcome.result}\n`;
-		if (context.outcome.sideEffects && context.outcome.sideEffects.length > 0) {
-			for (const s of context.outcome.sideEffects) {
-				output += `• ${s}\n`;
+	if (format === 'human') {
+		output += chalk.bold.bgBlueBright.white(' EXPLANATION ') + '\n';
+		if (context.plugin || context.cliVersion || context.pluginVersion) {
+			output += chalk.bold(`Plugin: ${context.plugin || 'N/A'} | CLI Version: ${context.cliVersion || 'N/A'} | Plugin Version: ${context.pluginVersion || 'N/A'}`) + '\n';
+		}
+		output += chalk.bold.underline(`\n${chalk.cyan('What ' + tenseMap.what + ' happen:')}`) + '\n';
+		for (const d of context.decisions) {
+			output += chalk.green(`• ${decisionToHuman(d)}`) + '\n';
+		}
+		if (context.outcome && context.outcome.result) {
+			output += chalk.bold.underline(`\n${chalk.cyan('Result:')}`) + '\n';
+			output += chalk.yellow(`• ${context.outcome.result}`) + '\n';
+			if (context.outcome.sideEffects && context.outcome.sideEffects.length > 0) {
+				for (const s of context.outcome.sideEffects) {
+					output += chalk.yellow(`• ${s}`) + '\n';
+				}
 			}
 		}
-	}
-	output += `\n${tenseMap.why}:\n`;
-	for (const d of context.decisions) {
-		output += `• ${decisionToWhy(d)}\n`;
-	}
-
-	if (format === 'details') {
+		output += chalk.bold.underline(`\n${chalk.cyan(tenseMap.why + ':')}`) + '\n';
+		for (const d of context.decisions) {
+			output += chalk.magenta(`• ${decisionToWhy(d)}`) + '\n';
+		}
+	} else if (format === 'details') {
+		output += chalk.bold.bgMagenta.white(' EXPLANATION (DETAILS) ') + '\n';
+		if (context.plugin || context.cliVersion || context.pluginVersion) {
+			output += chalk.bold(`Plugin: ${context.plugin || 'N/A'} | CLI Version: ${context.cliVersion || 'N/A'} | Plugin Version: ${context.pluginVersion || 'N/A'}`) + '\n';
+		}
+		output += chalk.bold.underline(`\n${chalk.cyan('What ' + tenseMap.what + ' happen:')}`) + '\n';
+		for (const d of context.decisions) {
+			output += chalk.greenBright(`• ${decisionToHuman(d)}`) + '\n';
+		}
+		if (context.outcome && context.outcome.result) {
+			output += chalk.bold.underline(`\n${chalk.cyan('Result:')}`) + '\n';
+			output += chalk.yellowBright(`• ${context.outcome.result}`) + '\n';
+			if (context.outcome.sideEffects && context.outcome.sideEffects.length > 0) {
+				for (const s of context.outcome.sideEffects) {
+					output += chalk.yellowBright(`• ${s}`) + '\n';
+				}
+			}
+		}
+		output += chalk.bold.underline(`\n${chalk.cyan(tenseMap.why + ':')}`) + '\n';
+		for (const d of context.decisions) {
+			output += chalk.magentaBright(`• ${decisionToWhy(d)}`) + '\n';
+		}
 		// Add technical details if present
+		output += chalk.bold.underline(`\n${chalk.cyan('Technical details:')}`) + '\n';
 		if (context.inferred) {
-			output += `\nTechnical details:\n`;
 			for (const [k, v] of Object.entries(context.inferred)) {
-				output += `• ${k}: ${v}\n`;
+				output += chalk.gray(`• ${k}: ${v}`) + '\n';
 			}
 		}
 		if (context.usedFlags) {
-			output += `\nFlags used:\n`;
+			output += chalk.bold.underline(`\n${chalk.cyan('Flags used:')}`) + '\n';
 			for (const [k, v] of Object.entries(context.usedFlags)) {
-				output += `• ${k}: ${v.value} (${v.source})\n`;
+				output += chalk.gray(`• ${k}: ${v.value} (${v.source})`) + '\n';
 			}
 		}
+		// Add extra info for developers
+		output += chalk.bold.underline(`\n${chalk.cyan('Execution flow:')}`) + '\n';
+		output += chalk.whiteBright('• Input validation, output path resolution, image processing, result summary') + '\n';
+		output += chalk.whiteBright('• All steps are performed in sequence for each input file') + '\n';
 	}
 	return output.trim();
 }
+
 
 // Helper: turn a decision into a human sentence
 function decisionToHuman(d: { key: string; value: any; reason: string }): string {

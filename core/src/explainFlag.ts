@@ -1,4 +1,6 @@
+import chalk from 'chalk';
 import { explainFormatter, ExplainFormat } from './formatters/explainFormatter.js';
+import { getCliVersion, getVersion } from './branding/branding.js';
 import { ExplainContext } from './types/explainTypes.js';
 
 /**
@@ -42,9 +44,26 @@ export function explainFlag({
     usedFlags[key] = { value, source: value !== undefined ? 'user' : 'system' };
   }
 
-  // Build ExplainContext
+  // Build ExplainContext with plugin/command info and version
+  // Get CLI and plugin version using branding utilities
+  let cliVersion: string | undefined = undefined;
+  let pluginVersion: string | undefined = undefined;
+  try {
+    cliVersion = getCliVersion();
+    // Try to get plugin version from parent command's package.json if available
+    if (command?.parent?.name?.()) {
+      // Assume plugin package.json is at ../../plugins/<plugin>/package.json
+      const pluginName = command.parent.name();
+      const pluginPath = `../../plugins/${pluginName}/package.json`;
+      pluginVersion = getVersion(pluginPath);
+    }
+  } catch {}
+
   const context: ExplainContext = {
     command: commandName,
+    plugin: command?.parent?.name?.() || undefined,
+    cliVersion,
+    pluginVersion,
     inputs: { inputPath, outputPath },
     usedFlags,
     decisions: Object.entries(usedFlags).map(([key, v]) => ({
@@ -54,14 +73,30 @@ export function explainFlag({
     })),
     outcome: {
       result: outputPath ? `A new file will be created at ${outputPath}` : 'Operation will complete',
-      sideEffects: [],
+      sideEffects: [
+        'Input validation is performed to ensure correct file types and dimensions.',
+        'Output paths are resolved and checked for conflicts.',
+        'Image processing is performed using the selected options and flags.',
+        'Results and logs are displayed after processing each file.'
+      ],
     },
+    explainFlow: [
+      '1. Parse and validate all user-provided flags and arguments.',
+      '2. Check input and output paths for validity and existence.',
+      '3. Prepare configuration for image processing (width, height, quality, etc.).',
+      '4. For each input file, process and apply transformations.',
+      '5. Save output files and display results.',
+      '6. Show summary and any errors encountered.'
+    ]
   };
 
   // Print explanation only
   const explanation = explainFormatter(context, format);
   if (format === 'json') {
-    console.log(JSON.stringify(explanation, null, 2));
+    // Add a styled header for JSON output
+    // Print JSON with a clear header
+    console.log(chalk.bold.bgBlueBright.white(' EXPLANATION (JSON) '));
+    console.log(chalk.gray(JSON.stringify(explanation, null, 2)));
   } else {
     console.log(explanation);
   }

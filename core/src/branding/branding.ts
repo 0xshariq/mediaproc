@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 /**
  * Get version from package.json
  */
-function getVersion(packagePath: string): string {
+export function getVersion(packagePath: string): string {
   try {
     const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'));
     return packageJson.version || '0.0.0';
@@ -17,7 +17,7 @@ function getVersion(packagePath: string): string {
 /**
  * Get CLI version from root package.json
  */
-function getCliVersion(): string {
+export function getCliVersion(): string {
   try {
     // For ES modules, use import.meta.url
     if (typeof import.meta.url !== 'undefined') {
