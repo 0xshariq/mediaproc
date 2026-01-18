@@ -1,8 +1,11 @@
+
 import chalk from 'chalk';
 import { explainFormatter } from '../formatters/explainFormatter.js';
 import { getCliVersion, getVersion } from '../branding/branding.js';
 import { ExplainContext, ExplainMode } from '../types/explainTypes.js';
 import os from 'os';
+import fs from 'fs';
+import path from 'path';
 
 
 /**
@@ -177,9 +180,18 @@ export function explainFlag({
   const explanation = explainFormatter(context, mode);
   if (mode === ExplainMode.Json) {
     // Add a styled header for JSON output
-    // Print JSON with a clear header
     console.log(chalk.bold.bgBlueBright.white(' EXPLANATION (JSON) '));
-    console.log(chalk.gray(JSON.stringify(explanation, null, 2)));
+    // Write JSON to file in output/explain/
+    const timestamp = context.timestamp?.replace(/[:.]/g, '-') || Date.now().toString();
+    const outDir = path.resolve(process.cwd(), 'output', 'explain');
+    if (!fs.existsSync(outDir)) {
+      fs.mkdirSync(outDir, { recursive: true });
+    }
+    const outFile = path.join(outDir, `explain-${timestamp}.json`);
+    fs.writeFileSync(outFile, JSON.stringify(context, null, 2), 'utf-8');
+    console.log(chalk.green(`Explanation JSON written to: ${outFile}`));
+    // Also print a preview to the console
+    console.log(chalk.gray(JSON.stringify(context, null, 2)));
   } else {
     console.log(explanation);
   }
