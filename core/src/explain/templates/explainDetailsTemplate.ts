@@ -4,147 +4,160 @@ import chalk from 'chalk';
 import boxen from 'boxen';
 
 export function explainDetailsTemplate(context: ExplainContext): string {
-    let sections: string[] = [];
+    function safe(val: any): string {
+        if (val === null || val === undefined || (typeof val === 'number' && Number.isNaN(val))) return 'N/A';
+        if (typeof val === 'function') return '[function]';
+        return String(val);
+    }
+    let lines: string[] = [];
 
-    // Header
-    sections.push(boxen('EXPLANATION (DETAILS)', {padding: 1, borderColor: 'magenta', borderStyle: 'round', align: 'center', backgroundColor: 'magenta'}));
+    // Gradient header
+    lines.push(
+        chalk.bgMagentaBright.white.bold('  EXPLANATION (DETAILS)  ')
+    );
 
     // Explain-only mode
     if (context.explainOnly) {
-        sections.push(boxen('EXPLAIN-ONLY MODE: No command will be executed', {borderColor: 'yellow', borderStyle: 'classic', backgroundColor: 'yellow', padding: 0, margin: 0}));
+        lines.push(
+            chalk.bgYellow.black.bold(' [explain-only] No command will be executed ')
+        );
     }
 
     // Context enrichment
-    const contextInfo = [
-        `Timestamp: ${context.timestamp ?? 'N/A'}`,
-        `User: ${context.user ?? 'N/A'}`,
-        `Platform: ${context.platform ?? 'N/A'}`,
-        `Mode: ${context.mode ?? 'N/A'}`
-    ].join(' | ');
-    sections.push(chalk.gray(contextInfo));
+    lines.push(
+        chalk.bgWhiteBright.gray(
+            ` Timestamp: ${safe(context.timestamp)} | User: ${safe(context.user)} | Platform: ${safe(context.platform)} | Mode: ${safe(context.mode)} `
+        )
+    );
 
     // Plugin/command info
     if (context.plugin || context.cliVersion || context.pluginVersion) {
-        sections.push(chalk.bold(`Plugin: ${context.plugin || 'N/A'} | CLI Version: ${context.cliVersion || 'N/A'} | Plugin Version: ${context.pluginVersion || 'N/A'}`));
+        lines.push(
+            chalk.bgWhiteBright.magenta.bold(` Plugin: ${safe(context.plugin)} | CLI Version: ${safe(context.cliVersion)} | Plugin Version: ${safe(context.pluginVersion)} `)
+        );
     }
 
     // Inputs/Outputs
     if ((context.inputs && Object.keys(context.inputs).length > 0) || (context.outputs && Object.keys(context.outputs).length > 0)) {
-        let io = '';
+        lines.push('');
+        lines.push(chalk.bgGray.white.bold(' Inputs & Outputs: '));
         if (context.inputs && Object.keys(context.inputs).length > 0) {
-            io += chalk.whiteBright('Inputs:') + '\n';
+            lines.push(chalk.whiteBright('  Inputs:'));
             for (const [k, v] of Object.entries(context.inputs)) {
-                io += chalk.gray(`  - ${k}: ${v}`) + '\n';
+                lines.push(chalk.gray(`    - ${k}: ${safe(v)}`));
             }
         }
         if (context.outputs && Object.keys(context.outputs).length > 0) {
-            io += chalk.whiteBright('Outputs:') + '\n';
+            lines.push(chalk.whiteBright('  Outputs:'));
             for (const [k, v] of Object.entries(context.outputs)) {
-                io += chalk.gray(`  - ${k}: ${v}`) + '\n';
+                lines.push(chalk.gray(`    - ${k}: ${safe(v)}`));
             }
         }
-        sections.push(boxen(io.trim(), {borderColor: 'gray', borderStyle: 'round'}));
     }
 
     // Technical workflow
     if (context.explainFlow && Array.isArray(context.explainFlow) && context.explainFlow.length > 0) {
-        let flow = chalk.bold.underline(chalk.cyan('Technical Workflow:')) + '\n';
+        lines.push('');
+        lines.push(chalk.bgCyanBright.black.bold(' Technical Workflow: '));
         for (const step of context.explainFlow) {
-            let safeStep = (typeof step === 'function') ? '[function]' : step;
-            flow += chalk.greenBright(`• ${safeStep}`) + '\n';
+            let safeStep = (typeof step === 'function') ? '[function]' : safe(step);
+            lines.push(chalk.greenBright(`  • ${safeStep}`));
         }
-        sections.push(boxen(flow.trim(), {borderColor: 'cyan', borderStyle: 'round'}));
     }
 
     // Flags used
     if (context.usedFlags && Object.keys(context.usedFlags).length > 0) {
-        let flags = chalk.bold.underline(chalk.cyan('Flags Used:')) + '\n';
+        lines.push('');
+        lines.push(chalk.bgGray.white.bold(' Flags Used: '));
         const userFlags = Object.entries(context.usedFlags).filter(([_, v]) => v.source === 'user');
         const defaultFlags = Object.entries(context.usedFlags).filter(([_, v]) => v.source === 'default');
         const systemFlags = Object.entries(context.usedFlags).filter(([_, v]) => v.source === 'system');
         if (userFlags.length > 0) {
-            flags += chalk.bold('User Flags:') + '\n';
+            lines.push(chalk.bold('  User Flags:'));
             for (const [k, v] of userFlags) {
-                let valueStr = (v.value === undefined || Number.isNaN(v.value)) ? 'N/A' : v.value;
-                if (typeof valueStr === 'function') valueStr = '[function]';
-                flags += chalk.gray(`  - ${k}: ${valueStr}`) + '\n';
+                let valueStr = safe(v.value);
+                lines.push(chalk.gray(`    - ${k}: ${valueStr}`));
             }
         }
         if (defaultFlags.length > 0) {
-            flags += chalk.bold('Default Flags:') + '\n';
+            lines.push(chalk.bold('  Default Flags:'));
             for (const [k, v] of defaultFlags) {
-                let valueStr = (v.value === undefined || Number.isNaN(v.value)) ? 'N/A' : v.value;
-                if (typeof valueStr === 'function') valueStr = '[function]';
-                flags += chalk.gray(`  - ${k}: ${valueStr}`) + '\n';
+                let valueStr = safe(v.value);
+                lines.push(chalk.gray(`    - ${k}: ${valueStr}`));
             }
         }
         if (systemFlags.length > 0) {
-            flags += chalk.bold('System Flags:') + '\n';
+            lines.push(chalk.bold('  System Flags:'));
             for (const [k, v] of systemFlags) {
-                let valueStr = (v.value === undefined || Number.isNaN(v.value)) ? 'N/A' : v.value;
-                if (typeof valueStr === 'function') valueStr = '[function]';
-                flags += chalk.gray(`  - ${k}: ${valueStr}`) + '\n';
+                let valueStr = safe(v.value);
+                lines.push(chalk.gray(`    - ${k}: ${valueStr}`));
             }
         }
-        sections.push(boxen(flags.trim(), {borderColor: 'gray', borderStyle: 'round'}));
     }
 
     // Errors and warnings
     if (context.outcome && Array.isArray(context.outcome.errors) && context.outcome.errors.length > 0) {
-        let errSection = chalk.redBright.bold('Errors:') + '\n';
+        lines.push('');
+        lines.push(chalk.bgRedBright.white.bold(' Errors: '));
         for (const err of context.outcome.errors) {
-            errSection += chalk.redBright(`  - ${err}`) + '\n';
+            lines.push(chalk.redBright(`  - ${safe(err)}`));
         }
-        sections.push(boxen(errSection.trim(), {borderColor: 'red', borderStyle: 'round'}));
     }
     if (context.outcome && Array.isArray(context.outcome.warnings) && context.outcome.warnings.length > 0) {
-        let warnSection = chalk.yellowBright.bold('Warnings:') + '\n';
+        lines.push('');
+        lines.push(chalk.bgYellowBright.black.bold(' Warnings: '));
         for (const warn of context.outcome.warnings) {
-            warnSection += chalk.yellowBright(`  - ${warn}`) + '\n';
+            lines.push(chalk.yellowBright(`  - ${safe(warn)}`));
         }
-        sections.push(boxen(warnSection.trim(), {borderColor: 'yellow', borderStyle: 'round'}));
     }
 
     // Developer/technical info
     if (context.technical && typeof context.technical === 'object' && Object.keys(context.technical).length > 0) {
-        let tech = chalk.bold('Technical Details:') + '\n';
+        lines.push('');
+        lines.push(chalk.bgMagentaBright.white.bold(' Technical Details: '));
         for (const [k, v] of Object.entries(context.technical)) {
-            let valueStr = (v === undefined || Number.isNaN(v)) ? 'N/A' : v;
-            if (typeof valueStr === 'function') valueStr = '[function]';
-            tech += chalk.gray(`  - ${k}: ${valueStr}`) + '\n';
+            let valueStr = safe(v);
+            lines.push(chalk.gray(`  - ${k}: ${valueStr}`));
         }
-        sections.push(boxen(tech.trim(), {borderColor: 'magenta', borderStyle: 'round'}));
     }
 
     // Environment info
     if (context.environment && typeof context.environment === 'object') {
-        let env = chalk.bold('Environment:') + '\n';
-        env += chalk.bold(`  cwd: ${context.environment.cwd ?? 'N/A'}`) + '\n';
-        env += chalk.bold(`  OS: ${context.environment.os ?? 'N/A'}`) + '\n';
-        env += chalk.bold(`  Node: ${context.environment.nodeVersion ?? 'N/A'}`) + '\n';
-        env += chalk.bold(`  Shell: ${context.environment.shell ?? 'N/A'}`) + '\n';
-        sections.push(boxen(env.trim(), {borderColor: 'gray', borderStyle: 'round'}));
+        lines.push('');
+        lines.push(chalk.bgGray.white.bold(' Environment: '));
+        lines.push(chalk.bold(`  cwd: ${safe(context.environment.cwd)}`));
+        lines.push(chalk.bold(`  OS: ${safe(context.environment.os)}`));
+        lines.push(chalk.bold(`  Node: ${safe(context.environment.nodeVersion)}`));
+        lines.push(chalk.bold(`  Shell: ${safe(context.environment.shell)}`));
     }
 
     // Custom plugin sections
     if (context.customSections && Array.isArray(context.customSections)) {
         for (const section of context.customSections) {
             if (section.items && section.items.length > 0) {
-                let custom = chalk.bold.underline(section.title) + '\n';
+                lines.push('');
+                lines.push(chalk.bgMagentaBright.white.bold(` ${section.title} `));
                 for (const item of section.items) {
-                    let safeItem = (typeof item === 'function') ? '[function]' : item;
-                    custom += chalk.cyan(`• ${safeItem}`) + '\n';
+                    let safeItem = (typeof item === 'function') ? '[function]' : safe(item);
+                    lines.push(chalk.magentaBright(`  • ${safeItem}`));
                 }
-                sections.push(boxen(custom.trim(), {borderColor: 'cyan', borderStyle: 'round'}));
             }
         }
     }
 
     // Diagram placeholder
-    sections.push(boxen(chalk.gray('Diagram: [future diagram rendering here]'), {borderColor: 'white', borderStyle: 'round'}));
+    lines.push('');
+    lines.push(chalk.bgWhiteBright.gray(' Diagram: [future diagram rendering here] '));
 
     // Tip
-    sections.push(chalk.gray('Tip: Use --explain for a simple summary.'));
+    lines.push('');
+    lines.push(chalk.bgWhiteBright.gray(' Tip: Use --explain for a simple summary. '));
 
-    return sections.join('\n\n');
+    // Wrap all in a single box with a magenta border
+    return boxen(lines.join('\n'), {
+        padding: 1,
+        borderColor: 'magenta',
+        borderStyle: 'round',
+        backgroundColor: 'black',
+    });
 }

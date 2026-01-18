@@ -1,2 +1,2 @@
 // Utils
-export * from './supportedExtensions.js';
+export * from './constants/supportedExtensions.js';

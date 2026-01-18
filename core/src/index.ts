@@ -27,5 +27,6 @@ export * from './types/index.js';
 // Explain System (Templates, Flag, Hook)
 export * from './explain/index.js';
 
-// Errors & Exit Codes
+// Errors & Exit Codes (Error Classes, Severity, Codes & Global Error Handler)
 export * from './errors/index.js';
+export * from './handlers/index.js';

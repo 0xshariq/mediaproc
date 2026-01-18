@@ -71,7 +71,7 @@ export function explainFlag({
     mode = ExplainMode.Human;
   } else if (explainValue) {
     // fallback for unknown explain values
-    console.warn(chalk.yellow(`Unknown explain mode: ${explainValue}, using 'human' mode.`));
+    console.warn(chalk.yellow(`warn: unknown explain mode "${explainValue}", falling back to "human"`));
     mode = ExplainMode.Human;
   }
   // Gather all possible flags from command (Commander.js API)
@@ -126,6 +126,7 @@ export function explainFlag({
   }
 
   const context: ExplainContext = {
+    schemaVersion: '1.0', // Tier 3 placeholder
     command: commandName,
     plugin: command?.parent?.name?.() || undefined,
     cliVersion,
@@ -135,6 +136,9 @@ export function explainFlag({
     user: process.env.USER || process.env.USERNAME || 'unknown',
     platform: `${os.platform()} ${os.arch()}`,
     mode,
+    summary: outputPath
+      ? `Resize/Process file(s) and write result to ${outputPath}`
+      : `Operation will complete (no output path specified)`,
     inputs: { inputPath, outputPath, ...allInputs },
     outputs: Object.keys(allOutputs).length > 0 ? allOutputs : undefined,
     usedFlags,
@@ -143,6 +147,7 @@ export function explainFlag({
       key,
       value: v.value,
       reason: v.source === 'user' ? 'user specified' : (v.source === 'default' ? 'default' : 'system'),
+      provenance: v.source,
     })),
     outcome: {
       result: outputPath ? `A new file will be created at ${outputPath}` : 'Operation will complete',
@@ -154,6 +159,11 @@ export function explainFlag({
       ],
       errors: [], // Placeholder for error reporting
       warnings: [], // Placeholder for warning reporting
+      confidence: 'high', // Tier 4 placeholder
+      whatWillNotHappen: [ // Tier 4 placeholder
+        'Original files will not be modified',
+        'No network requests will be made'
+      ]
     },
     explainFlow: [
       '1. Parse and validate all user-provided flags and arguments.',
@@ -174,6 +184,7 @@ export function explainFlag({
       estimatedTime: 'depends on input size and options',
       memoryUsage: 'depends on batch size and image dimensions',
     },
+    exitCode: 0, // Tier 3 placeholder
   };
 
   // Print explanation only

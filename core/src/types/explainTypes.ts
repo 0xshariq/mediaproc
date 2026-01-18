@@ -18,6 +18,9 @@ export interface ExplainDecision {
 
 
 export interface ExplainContext {
+  schemaVersion?: string; // Tier 3 placeholder
+  summary?: string; // Tier 2: summary line
+  exitCode?: number; // Tier 3 placeholder
   // If true, this is an explain-only run (no command execution)
   explainOnly?: boolean;
   // Command and plugin info
@@ -61,6 +64,8 @@ export interface ExplainContext {
     sideEffects?: string[];
     errors?: string[];
     warnings?: string[];
+    confidence?: string; // Tier 4 placeholder
+    whatWillNotHappen?: string[]; // Tier 4 placeholder
   };
   explainFlow?: string[];
 
