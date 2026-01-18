@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { stat } from 'fs/promises';
 import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuration } from '../utils/ffmpeg.js';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
-import { parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, showPluginBranding, AUDIO_EXTENSIONS, explainFlag } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, showPluginBranding, AUDIO_EXTENSIONS } from '@mediaproc/core';
 import ora from 'ora';
 
 export function convertCommand(audioCmd: Command): void {
@@ -25,10 +25,10 @@ export function convertCommand(audioCmd: Command): void {
     .option('--metadata <key=value>', 'Set custom metadata (repeatable)', (val: string, acc: string[] = []) => { acc.push(val); return acc; }, [] as string[])
     .option('--force', 'Overwrite output files without prompt')
     .option('--dry-run', 'Preview command without executing')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('-h, --help', 'Display help for convert command')
-    .action(async function (input: string | undefined, options: any) {
+    .action(async (input: string | undefined, options: any) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'convert',
@@ -55,7 +55,7 @@ export function convertCommand(audioCmd: Command): void {
             { flag: '--metadata <key=value>', description: 'Set custom metadata (repeatable)' },
             { flag: '--force', description: 'Overwrite output files without prompt' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output and progress' }
           ],
           examples: [
@@ -164,16 +164,10 @@ export function convertCommand(audioCmd: Command): void {
           if (options.dryRun) {
             console.log(chalk.yellow('\n[DRY RUN] Would execute:'));
             console.log(chalk.dim(`ffmpeg ${args.join(' ')}`));
-            showPluginBranding('Audio', require.resolve('../../package.json'));
+            showPluginBranding('Audio', '../../package.json');
             continue;
-          }
-          if (options.explain) {
-            explainFlag({
-              command: this,
-              args: { input, output: options.output },
-              options
-            });
-          }
+          };
+
 
           // Execute conversion
           const spinner = ora('Converting...').start();
@@ -203,7 +197,7 @@ export function convertCommand(audioCmd: Command): void {
           console.log(chalk.green(`\n✓ Converted ${inputPaths.length} files successfully`));
         }
 
-        showPluginBranding('Audio', require.resolve('../../package.json'));
+        showPluginBranding('Audio', '../../package.json');
 
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));

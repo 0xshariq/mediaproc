@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { stat } from 'fs/promises';
 import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuration } from '../utils/ffmpeg.js';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
-import { AUDIO_EXTENSIONS, parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
+import { AUDIO_EXTENSIONS, parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import ora from 'ora';
 
 export function normalizeCommand(audioCmd: Command): void {
@@ -17,7 +17,7 @@ export function normalizeCommand(audioCmd: Command): void {
     .option('--format <format>', 'Output format (default: same as input)')
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-h, --help', 'Display help for normalize command')
     .action(async function (input: string | undefined, options: any) {
       if (options.help || !input) {
@@ -37,7 +37,7 @@ export function normalizeCommand(audioCmd: Command): void {
             { flag: '-m, --method <method>', description: 'Normalization method: loudnorm (EBU R128 standard), peak' },
             { flag: '--format <format>', description: 'Output format: mp3, aac, wav, flac (default: same as input)' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output and progress' }
           ],
           examples: [
@@ -103,13 +103,6 @@ export function normalizeCommand(audioCmd: Command): void {
             continue;
           }
 
-          if (options.explain) {
-            explainFlag({
-              command: this,
-              args: { input, output: options.output },
-              options
-            });
-          }
           const spinner = ora('Normalizing...').start();
 
           try {

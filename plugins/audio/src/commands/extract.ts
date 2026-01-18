@@ -9,7 +9,7 @@ import {
   formatDuration,
 } from '../utils/ffmpeg.js';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
-import { AUDIO_EXTENSIONS, parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
+import { AUDIO_EXTENSIONS, parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import ora from 'ora';
 
 export function extractCommand(audioCmd: Command): void {
@@ -31,9 +31,9 @@ export function extractCommand(audioCmd: Command): void {
     .option('--force', 'Overwrite output files without prompt')
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-h, --help', 'Display help for extract command')
-    .action(async function (input: string | undefined, options: any) {
+    .action(async (input: string | undefined, options: any) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'extract',
@@ -59,7 +59,7 @@ export function extractCommand(audioCmd: Command): void {
             { flag: '--metadata <key=value>', description: 'Set custom metadata (repeatable)' },
             { flag: '--force', description: 'Overwrite output files without prompt' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output and progress' }
           ],
           examples: [
@@ -169,13 +169,6 @@ export function extractCommand(audioCmd: Command): void {
             continue;
           }
 
-          if (options.explain) {
-            explainFlag({
-              command: this,
-              args: { input, output: options.output },
-              options
-            });
-          }
           const spinner = ora('Extracting audio...').start();
 
           try {

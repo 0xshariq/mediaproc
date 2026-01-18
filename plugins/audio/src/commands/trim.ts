@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { stat } from 'fs/promises';
 import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuration, parseTime } from '../utils/ffmpeg.js';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
-import { AUDIO_EXTENSIONS, parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
+import { AUDIO_EXTENSIONS, parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import ora from 'ora';
 
 export function trimCommand(audioCmd: Command): void {
@@ -22,7 +22,7 @@ export function trimCommand(audioCmd: Command): void {
     .option('--metadata <key=value>', 'Set custom metadata (repeatable)', (val: string, acc: string[] = []) => { acc.push(val); return acc; }, [] as string[])
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-h, --help', 'Display help for trim command')
     .action(async function (input: string | undefined, options: any) {
       if (options.help || !input) {
@@ -47,7 +47,7 @@ export function trimCommand(audioCmd: Command): void {
             { flag: '--force', description: 'Overwrite output files without prompt' },
             { flag: '--metadata <key=value>', description: 'Set custom metadata (repeatable)' },
             { flag: '--dry-run', description: 'Preview FFmpeg command without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed FFmpeg output and progress' }
           ],
           examples: [
@@ -148,13 +148,6 @@ export function trimCommand(audioCmd: Command): void {
             console.log(chalk.dim(`ffmpeg ${args.join(' ')}`));
             showPluginBranding('Audio', '../../package.json');
             continue;
-          }
-          if (options.explain) {
-            explainFlag({
-              command: this,
-              args: { input, output: options.output },
-              options
-            });
           }
 
           const spinner = ora('Trimming...').start();
