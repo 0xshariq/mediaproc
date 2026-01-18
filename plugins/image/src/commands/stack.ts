@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { ImageOptions } from '../types.js';
 
@@ -29,9 +29,9 @@ export function stackCommand(imageCmd: Command): void {
     .option('-o, --output <path>', 'Output file path (default: stacked.png)')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for stack command')
-    .action(async function (images: string[], options: StackOptions) {
+    .action(async (images: string[], options: StackOptions) => {
       if (options.help || !images) {
         createStandardHelp({
           commandName: 'stack',
@@ -45,7 +45,7 @@ export function stackCommand(imageCmd: Command): void {
             { flag: '-b, --background <color>', description: 'Background color for gaps (default: transparent)' },
             { flag: '-o, --output <path>', description: 'Output file path (default: stacked.png)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
@@ -172,13 +172,6 @@ export function stackCommand(imageCmd: Command): void {
           console.log(chalk.dim(`  Output size: ${canvasWidth}x${canvasHeight}`));
           showPluginBranding('Image', '../../package.json');
           return;
-        }
-        if (options.explain) {
-          explainFlag({
-            command: this,
-            args: { images, output: options.output },
-            options
-          });
         }
 
         // Create canvas

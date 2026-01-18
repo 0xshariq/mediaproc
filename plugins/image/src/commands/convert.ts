@@ -4,7 +4,7 @@ import ora from 'ora';
 
 import type { ConvertOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp, explainFlag } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
 
 
 interface ConvertOptionsExtended extends ConvertOptions {
@@ -22,9 +22,9 @@ export function convertCommand(imageCmd: Command): void {
     .option('--progressive', 'Use progressive/interlaced format')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for convert command')
-    .action(async function (input: string, options: ConvertOptionsExtended) {
+    .action(async (input: string, options: ConvertOptionsExtended) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'convert',
@@ -38,7 +38,7 @@ export function convertCommand(imageCmd: Command): void {
             { flag: '--compression <level>', description: 'PNG compression level 0-9 (default: 9)' },
             { flag: '--progressive', description: 'Use progressive/interlaced format' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
@@ -126,13 +126,6 @@ export function convertCommand(imageCmd: Command): void {
           });
           showPluginBranding('Image', '../../package.json');
           return;
-        }
-        if (options.explain) {
-          explainFlag({
-            command: this,
-            args: { input, output: options.output },
-            options
-          });
         }
 
         // Process each input file

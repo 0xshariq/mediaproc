@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import type { StatsOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 
@@ -20,9 +20,9 @@ export function statsCommand(imageCmd: Command): void {
     .option('--histogram', 'Calculate and display color histogram')
     .option('--dry-run', 'Show what would be analyzed without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for stats command')
-    .action(async function (input: string, options: StatsOptionsExtended) {
+    .action(async (input: string, options: StatsOptionsExtended) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'stats',
@@ -32,7 +32,7 @@ export function statsCommand(imageCmd: Command): void {
           options: [
             { flag: '-d, --detailed', description: 'Show detailed EXIF and metadata information' },
             { flag: '--histogram', description: 'Calculate and display color channel statistics' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show extra verbose output' }
           ],
           examples: [
@@ -107,13 +107,6 @@ export function statsCommand(imageCmd: Command): void {
           console.log(chalk.dim(`\n  Total files: ${totalFiles}`));
           showPluginBranding('Image', '../../package.json');
           process.exit(0);
-        }
-        if (options.explain) {
-          explainFlag({
-            command: this,
-            args: { input, output: options.output },
-            options
-          });
         }
 
         spinner.succeed(chalk.green(`Found ${totalFiles} file${totalFiles > 1 ? 's' : ''} to analyze`));

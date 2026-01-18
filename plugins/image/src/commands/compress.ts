@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { stat } from 'node:fs/promises';
@@ -21,9 +21,9 @@ export function compressCommand(imageCmd: Command): void {
     .option('--lossy', 'Use lossy compression for better size reduction')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for compress command')
-    .action(async function (input: string, options: CompressOptions) {
+    .action(async (input: string, options: CompressOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'compress',
@@ -35,7 +35,7 @@ export function compressCommand(imageCmd: Command): void {
             { flag: '-q, --quality <quality>', description: 'Compression quality 1-100 (default: 75)' },
             { flag: '--lossy', description: 'Enable lossy compression for maximum reduction' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
@@ -120,13 +120,6 @@ export function compressCommand(imageCmd: Command): void {
             console.log(chalk.gray(`   Lossy: ${options.lossy ? 'Yes' : 'No'}`));
             showPluginBranding('Image', '../../package.json');
             continue;
-          }
-          if (options.explain) {
-            explainFlag({
-              command: this,
-              args: { input, output: options.output },
-              options
-            });
           }
 
           const processSpinner = ora(`Compressing ${fileName}...`).start();

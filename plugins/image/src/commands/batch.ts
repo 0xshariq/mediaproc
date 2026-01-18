@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp, explainFlag } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import path from 'path';
 import { ImageOptions } from '../types.js';
@@ -35,9 +35,9 @@ export function batchCommand(imageCmd: Command): void {
     .option('-q, --quality <quality>', 'Quality for optimization', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for batch command')
-    .action(async function (directory: string, options: BatchOptions) {
+    .action(async (directory: string, options: BatchOptions) => {
       if (options.help || !directory) {
         createStandardHelp({
           commandName: 'batch',
@@ -54,7 +54,7 @@ export function batchCommand(imageCmd: Command): void {
             { flag: '-f, --format <format>', description: 'Output format for convert operations' },
             { flag: '-q, --quality <quality>', description: 'Quality for optimization/conversion' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
@@ -144,13 +144,6 @@ export function batchCommand(imageCmd: Command): void {
           }
 
           return;
-        }
-        if (options.explain) {
-          explainFlag({
-            command: this,
-            args: { directory, output: options.output },
-            options
-          });
         }
 
         // Create output directory

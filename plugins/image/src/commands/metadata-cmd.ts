@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import fs from 'fs';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { ImageOptions } from '../types.js';
 
@@ -28,9 +28,9 @@ export function metadataCommand(imageCmd: Command): void {
     .option('-o, --output <path>', 'Output file (when removing metadata)')
     .option('--dry-run', 'Show what would be analyzed without executing')
     .option('-v, --verbose', 'Show detailed metadata')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for metadata command')
-    .action(async function (input: string, options: MetadataCommandOptions) {
+    .action(async (input: string, options: MetadataCommandOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'metadata',
@@ -42,7 +42,7 @@ export function metadataCommand(imageCmd: Command): void {
             { flag: '--remove-all', description: 'Alias for --remove' },
             { flag: '--export <path>', description: 'Export metadata to JSON file' },
             { flag: '-o, --output <path>', description: 'Output file path (when removing metadata)' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed metadata information' }
           ],
           examples: [
@@ -126,13 +126,6 @@ export function metadataCommand(imageCmd: Command): void {
           console.log(chalk.dim(`\n  Total files: ${totalFiles}`));
           showPluginBranding('Image', '../../package.json');
           process.exit(0);
-        }
-        if (options.explain) {
-          explainFlag({
-            command: this,
-            args: { input, output: options.output },
-            options
-          });
         }
 
         spinner.succeed(chalk.green(`Found ${totalFiles} file${totalFiles > 1 ? 's' : ''} to process`));

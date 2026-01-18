@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { ImageOptions } from '../types.js';
 
@@ -23,9 +23,9 @@ export function pixelateCommand(imageCmd: Command): void {
     .option('-o, --output <path>', 'Output file path')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for pixelate command')
-    .action(async function (input: string, options: PixelateOptions) {
+    .action(async (input: string, options: PixelateOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'pixelate',
@@ -36,7 +36,7 @@ export function pixelateCommand(imageCmd: Command): void {
             { flag: '-p, --pixels <size>', description: 'Pixel size 2-50 (default: 10) - larger = more pixelated' },
             { flag: '-o, --output <path>', description: 'Output file path' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
@@ -117,13 +117,6 @@ export function pixelateCommand(imageCmd: Command): void {
           });
           showPluginBranding('Image', '../../package.json');
           return;
-        }
-        if (options.explain) {
-          explainFlag({
-            command: this,
-            args: { input, output: options.output },
-            options
-          });
         }
 
         let successCount = 0;

@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { normalizeColor } from '../utils/colorUtils.js';
 import { ImageOptions } from '../types.js';
@@ -26,9 +26,9 @@ export function dominantColorCommand(imageCmd: Command): void {
     .option('--export <path>', 'Export color palette to JSON file')
     .option('--dry-run', 'Show what would be analyzed without executing')
     .option('-v, --verbose', 'Show detailed color information')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Show detailed help for dominant-color command')
-    .action(async function (input: string, options: DominantColorOptions) {
+    .action(async (input: string, options: DominantColorOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'dominant-color',
@@ -39,7 +39,7 @@ export function dominantColorCommand(imageCmd: Command): void {
             { flag: '-c, --count <number>', description: 'Number of dominant colors to extract (default: 5, max: 10)' },
             { flag: '--export <path>', description: 'Export color palette to JSON file' },
             { flag: '--color-format', description: 'Accepted formats: hex (#ff6600), rgb(255,0,0), rgba(255,0,0,0.5), named (red), ascii (255,0,0)' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed RGB/HSL values' }
           ],
           examples: [
@@ -109,13 +109,6 @@ export function dominantColorCommand(imageCmd: Command): void {
           console.log(chalk.dim(`\n  Total files: ${totalFiles}`));
           showPluginBranding('Image', '../../package.json');
           process.exit(0);
-        }
-        if (options.explain) {
-          explainFlag({
-            command: this,
-            args: { input, output: options.output },
-            options
-          });
         }
 
         spinner.succeed(chalk.green(`Found ${totalFiles} file${totalFiles > 1 ? 's' : ''} to analyze`));

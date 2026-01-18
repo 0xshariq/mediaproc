@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import path from 'node:path';
@@ -21,9 +21,9 @@ export function optimizeCommand(imageCmd: Command): void {
     .option('--aggressive', 'More aggressive compression (lower quality)')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for optimize command')
-    .action(async function (input: string, options: OptimizeOptions) {
+    .action(async (input: string, options: OptimizeOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'optimize',
@@ -35,7 +35,7 @@ export function optimizeCommand(imageCmd: Command): void {
             { flag: '-q, --quality <quality>', description: 'Quality 1-100 (default: 85)' },
             { flag: '--aggressive', description: 'More aggressive compression (quality 70)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
@@ -116,13 +116,6 @@ export function optimizeCommand(imageCmd: Command): void {
           });
           showPluginBranding('Image', '../../package.json');
           return;
-        }
-        if (options.explain) {
-          explainFlag({
-            command: this,
-            args: { input, output: options.output },
-            options
-          });
         }
 
         let successCount = 0;

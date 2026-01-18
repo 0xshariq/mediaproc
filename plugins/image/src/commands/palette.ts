@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { ImageOptions } from '../types.js';
 
@@ -21,9 +21,9 @@ export function paletteCommand(imageCmd: Command): void {
     .option('-c, --colors <count>', 'Number of colors to extract 1-10 (default: 5)', parseInt, 5)
     .option('--dry-run', 'Show what would be analyzed without executing')
     .option('-v, --verbose', 'Verbose output with hex codes')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for palette command')
-    .action(async function (input: string, options: PaletteOptions) {
+    .action(async (input: string, options: PaletteOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'palette',
@@ -32,7 +32,7 @@ export function paletteCommand(imageCmd: Command): void {
           usage: ['palette <input>', 'palette <input> --colors 8', 'palette <input> -c 3 -v'],
           options: [
             { flag: '-c, --colors <count>', description: 'Number of colors to extract 1-10 (default: 5)' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output with hex codes and RGB values' }
           ],
           examples: [
@@ -104,13 +104,6 @@ export function paletteCommand(imageCmd: Command): void {
           console.log(chalk.dim(`\n  Total files: ${totalFiles}`));
           showPluginBranding('Image', '../../package.json');
           process.exit(0);
-        }
-        if (options.explain) {
-          explainFlag({
-            command: this,
-            args: { input, output: options.output },
-            options
-          });
         }
 
         spinner.succeed(chalk.green(`Found ${totalFiles} file${totalFiles > 1 ? 's' : ''} to analyze`));

@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import type { CompositeOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 
@@ -25,9 +25,9 @@ export function compositeCommand(imageCmd: Command): void {
     .option('--tile', 'Tile the overlay across the image')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for composite command')
-    .action(async function (input: string, options: CompositeOptionsExtended) {
+    .action(async (input: string, options: CompositeOptionsExtended) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'composite',
@@ -44,7 +44,7 @@ export function compositeCommand(imageCmd: Command): void {
             { flag: '--opacity <value>', description: 'Opacity 0-1 (default: 1)' },
             { flag: '--tile', description: 'Tile the overlay across the entire image' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
@@ -143,13 +143,6 @@ export function compositeCommand(imageCmd: Command): void {
           console.log(chalk.dim(`  Position: ${options.left !== undefined && options.top !== undefined ? `${options.left}x${options.top}` : options.gravity}`));
           showPluginBranding('Image', '../../package.json');
           return;
-        }
-        if (options.explain) {
-          explainFlag({
-            command: this,
-            args: { input, output: options.output },
-            options
-          });
         }
 
         // Preload and prepare overlay buffer once

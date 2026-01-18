@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, createStandardHelp, showPluginBranding, explainFlag } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { ImageOptions } from '../types.js';
 
@@ -32,10 +32,10 @@ export function gridCommand(imageCmd: Command): void {
     .option('-b, --background <color>', 'Background color (default: #FFFFFF)', '#FFFFFF')
     .option('-o, --output <path>', 'Output file path (default: grid.jpg)')
     .option('--dry-run', 'Show what would be done without executing')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-v, --verbose', 'Verbose output')
     .option('--help', 'Display help for grid command')
-    .action(async function (images: string[], options: GridOptions) {
+    .action(async (images: string[], options: GridOptions) => {
       if (options.help || !images) {
         createStandardHelp({
           commandName: 'grid',
@@ -51,7 +51,7 @@ export function gridCommand(imageCmd: Command): void {
             { flag: '-b, --background <color>', description: 'Background color - hex or name (default: #FFFFFF)' },
             { flag: '-o, --output <path>', description: 'Output file path (default: grid.jpg)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain what is happening behind the scene in proper flow and in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
@@ -169,13 +169,6 @@ export function gridCommand(imageCmd: Command): void {
           console.log(chalk.dim(`  Output size: ${gridWidth}x${gridHeight}`));
           showPluginBranding('Image', '../../package.json');
           return;
-        }
-        if (options.explain) {
-          explainFlag({
-            command: this,
-            args: { images, output: options.output },
-            options
-          });
         }
 
         // Create base canvas

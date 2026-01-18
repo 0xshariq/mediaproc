@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import type { ResizeOptions } from '../types.js';
 import { createSharpInstance, sharp } from '../utils/sharp.js';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp, explainFlag } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
 import path from 'node:path';
 
 
@@ -22,7 +22,7 @@ export function resizeCommand(imageCmd: Command): void {
     .option('--background <color>', 'Background color for contain/outside (hex, rgb, or named)', '#ffffff')
     .option('--kernel <kernel>', 'Kernel for resizing: nearest, cubic, mitchell, lanczos2, lanczos3', 'lanczos3')
     .option('--dry-run', 'Show what would be done without executing')
-    .option('--explain', 'Explain the proper flow of this command in detail.')
+    .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-v, --verbose', 'Verbose output')
     .option('--help', 'Display help for resize command')
     .action(async function (input: string, options: ResizeOptions) {
@@ -49,7 +49,7 @@ export function resizeCommand(imageCmd: Command): void {
             { flag: '--background <color>', description: 'Background color for contain/outside (default: #ffffff)' },
             { flag: '--kernel <kernel>', description: 'Resize kernel: nearest, cubic, mitchell, lanczos2, lanczos3 (default: lanczos3)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
-            { flag: '--explain', description: 'Explain the proper flow of this command in detail.' },
+            { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
@@ -139,13 +139,7 @@ export function resizeCommand(imageCmd: Command): void {
           showPluginBranding('Image', '../../package.json');
           return;
         }
-        if (options.explain) {
-          explainFlag({
-            command: this,
-            args: { input, output: options.output },
-            options
-          });
-        }
+
 
         // Process each input file
         let successCount = 0;
