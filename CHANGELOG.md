@@ -26,7 +26,29 @@ MediaProc is organized as a monorepo with the following packages:
 
 ---
 
-## [@mediaproc/core@1.3.0] - 2026-01-18
+## [@mediaproc/core@1.4.0], [@mediaproc/cli@0.8.0] - 2026-01-18
+
+### Added
+
+- **Explain Flag System Improvements:**
+  - Human and Details templates now guarantee no function source, NaN, null, or undefined is ever displayed—these are always shown as [function] or N/A for safety.
+  - Output is more robust, readable, and safe for all CLI and plugin commands.
+  - All output is sanitized and context-enriched (timestamp, user, platform, mode).
+  - Improved test coverage for output safety and formatting.
+
+### Changed
+
+- **Template Rendering:**
+  - Human template now matches test and user expectations for output (plain or boxed as required, always safe values).
+  - Details template uses the same value-safety logic as human template.
+
+### Fixed
+
+- **Output Safety:**
+  - No function source, NaN, null, or undefined is ever shown in any explain output.
+  - All output is consistent and safe for end users and developers.
+
+---
 
 ### Added
 
