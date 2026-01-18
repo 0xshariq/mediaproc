@@ -18,7 +18,7 @@ importers:
         specifier: ^0.61.0
         version: 0.61.0
       '@mediaproc/core':
-        specifier: ^1.2.0
+        specifier: ^1.2.1
         version: 1.2.1
       chalk:
         specifier: ^5.3.0
@@ -2373,7 +2373,6 @@ packages:
 
   shaka-player@4.16.13:
     resolution: {integrity: sha512-2K6g1EBGXht3QnUqF/LKiGuVrvr+nx2AF2Y7DGicSOTUoTXY7YQW8CFXT1ha+ldQfkTuihQkju5NCEzY/KKuIw==}
-    engines: {node: '>=18'}
 
   sharp@0.34.5:
     resolution: {integrity: sha512-Ou9I5Ft9WNcCbXrU9cMgPBcCK8LiwLqcbywW3t4oDV37n1pzpuNLsYiAV8eODnjbtQlSDwZ2cUEeQz4E54Hltg==}
