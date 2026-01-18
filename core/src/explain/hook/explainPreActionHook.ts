@@ -1,6 +1,6 @@
 
 import type { Command } from 'commander';
-import { explainFlag } from '../explain/explainFlag.js';
+import { explainFlag } from '../explainFlag.js';
 
 /**
  * Global preAction hook for Commander.js to support --explain and --explain=only.

@@ -1,7 +1,7 @@
 import chalk from 'chalk';
-import { explainFormatter, ExplainFormat } from './formatter/explainFormatter.js';
+import { explainFormatter, ExplainFormat } from '../formatters/explainFormatter.js';
 import { getCliVersion, getVersion } from '../branding/branding.js';
-import { ExplainContext } from './types/explainTypes.js';
+import { ExplainContext } from '../types/explainTypes.js';
 import os from 'os';
 
 

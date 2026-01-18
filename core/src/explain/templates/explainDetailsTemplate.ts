@@ -1,4 +1,4 @@
-import { ExplainContext } from '../types/explainTypes.js';
+import { ExplainContext } from '../../types/explainTypes.js';
 import chalk from 'chalk';
 
 export function explainDetailsTemplate(context: ExplainContext): string {

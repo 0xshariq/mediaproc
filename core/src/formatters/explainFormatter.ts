@@ -1,8 +1,8 @@
 
 
 import { ExplainContext } from '../types/explainTypes.js';
-import { explainHumanTemplate } from '../templates/explainHumanTemplate.js';
-import { explainDetailsTemplate } from '../templates/explainDetailsTemplate.js';
+import { explainHumanTemplate } from '../explain/templates/explainHumanTemplate.js';
+import { explainDetailsTemplate } from '../explain/templates/explainDetailsTemplate.js';
 
 
 export type ExplainFormat = 'human' | 'details' | 'json';
