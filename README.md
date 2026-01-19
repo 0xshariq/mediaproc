@@ -1,10 +1,8 @@
 # MediaProc
 
-> MediaProc is free and open source for manual, local usage.
+<p align='center'> MediaProc is free and open source for manual, local usage.</p>
 
-> In the future, paid plans may be introduced for automation, pipelines, scheduling, and large-scale workflows to support long-term development.
-
-> Core CLI commands will remain free.
+> In the future, paid plans may be introduced for automation, pipelines, scheduling, and large-scale workflows to support long-term development. Core CLI commands will remain free.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/badge/version-0.6.0--beta-blue.svg)](https://www.npmjs.com/package/@mediaproc/cli)
