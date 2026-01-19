@@ -2,10 +2,9 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding, normalizeColor } from '@mediaproc/core';
 import type { BorderOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { normalizeColor } from '../utils/colorUtils.js';
 
 interface BorderOptionsExtended extends BorderOptions {
   help?: boolean;

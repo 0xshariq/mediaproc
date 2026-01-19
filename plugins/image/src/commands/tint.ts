@@ -2,10 +2,9 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp, normalizeColor } from '@mediaproc/core';
 import type { FilterOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { normalizeColor } from '../utils/colorUtils.js';
 import path from 'node:path';
 
 interface TintOptions extends FilterOptions {

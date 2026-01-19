@@ -3,9 +3,8 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding, normalizeColor } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
-import { normalizeColor } from '../utils/colorUtils.js';
 import { ImageOptions } from '../types.js';
 
 interface DominantColorOptions extends ImageOptions {
