@@ -6,6 +6,7 @@ import { ExplainContext, ExplainMode } from '../types/explainTypes.js';
 import os from 'os';
 import fs from 'fs';
 import path from 'path';
+import { getPhrase } from './phrases.js';
 
 
 /**
@@ -79,8 +80,21 @@ export function explainFlag({
   const omittedFlags: Record<string, { defaultValue: any; source: 'default' }> = {};
   if (command && typeof command.options === 'object') {
     for (const opt of command.options) {
-      const flagName = opt.attributeName || opt.long?.replace(/^--/, '') || opt.short?.replace(/^-/, '');
-      if (!flagName) continue;
+      let flagName: string | undefined;
+      if (typeof opt.attributeName === 'function') {
+        try {
+          const attr = opt.attributeName();
+          flagName = typeof attr === 'string' ? attr : undefined;
+        } catch {
+          flagName = undefined;
+        }
+      } else if (typeof opt.attributeName === 'string') {
+        flagName = opt.attributeName;
+      } else {
+        flagName = opt.long?.replace(/^--/, '') || opt.short?.replace(/^-/, '');
+      }
+      // Only allow string flag names, skip if not a string
+      if (!flagName || typeof flagName !== 'string') continue;
       let userValue = options[flagName];
       // Handle boolean flags
       if (typeof userValue === 'boolean') userValue = userValue ? 'enabled' : 'disabled';
@@ -112,33 +126,78 @@ export function explainFlag({
   // Get CLI and plugin version using branding utilities
   let cliVersion: string | undefined = undefined;
   let pluginVersion: string | undefined = undefined;
+  let plugin: string | undefined = undefined;
   try {
     cliVersion = getCliVersion();
     // Try to get plugin version from parent command's package.json if available
     if (command?.parent?.name?.()) {
       // Assume plugin package.json is at ../../plugins/<plugin>/package.json
-      const pluginName = command.parent.name();
-      const pluginPath = `../../plugins/${pluginName}/package.json`;
+      plugin = command.parent.name();
+      const pluginPath = `../../plugins/${plugin}/package.json`;
       pluginVersion = getVersion(pluginPath);
     }
   } catch (error) {
     console.error(chalk.red('Error retrieving version information:'), error);
   }
 
-  const context: ExplainContext = {
-    schemaVersion: '1.0', // Tier 3 placeholder
+  // Step 1: Add effects/primitives to context (plugin-agnostic)
+  const effects: string[] = [];
+  if (inputPath) effects.push('inputRead');
+  if (outputPath) effects.push('outputWrite');
+  if (usedFlags['width'] || usedFlags['height']) effects.push('dimensionsChange');
+  if (usedFlags['quality']) effects.push('qualityChange');
+  if (usedFlags['format']) effects.push('formatConversion');
+  if (usedFlags['metadata']) effects.push('metadataPreserved');
+  if (usedFlags['tool'] || command?.parent?.name?.()) effects.push('externalTool');
+  if (usedFlags['noNetwork']) effects.push('noNetwork');
+  // Add more effects for other plugin types as needed
+
+  // Dynamic summary using enhanced phrases
+  // Build ExplainContext with plugin/command info and version
+  // (moved summary logic after context is built)
+
+  // Dynamic outcome and flow using enhanced phrases
+  const sideEffects: string[] = [];
+  if (usedFlags['noNetwork']) sideEffects.push(getPhrase('noNetwork', plugin)());
+  if (usedFlags['metadata']) sideEffects.push(getPhrase('metadataPreserved', plugin)());
+  if (usedFlags['validation']) sideEffects.push(getPhrase('validation', plugin)());
+  if (usedFlags['logging']) sideEffects.push(getPhrase('logging', plugin)());
+  if (usedFlags['cleanup']) sideEffects.push(getPhrase('cleanup', plugin)());
+  // Add more side effects as needed
+
+  // Dynamic explainFlow for any plugin
+  const explainFlow: string[] = [
+    getPhrase('validation', plugin)(),
+    'Check input and output paths for validity and existence.',
+    'Prepare configuration for processing (flags/options).',
+    'Execute main processing logic for each input.',
+    getPhrase('logging', plugin)(),
+    getPhrase('cleanup', plugin)(),
+    'Show summary and any errors encountered.'
+  ];
+
+  // Technical details (plugin-agnostic)
+  const technical: Record<string, any> = {
+    tool: command?.parent?.name?.() || 'unknown',
+    library: options.library || 'unknown',
+    performance: options.performance || 'optimized for batch processing',
+    fileFormats: options.fileFormats || [],
+    compressionRatio: options.compressionRatio || '',
+    estimatedTime: options.estimatedTime || '',
+    memoryUsage: options.memoryUsage || '',
+  };
+
+  let context: ExplainContext = {
+    schemaVersion: '1.0',
     command: commandName,
-    plugin: command?.parent?.name?.() || undefined,
+    plugin,
     cliVersion,
     pluginVersion,
-    // Context enrichment
     timestamp: new Date().toISOString(),
     user: process.env.USER || process.env.USERNAME || 'unknown',
     platform: `${os.platform()} ${os.arch()}`,
     mode,
-    summary: outputPath
-      ? `Resize/Process file(s) and write result to ${outputPath}`
-      : `Operation will complete (no output path specified)`,
+    summary: '', // will set below
     inputs: { inputPath, outputPath, ...allInputs },
     outputs: Object.keys(allOutputs).length > 0 ? allOutputs : undefined,
     usedFlags,
@@ -149,43 +208,33 @@ export function explainFlag({
       reason: v.source === 'user' ? 'user specified' : (v.source === 'default' ? 'default' : 'system'),
       provenance: v.source,
     })),
+    effects,
     outcome: {
-      result: outputPath ? `A new file will be created at ${outputPath}` : 'Operation will complete',
-      sideEffects: [
-        'Input validation is performed to ensure correct file types and dimensions.',
-        'Output paths are resolved and checked for conflicts.',
-        'Image processing is performed using the selected options and flags.',
-        'Results and logs are displayed after processing each file.'
-      ],
-      errors: [], // Placeholder for error reporting
-      warnings: [], // Placeholder for warning reporting
-      confidence: 'high', // Tier 4 placeholder
-      whatWillNotHappen: [ // Tier 4 placeholder
-        'Original files will not be modified',
-        'No network requests will be made'
-      ]
+      result: '', // will set below
+      sideEffects,
+      errors: [],
+      warnings: [],
+      confidence: 'high',
+      whatWillNotHappen: [getPhrase('noNetwork', plugin)()],
     },
-    explainFlow: [
-      '1. Parse and validate all user-provided flags and arguments.',
-      '2. Check input and output paths for validity and existence.',
-      '3. Prepare configuration for image processing (width, height, quality, etc.).',
-      '4. For each input file, process and apply transformations.',
-      '5. Save output files and display results.',
-      '6. Show summary and any errors encountered.'
-    ],
+    explainFlow,
     environment,
     explainOnly,
-    technical: {
-      library: 'sharp',
-      tool: 'mediaproc',
-      performance: 'optimized for batch image processing',
-      fileFormats: ['jpg', 'png', 'webp'],
-      compressionRatio: 'varies by format and quality',
-      estimatedTime: 'depends on input size and options',
-      memoryUsage: 'depends on batch size and image dimensions',
-    },
-    exitCode: 0, // Tier 3 placeholder
+    technical,
+    exitCode: 0,
   };
+
+  // Now set summary and result using the full context
+  if (inputPath && outputPath) {
+    context.summary = `${getPhrase('inputRead', plugin)({ context })} ${getPhrase('outputWrite', plugin)({ context })}`;
+  } else if (inputPath) {
+    context.summary = getPhrase('inputRead', plugin)({ context });
+  } else if (outputPath) {
+    context.summary = getPhrase('outputWrite', plugin)({ context });
+  } else {
+    context.summary = getPhrase('summarySuccess', plugin);
+  }
+  context.outcome.result = outputPath ? getPhrase('outputWrite', plugin)({ context }) : 'Operation will complete';
 
   // Print explanation only
   const explanation = explainFormatter(context, mode);

@@ -1,0 +1,104 @@
+import { CommonPhrases, ExplainContext } from '../types/explainTypes.js';
+
+// Plugin-specific phrase overrides
+const PLUGIN_PHRASES: Record<string, Partial<CommonPhrases>> = {};
+
+/**
+ * Register or override phrases for a plugin.
+ * @param pluginName The plugin name (string)
+ * @param phrases An object of phrase overrides (same shape as COMMON_PHRASES)
+ */
+export function registerPluginPhrases(pluginName: string, phrases: Partial<CommonPhrases>) {
+    PLUGIN_PHRASES[pluginName] = {
+        ...(PLUGIN_PHRASES[pluginName] || {}),
+        ...phrases,
+    };
+}
+
+/**
+ * Lookup a phrase, checking plugin overrides first.
+ * @param key The phrase key (string)
+ * @param pluginName Optional plugin name for override lookup
+ */
+export function getPhrase<K extends keyof CommonPhrases>(key: K, pluginName?: string): CommonPhrases[K] {
+    if (pluginName && PLUGIN_PHRASES[pluginName] && PLUGIN_PHRASES[pluginName][key]) {
+        return PLUGIN_PHRASES[pluginName][key] as CommonPhrases[K];
+    }
+    return COMMON_PHRASES[key];
+}
+// Centralized reusable phrases for explain engine
+export const COMMON_PHRASES: CommonPhrases = {
+    // Section headers and static text for templates
+    header: '  EXPLANATION  ',
+    detailsHeader: '  EXPLANATION (DETAILS)  ',
+    summaryHeader: ' Summary: ',
+    commandType: 'Command Type:',
+    commandCategory: 'Command Category:',
+    commandPurpose: 'Purpose:',
+    commandInputs: 'Inputs:',
+    commandOutputs: 'Outputs:',
+    commandFlags: 'Flags:',
+    commandOptions: 'Options:',
+    commandPerformance: 'Performance:',
+    commandSecurity: 'Security:',
+    commandDependencies: 'Dependencies:',
+    commandSideEffects: 'Side Effects:',
+    commandWarnings: 'Warnings:',
+    commandLimitations: 'Limitations:',
+    commandExamples: 'Examples:',
+    commandDocs: 'Documentation:',
+    commandAuthor: 'Author:',
+    commandVersion: 'Version:',
+    commandLastModified: 'Last Modified:',
+    commandRelated: 'Related Commands:',
+    explainOnly: ' [explain-only] No files were modified. ',
+    contextEnrichmentPrefix: ' Timestamp: ',
+    user: 'User:',
+    platform: 'Platform:',
+    mode: 'Mode:',
+    pluginInfoPrefix: ' This command uses the ',
+    pluginInfoSuffix: ' plugin. ',
+    whatWillHappenHeader: ' What will happen: ',
+    whyChoicesHeader: ' Why these choices were made: ',
+    resultHeader: ' Result: ',
+    schemaVersionPrefix: '[schemaVersion: ',
+    exitCodePrefix: '[exitCode: ',
+    confidencePrefix: '[confidence: ',
+    whatWillNotHappenHeader: ' What will NOT happen: ',
+    inputsOutputsHeader: ' Inputs & Outputs: ',
+    effectsHeader: ' Effects & Primitives: ',
+    technicalWorkflowHeader: ' Technical Workflow: ',
+    flagsUsedHeader: ' Flags Used: ',
+    errorsHeader: ' Errors: ',
+    warningsHeader: ' Warnings: ',
+    technicalDetailsHeader: ' Technical Details: ',
+    environmentHeader: ' Environment: ',
+    diagramPlaceholder: ' Diagram: (visual summary or workflow will appear here) ',
+    inputRead: ({ context }: { context: ExplainContext }) => `The input file "${context?.inputs?.inputPath ?? context?.inputs?.input ?? 'unknown'}" will be read from disk, ensuring the correct format and accessibility.`,
+    outputWrite: ({ context }: { context: ExplainContext }) => `A new file will be written to the output path "${context?.outputs?.outputPath ?? context?.outputs?.output ?? 'unknown'}", with all changes applied.`,
+    noNetwork: () => 'No network requests will be made, guaranteeing local-only processing.',
+    externalTool: ({ context }: { context: ExplainContext }) => `Processing will be performed using the external tool: ${context?.technical?.tool ?? 'unknown'}.`,
+    dimensionsChange: ({ context }: { context: ExplainContext }) => `The dimensions will be changed to width=${context?.usedFlags?.width?.value ?? '?'} and height=${context?.usedFlags?.height?.value ?? '?'}.`,
+    formatConversion: ({ context }: { context: ExplainContext }) => `Format will be converted to ${context?.usedFlags?.format?.value ?? 'unknown'}, ensuring compatibility and optimal quality.`,
+    qualityChange: ({ context }: { context: ExplainContext }) => `Quality will be set to ${context?.usedFlags?.quality?.value ?? '?'} for optimal output fidelity.`,
+    metadataPreserved: () => 'Metadata will be preserved in the output file, retaining important information.',
+    audioProcessing: ({ context }: { context: ExplainContext }) => `Audio will be processed with effects: ${context?.usedFlags?.effects?.value ?? 'none'}.`,
+    videoProcessing: ({ context }: { context: ExplainContext }) => `Video will be processed with codec: ${context?.usedFlags?.codec?.value ?? 'default'}.`,
+    documentProcessing: ({ context }: { context: ExplainContext }) => `Document will be processed with format: ${context?.usedFlags?.format?.value ?? 'default'}.`,
+    streamProcessing: ({ context }: { context: ExplainContext }) => `Stream will be processed in real-time with protocol: ${context?.usedFlags?.protocol?.value ?? 'default'}.`,
+    pipelineExecution: ({ context }: { context: ExplainContext }) => `Pipeline will be executed with ${Array.isArray((context as any)?.steps) ? (context as any).steps.length : 0} steps, orchestrating multiple plugin actions for advanced workflows.`,
+    pluginAction: ({ context }: { context: ExplainContext }) => `Action will be performed by plugin: ${context?.plugin ?? 'unknown'}, leveraging its specialized capabilities.`,
+    errorHandling: () => 'Errors will be handled gracefully, with clear reporting and recovery strategies.',
+    validation: () => 'Validation will be performed on all inputs, ensuring correctness and safety.',
+    outputPreview: () => 'A preview of the output will be generated for user review before finalization.',
+    logging: () => 'Detailed logs will be generated for this operation, aiding in troubleshooting and auditing.',
+    cleanup: () => 'Temporary files and resources will be cleaned up after processing to maintain system hygiene.',
+    summarySuccess: 'Operation completed successfully.',
+    summaryFailure: 'Operation failed. Please review the logs and errors.',
+    summaryPartial: 'Operation completed with some warnings or errors.',
+    warningDeprecated: (flag: string) => `Warning: The flag "${flag}" is deprecated and may be removed in future versions.`,
+    warningIgnored: (flag: string) => `Warning: The flag "${flag}" was ignored due to incompatibility or redundancy.`,
+    tipDetails: 'Tip: Use --explain=details for a technical breakdown of the operation.',
+    tipJson: 'Tip: Use --explain=json to get a machine-readable explanation.',
+    tipHuman: 'Tip: Use --explain=human for a user-friendly summary.'
+};

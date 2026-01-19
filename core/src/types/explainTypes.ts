@@ -1,3 +1,89 @@
+export interface ExplainEffectContext {
+  effect: string;
+  context: ExplainContext;
+}
+
+export interface CommonPhrases {
+  // Section headers and static text
+  header: string;
+  detailsHeader: string;
+  summaryHeader: string;
+  commandType: string;
+  commandCategory: string;
+  commandPurpose: string;
+  commandInputs: string;
+  commandOutputs: string;
+  commandFlags: string;
+  commandOptions: string;
+  commandPerformance: string;
+  commandSecurity: string;
+  commandDependencies: string;
+  commandSideEffects: string;
+  commandWarnings: string;
+  commandLimitations: string;
+  commandExamples: string;
+  commandDocs: string;
+  commandAuthor: string;
+  commandVersion: string;
+  commandLastModified: string;
+  commandRelated: string;
+  explainOnly: string;
+  contextEnrichmentPrefix: string;
+  user: string;
+  platform: string;
+  mode: string;
+  pluginInfoPrefix: string;
+  pluginInfoSuffix: string;
+  whatWillHappenHeader: string;
+  whyChoicesHeader: string;
+  resultHeader: string;
+  schemaVersionPrefix: string;
+  exitCodePrefix: string;
+  confidencePrefix: string;
+  whatWillNotHappenHeader: string;
+  inputsOutputsHeader: string;
+  effectsHeader: string;
+  technicalWorkflowHeader: string;
+  flagsUsedHeader: string;
+  errorsHeader: string;
+  warningsHeader: string;
+  technicalDetailsHeader: string;
+  environmentHeader: string;
+  diagramPlaceholder: string;
+
+  // Dynamic effect phrases (functions)
+  inputRead: (args: { context: ExplainContext }) => string;
+  outputWrite: (args: { context: ExplainContext }) => string;
+  noNetwork: () => string;
+  externalTool: (args: { context: ExplainContext }) => string;
+  dimensionsChange: (args: { context: ExplainContext }) => string;
+  formatConversion: (args: { context: ExplainContext }) => string;
+  qualityChange: (args: { context: ExplainContext }) => string;
+  metadataPreserved: () => string;
+  audioProcessing: (args: { context: ExplainContext }) => string;
+  videoProcessing: (args: { context: ExplainContext }) => string;
+  documentProcessing: (args: { context: ExplainContext }) => string;
+  streamProcessing: (args: { context: ExplainContext }) => string;
+  pipelineExecution: (args: { context: ExplainContext }) => string;
+  pluginAction: (args: { context: ExplainContext }) => string;
+  errorHandling: () => string;
+  validation: () => string;
+  outputPreview: () => string;
+  logging: () => string;
+  cleanup: () => string;
+
+  // Summary and warnings
+  summarySuccess: string;
+  summaryFailure: string;
+  summaryPartial: string;
+  warningDeprecated: (flag: string) => string;
+  warningIgnored: (flag: string) => string;
+
+  // Tips
+  tipDetails: string;
+  tipJson: string;
+  tipHuman?: string;
+}
 // Shared types for the explain engine
 
 export type ExplainFlagSource = 'user' | 'system' | 'default' | 'deprecated' | 'ignored';
@@ -29,7 +115,7 @@ export interface ExplainContext {
   commandGroup?: string;
   cliVersion?: string;
   pluginVersion?: string;
-
+  effects?: string[];
   // Context enrichment
   timestamp?: string; // ISO string
   user?: string; // Username or user id
@@ -90,4 +176,26 @@ export interface ExplainContext {
 
   // Extensibility for plugin authors
   customSections?: Array<{ title: string; items: string[] }>;
+
+  // Optional diagram (ASCII or plugin-provided)
+  diagram?: string;
+  commandType?: string;
+  commandCategory?: string;
+  commandPurpose?: string;
+  commandInputs?: string;
+  commandOutputs?: string;
+  commandFlags?: string;
+  commandOptions?: string;
+  commandPerformance?: string;
+  commandSecurity?: string;
+  commandDependencies?: string;
+  commandSideEffects?: string;
+  commandWarnings?: string;
+  commandLimitations?: string;
+  commandExamples?: string;
+  commandDocs?: string;
+  commandAuthor?: string;
+  commandVersion?: string;
+  commandLastModified?: string;
+  commandRelated?: string;
 }

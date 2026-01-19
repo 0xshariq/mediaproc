@@ -14,8 +14,9 @@ export function explainFormatter(
   context: ExplainContext,
   mode: ExplainMode = ExplainMode.Human
 ): string | object {
+  // Future: Add context-aware formatting logic here if needed
   if (mode === ExplainMode.Json) {
-    // Return raw context for machine use
+    // Return raw context for machine use, including all enhanced fields
     return context;
   }
   if (mode === ExplainMode.Human) {
