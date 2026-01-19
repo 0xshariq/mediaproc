@@ -310,16 +310,15 @@ done
 
 ## 📋 Commands Overview
 
-All **49 commands** organized by category:
+All **48 commands** organized by category:
 
-### 🔄 Transform & Resize (10 commands)
+### 🔄 Transform & Resize (9 commands)
 
 - **resize** - Resize images with advanced fit modes (cover, contain, fill, inside, outside)
 - **crop** - Extract rectangular regions with positioning options
 - **rotate** - Rotate by any angle with background control
 - **flip** - Vertical mirroring (top-to-bottom flip)
 - **flop** - Horizontal mirroring (left-to-right flip)
-- **auto-orient** - Auto-rotate based on EXIF orientation data
 - **affine** - Apply affine transformation matrix (scale, shear, reflect)
 - **trim** - Auto-remove uniform borders from edges
 - **extend** - Add padding/borders with custom colors
@@ -333,7 +332,7 @@ All **49 commands** organized by category:
 - **grayscale** - Convert to black & white
 - **negate** - Create negative/inverted image
 - **normalize** - Auto-enhance contrast and brightness
-- **linear** - Apply linear formula: output = (a * input) + b
+- **linear** - Apply linear formula: output = (a \* input) + b
 - **recomb** - Recombine RGB channels using transformation matrix
 - **flatten** - Remove alpha transparency with background color
 - **unflatten** - Add alpha channel (RGB→RGBA)
@@ -359,10 +358,8 @@ All **49 commands** organized by category:
 - **convolve** - Apply custom convolution kernels (sharpen, emboss, edge)
 - **boolean** - Perform boolean operations between images (AND, OR, XOR)
 
-### 🤖 Smart/AI Operations (6 commands)
+### 🤖 Smart/AI Operations (4 commands)
 
-- **smart-crop** - Intelligent content-aware cropping (attention/entropy)
-- **auto-enhance** - Automatic color and contrast enhancement
 - **palette** - Extract dominant color palettes (2-256 colors)
 - **dominant-color** - Quick dominant color extraction
 - **grid** - Combine images into collage layouts

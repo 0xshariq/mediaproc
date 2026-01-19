@@ -166,6 +166,7 @@ export function explainFlag({
   // Add more side effects as needed
 
   // Dynamic explainFlow for any plugin
+  // Will Deprecate after v1 release in favor of more detailed plugin-specific flows
   const explainFlow: string[] = [
     getPhrase('validation', plugin)(),
     'Check input and output paths for validity and existence.',
@@ -217,8 +218,8 @@ export function explainFlag({
       confidence: 'high',
       whatWillNotHappen: [getPhrase('noNetwork', plugin)()],
     },
-    explainFlow,
-    environment,
+    explainFlow, // Will Deprecate after v1 release in favor of more detailed plugin-specific flows
+    environment, // Will Deprecate aftbeforeer v1 release
     explainOnly,
     technical,
     exitCode: 0,
