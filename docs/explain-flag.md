@@ -4,6 +4,36 @@
 
 The `--explain` flag provides a detailed, user-friendly, and technically robust explanation of what the MediaProc CLI will do before executing any command. It is designed for transparency, education, and debugging, and is extensible for plugin authors.
 
+## Key Principles (2026+)
+
+- **Dynamic, Data-Driven Engine:** Explanations are generated using a layered, primitive-based engine with centralized phrases and context enrichment.
+- **Plugin Extensibility:** Plugins can override or extend phrases and inject custom sections using the `getPhrase` function and the plugin phrase registry.
+- **Output Safety:** No function source, NaN, null, or undefined values are ever shown in output.
+- **Type Safety:** All phrase lookups and context fields are type-checked for reliability and maintainability.
+- **Accessibility:** Output is screen-reader friendly and supports accessible color modes.
+
+## Best Practices for Plugin Authors
+
+- **Always use `getPhrase` for all phrase lookups.**
+  - Do **not** use `COMMON_PHRASES` directly. This ensures extensibility, plugin override support, and future compatibility.
+- **Register plugin phrases** using the plugin phrase registry for overrides or new phrases.
+- **Inject custom sections** via the `customSections` field in the explain context.
+- **Avoid hardcoding output.** Use phrase functions for all dynamic or context-aware text.
+- **Test your plugin's explain output** for all modes (human, details, json) and edge cases.
+
+## Further Improvements (Planned & Ongoing)
+
+1. **Verbosity Levels:** Support for multiple verbosity levels (basic, detailed, technical) via CLI flags or config.
+2. **Accessibility:** Ensure all output is screen-reader friendly and supports high-contrast/accessible color modes.
+3. **Diagram Rendering:** Implement real diagram rendering (ASCII, SVG, or image) for supported commands.
+4. **Plugin Phrase Registry:** Document and enforce plugin phrase override/extension patterns.
+5. **Localization:** Add support for multiple languages/locales using getPhrase and phrase registries.
+6. **Custom Sections:** Allow plugins to inject custom sections into explanations in a type-safe way.
+7. **Explain Context Enrichment:** Add more context fields (e.g., environment, user config, plugin metadata).
+8. **Output Safety:** Continue to enforce no function source, NaN, null, or undefined in output.
+9. **Testing:** Expand test coverage for plugin overrides, phrase argument edge cases, and output safety.
+10. **Docs & Examples:** Provide clear documentation and code samples for plugin authors on extending the explain system.
+
 ## Features
 
 - **Auto-detects command context:** Shows command, plugin, CLI/plugin version, input/output paths, and all used flags.
