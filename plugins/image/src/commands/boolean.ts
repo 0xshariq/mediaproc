@@ -17,7 +17,7 @@ export function booleanCommand(imageCmd: Command): void {
   const cmd = imageCmd
     .command('boolean <input>')
     .description('Perform boolean operations between images')
-    .requiredOption('--operation <op>', 'Boolean operation: and, or, eor (XOR)')
+    .requiredOption('--operation <op>', 'Boolean operation: and, or, eor (XOR)','and')
     .requiredOption('--operand <path>', 'Second image for operation')
     .option('-o, --output <path>', 'Output file path')
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
