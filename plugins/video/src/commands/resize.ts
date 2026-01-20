@@ -146,6 +146,8 @@ export function resizeCommand(videoCmd: Command): void {
 
         // Scale mapping with 8K support
         const scaleMap: Record<string, { width: number; height: number }> = {
+          '144p': { width: 256, height: 144 },
+          '240p': { width: 426, height: 240 },
           '360p': { width: 640, height: 360 },
           '480p': { width: 854, height: 480 },
           '720p': { width: 1280, height: 720 },
