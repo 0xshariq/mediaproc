@@ -27,10 +27,8 @@ import { claheCommand } from './commands/clahe.js';
 import { convolveCommand } from './commands/convolve.js';
 import { vignetteCommand } from './commands/vignette.js';
 import { batchCommand } from './commands/batch.js';
-import { smartCropCommand } from './commands/smart-crop.js';
 import { pixelateCommand } from './commands/pixelate.js';
 import { paletteCommand } from './commands/palette.js';
-import { autoEnhanceCommand } from './commands/auto-enhance.js';
 import { gridCommand } from './commands/grid.js';
 import { splitCommand } from './commands/split.js';
 import { metadataCommand } from './commands/metadata-cmd.js';
@@ -38,7 +36,6 @@ import { stackCommand } from './commands/stack.js';
 import { mirrorCommand } from './commands/mirror.js';
 import { dominantColorCommand } from './commands/dominant-color.js';
 import { flopCommand } from './commands/flop.js';
-import { autoOrientCommand } from './commands/auto-orient.js';
 import { affineCommand } from './commands/affine.js';
 import { thresholdCommand } from './commands/threshold.js';
 import { flattenCommand } from './commands/flatten.js';
@@ -65,7 +62,6 @@ export function register(program: Command): void {
   rotateCommand(imageCmd);
   flipCommand(imageCmd);
   flopCommand(imageCmd);
-  autoOrientCommand(imageCmd);
   affineCommand(imageCmd);
   trimCommand(imageCmd);
   extendCommand(imageCmd);
@@ -108,8 +104,6 @@ export function register(program: Command): void {
   booleanCommand(imageCmd);
   
   // Smart/AI operations
-  smartCropCommand(imageCmd);
-  autoEnhanceCommand(imageCmd);
   pixelateCommand(imageCmd);
   paletteCommand(imageCmd);
   gridCommand(imageCmd);
