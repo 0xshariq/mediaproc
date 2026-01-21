@@ -30,6 +30,7 @@ export function explainFlag({
 }) {
   // Auto-detect command name
   const commandName = command?.name?.() || command?._name || 'unknown';
+  // Must remove from human and details mode not from json mode
   const environment = {
     cwd: process.cwd(),
     os: `${os.type()} ${os.release()} (${os.platform()})`,
@@ -128,7 +129,7 @@ export function explainFlag({
   let pluginVersion: string | undefined = undefined;
   let plugin: string | undefined = undefined;
   try {
-    cliVersion = getCliVersion();
+    cliVersion = getCliVersion('../../../cli/package.json');
     // Try to get plugin version from parent command's package.json if available
     if (command?.parent?.name?.()) {
       // Assume plugin package.json is at ../../plugins/<plugin>/package.json
