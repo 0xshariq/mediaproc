@@ -52,7 +52,7 @@ export function extractCommand(videoCmd: Command): void {
         });
         return;
       }
-      const inputPaths = await parseInputPaths(input, VIDEO_EXTENSIONS);
+      const inputPaths = parseInputPaths(input, VIDEO_EXTENSIONS);
       const outputPathsMap = resolveOutputPaths(inputPaths, options.output, { suffix: '-audio', newExtension: options.format });
       const outputPaths = Array.from(outputPathsMap.values());
       for (let i = 0; i < inputPaths.length; i++) {
