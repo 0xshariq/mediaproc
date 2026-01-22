@@ -2,10 +2,8 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-
 import * as fs from 'fs';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
-import { MediaProcError, ValidationError, UserInputError, EXIT_CODES } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import path from 'path';
@@ -105,19 +103,15 @@ export function booleanCommand(imageCmd: Command): void {
     try {
       // Validate operand file exists (single file)
       if (!options.operand || !fs.existsSync(options.operand)) {
-        throw new ValidationError(`Operand image not found: ${options.operand}`, undefined, undefined);
+        spinner.fail(chalk.red(`Operand image not found: ${options.operand}`));
+        process.exit(1);
       }
 
       const validOperations = ['and', 'or', 'eor'];
       const operation = options.operation.toLowerCase();
       if (!validOperations.includes(operation)) {
-        throw new ValidationError(`Invalid operation. Use: ${validOperations.join(', ')}`, undefined, undefined);
-      }
-
-      // Validate quality
-      const quality = typeof options.quality === 'number' ? options.quality : 90;
-      if (isNaN(quality) || quality < 1 || quality > 100) {
-        throw new ValidationError('Quality must be an integer between 1 and 100', { quality }, undefined);
+        spinner.fail(chalk.red(`Invalid operation. Use: ${validOperations.join(', ')}`));
+        process.exit(1);
       }
 
       // Validate input paths (can be multiple)
@@ -126,11 +120,14 @@ export function booleanCommand(imageCmd: Command): void {
       });
 
       if (errors.length > 0) {
-        throw new ValidationError('Validation failed', errors, undefined);
+        spinner.fail(chalk.red('Validation failed:'));
+        errors.forEach(err => console.log(chalk.red(`  ✗ ${err}`)));
+        process.exit(1);
       }
 
       if (inputFiles.length === 0) {
-        throw new UserInputError('No valid image files found', undefined, undefined);
+        spinner.fail(chalk.red('No valid image files found'));
+        process.exit(1);
       }
 
       const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
@@ -153,6 +150,7 @@ export function booleanCommand(imageCmd: Command): void {
         console.log(chalk.green(`✓ Would perform ${operation.toUpperCase()} operation on ${inputFiles.length} file(s):`));
         inputFiles.forEach(f => console.log(chalk.dim(`  - ${f}`)));
         console.log(chalk.dim(`  Operand: ${options.operand}`));
+        showPluginBranding('Image', '../../package.json');
         return;
       }
 
@@ -169,11 +167,11 @@ export function booleanCommand(imageCmd: Command): void {
 
           const outputExt = path.extname(outputPath).toLowerCase();
           if (outputExt === '.jpg' || outputExt === '.jpeg') {
-            pipeline.jpeg({ quality });
+            pipeline.jpeg({ quality: options.quality || 90 });
           } else if (outputExt === '.png') {
-            pipeline.png({ quality });
+            pipeline.png({ quality: options.quality || 90 });
           } else if (outputExt === '.webp') {
-            pipeline.webp({ quality });
+            pipeline.webp({ quality: options.quality || 90 });
           }
 
           await pipeline.toFile(outputPath);
@@ -194,16 +192,13 @@ export function booleanCommand(imageCmd: Command): void {
       if (failCount > 0) {
         console.log(chalk.red(`  ✗ Failed: ${failCount}`));
       }
+      showPluginBranding('Image', '../../package.json');
 
     } catch (error) {
       spinner.fail(chalk.red('Processing failed'));
-      if (error instanceof MediaProcError) {
-        console.error(chalk.red(error.message));
-        process.exit(error.exitCode);
-      } else {
-        console.error(chalk.red(error instanceof Error ? error.message : String(error)));
-        process.exit(EXIT_CODES.INTERNAL);
-      }
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(chalk.red(errorMessage));
+      process.exit(1);
     }
   });
 }

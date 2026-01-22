@@ -3,9 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-
-import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
-import { MediaProcError, ValidationError, UserInputError, EXIT_CODES } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import path from 'path';
 import { ImageOptions } from '../types.js';
@@ -104,23 +102,20 @@ export function batchCommand(imageCmd: Command): void {
       const spinner = ora('Scanning directory...').start();
 
       try {
-        // Validate quality
-        const quality = typeof options.quality === 'number' ? options.quality : 90;
-        if (isNaN(quality) || quality < 1 || quality > 100) {
-          throw new ValidationError('Quality must be an integer between 1 and 100', { quality }, undefined);
-        }
-
         // Validate input directory
         const { inputFiles, errors } = validatePaths(directory, undefined, {
           allowedExtensions: IMAGE_EXTENSIONS,
         });
 
         if (errors.length > 0) {
-          throw new ValidationError('Validation failed', errors, undefined);
+          spinner.fail(chalk.red('Validation failed:'));
+          errors.forEach(err => console.log(chalk.red(`  ✗ ${err}`)));
+          process.exit(1);
         }
 
         if (inputFiles.length === 0) {
-          throw new UserInputError('No valid image files found in directory', undefined, undefined);
+          spinner.fail(chalk.red('No valid image files found in directory'));
+          process.exit(1);
         }
 
         // Use validated files from path validator
@@ -147,6 +142,7 @@ export function batchCommand(imageCmd: Command): void {
           if (imageFiles.length > 10) {
             console.log(chalk.dim(`  ... and ${imageFiles.length - 10} more`));
           }
+
           return;
         }
 
@@ -185,13 +181,13 @@ export function batchCommand(imageCmd: Command): void {
 
               case 'convert':
                 if (options.format) {
-                  pipeline = pipeline.toFormat(options.format as any, { quality });
+                  pipeline = pipeline.toFormat(options.format as any, { quality: options.quality || 90 });
                 }
                 break;
 
               case 'optimize':
                 pipeline = pipeline.toFormat(path.extname(inputFile).slice(1) as any, {
-                  quality
+                  quality: options.quality || 85
                 });
                 break;
 
@@ -225,7 +221,7 @@ export function batchCommand(imageCmd: Command): void {
                 break;
 
               default:
-                throw new ValidationError(`Unknown operation: ${options.operation}`, undefined, undefined);
+                throw new Error(`Unknown operation: ${options.operation}`);
             }
 
             await pipeline.toFile(outputPath);
@@ -244,16 +240,16 @@ export function batchCommand(imageCmd: Command): void {
         if (failed > 0) {
           console.log(chalk.yellow(`  Failed: ${failed}`));
         }
+        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Batch processing failed'));
-        if (error instanceof MediaProcError) {
-          console.error(chalk.red(error.message));
-          process.exit(error.exitCode);
+        if (options.verbose) {
+          console.error(chalk.red('Error details:'), error);
         } else {
-          console.error(chalk.red(error instanceof Error ? error.message : String(error)));
-          process.exit(EXIT_CODES.INTERNAL);
+          console.error(chalk.red((error as Error).message));
         }
+        process.exit(1);
       }
     });
 }
