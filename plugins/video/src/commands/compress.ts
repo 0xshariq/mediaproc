@@ -8,7 +8,7 @@ import {
   checkFFmpeg,
   formatFileSize,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, createStandardHelp, showPluginBranding, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 
 export function compressCommand(videoCmd: Command): void {
@@ -218,7 +218,6 @@ export function compressCommand(videoCmd: Command): void {
 
         if (!options.dryRun) {
           console.log(chalk.green.bold(`\n✨ Successfully compressed ${inputFiles.length} video(s)!`));
-          showPluginBranding('Video', '../../package.json');
         }
       } catch (error) {
         spinner.fail(chalk.red(`Error: ${(error as Error).message}`));

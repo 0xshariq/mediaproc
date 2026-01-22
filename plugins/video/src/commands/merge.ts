@@ -11,7 +11,7 @@ import {
   formatFileSize,
   formatDuration,
 } from '../utils/ffmpeg.js';
-import { fileExists, validatePaths, resolveOutputPaths, createStandardHelp, showPluginBranding, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { fileExists, validatePaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 
 export function mergeCommand(videoCmd: Command): void {
@@ -203,7 +203,6 @@ export function mergeCommand(videoCmd: Command): void {
           console.log(chalk.dim('\nCommand:'));
           console.log(chalk.gray(`  ffmpeg ${args.join(' ')}\n`));
           console.log(chalk.green('✓ Dry run complete'));
-          showPluginBranding('Video', '../../package.json');
           return;
         }
 
@@ -228,7 +227,6 @@ export function mergeCommand(videoCmd: Command): void {
         console.log(chalk.gray(`   Total duration: ${formatDuration(totalDuration)}`));
         console.log(chalk.gray(`   Output size: ${formatFileSize(outputStat.size)}`));
         console.log(chalk.dim(`\n   ${output}`));
-        showPluginBranding('Video', '../../package.json');
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
         process.exit(1);

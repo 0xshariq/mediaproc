@@ -1,7 +1,7 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
 import { runFFmpeg, checkFFmpeg } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import ora from 'ora';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 
@@ -87,7 +87,6 @@ export function extractCommand(videoCmd: Command): void {
           spinner.fail(chalk.red.bold(`✗ ${err.message}`));
         }
       }
-      showPluginBranding('Video', '../../package.json');
     });
 
   // Extract frame subcommand
@@ -160,7 +159,6 @@ export function extractCommand(videoCmd: Command): void {
           spinner.fail(chalk.red.bold(`✗ ${err.message}`));
         }
       }
-      showPluginBranding('Video', '../../package.json');
     });
 
   // Extract thumbnail subcommand
@@ -230,6 +228,5 @@ export function extractCommand(videoCmd: Command): void {
           spinner.fail(chalk.red.bold(`✗ ${err.message}`));
         }
       }
-      showPluginBranding('Video', '../../package.json');
     });
 }

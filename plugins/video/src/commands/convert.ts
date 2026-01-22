@@ -8,7 +8,7 @@ import {
     formatFileSize,
     formatDuration,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, showPluginBranding, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import ora from 'ora';
 
@@ -230,7 +230,6 @@ export function convertCommand(videoCmd: Command): void {
                         console.log(chalk.dim('\n[DRY RUN] Would execute:'));
                         console.log(chalk.cyan(`ffmpeg ${args.join(' ')}`));
                         console.log();
-                        showPluginBranding('Video', '../../package.json');
                         continue;
                     }
 
@@ -270,7 +269,6 @@ export function convertCommand(videoCmd: Command): void {
                 if (inputPaths.length > 1) {
                     console.log(chalk.green.bold(`\n✓ Converted ${inputPaths.length} videos successfully!`));
                 }
-                showPluginBranding('Video', '../../package.json');
 
             } catch (error) {
                 console.log(chalk.red(`\n❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`));

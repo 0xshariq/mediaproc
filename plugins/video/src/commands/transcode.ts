@@ -10,7 +10,7 @@ import {
   formatFileSize,
   formatDuration
 } from '../utils/ffmpeg.js';
-import { createStandardHelp, parseInputPaths, showPluginBranding, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { createStandardHelp, parseInputPaths, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
 
 export function transcodeCommand(videoCmd: Command): void {
@@ -133,7 +133,6 @@ export function transcodeCommand(videoCmd: Command): void {
           console.log(chalk.gray(`  Video codec: ${options.codec || 'h264'}`));
           console.log(chalk.gray(`  Audio codec: ${audioCodec}`));
           console.log(chalk.green('\n✓ Dry run complete'));
-          showPluginBranding('Video', '../../package.json');
           return;
         }
 
@@ -158,7 +157,6 @@ export function transcodeCommand(videoCmd: Command): void {
         console.log(chalk.gray(`   Codec: ${metadata.codec} → ${options.codec || 'h264'}`));
         console.log(chalk.gray(`   Size: ${formatFileSize(inputStat.size)} → ${formatFileSize(outputStat.size)}`));
         console.log(chalk.dim(`\n   ${output}`));
-        showPluginBranding('Video', '../../package.json');
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
         process.exit(1);
