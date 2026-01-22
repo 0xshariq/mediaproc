@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import type { StatsOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 
@@ -105,7 +105,6 @@ export function statsCommand(imageCmd: Command): void {
             console.log(chalk.dim(`  [${index + 1}/${totalFiles}] ${file}`));
           });
           console.log(chalk.dim(`\n  Total files: ${totalFiles}`));
-          showPluginBranding('Image', '../../package.json');
           process.exit(0);
         }
 
@@ -277,7 +276,6 @@ export function statsCommand(imageCmd: Command): void {
         if (failCount > 0 && failCount === totalFiles) {
           process.exit(1);
         }
-        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to validate input'));

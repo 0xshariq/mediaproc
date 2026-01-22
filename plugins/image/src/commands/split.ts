@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import path from 'path';
 import { ImageOptions } from '../types.js';
@@ -156,7 +156,6 @@ export function splitCommand(imageCmd: Command): void {
           console.log(chalk.green(`✓ Would split ${inputFiles.length} file(s):`));
           inputFiles.forEach(f => console.log(chalk.dim(`  - ${f}`)));
           console.log(chalk.dim(`  Into: ${rows}x${columns} grid (${totalTiles} tiles each)`));
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -232,7 +231,6 @@ export function splitCommand(imageCmd: Command): void {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
         console.log(chalk.dim(`  Tiles per image: ${totalTiles} (${rows}x${columns})`));
-        showPluginBranding('Image', '../../package.json');
       } catch (error) {
         spinner.fail(chalk.red('Processing failed'));
         if (options.verbose) {

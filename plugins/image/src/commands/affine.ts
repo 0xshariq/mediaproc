@@ -2,7 +2,8 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, MediaProcError, ValidationError, UserInputError, EXIT_CODES } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import path from 'node:path';
@@ -94,7 +95,7 @@ export function affineCommand(imageCmd: Command): void {
             'Background color matters for rotations/shears'
           ]
         });
-      };
+      }
       const spinner = ora('Validating inputs...').start();
 
       try {
@@ -104,11 +105,16 @@ export function affineCommand(imageCmd: Command): void {
         try {
           matrix = JSON.parse(matrixStr);
           if (!Array.isArray(matrix) || (matrix.length !== 4 && matrix.length !== 6)) {
-            throw new Error('Matrix must have 4 or 6 values');
+            throw new ValidationError('Matrix must have 4 or 6 values', undefined, undefined);
           }
         } catch (e) {
-          spinner.fail(chalk.red('Invalid matrix format. Use JSON array like [1,0,0,1]'));
-          process.exit(1);
+          throw new ValidationError('Invalid matrix format. Use JSON array like [1,0,0,1]', undefined, undefined);
+        }
+
+        // Validate quality
+        const quality = typeof options.quality === 'number' ? options.quality : 90;
+        if (isNaN(quality) || quality < 1 || quality > 100) {
+          throw new ValidationError('Quality must be an integer between 1 and 100', { quality }, undefined);
         }
 
         const { inputFiles, outputPath, errors } = validatePaths(input, options.output, {
@@ -116,14 +122,11 @@ export function affineCommand(imageCmd: Command): void {
         });
 
         if (errors.length > 0) {
-          spinner.fail(chalk.red('Validation failed:'));
-          errors.forEach(err => console.log(chalk.red(`  ✗ ${err}`)));
-          process.exit(1);
+          throw new ValidationError('Validation failed', errors, undefined);
         }
 
         if (inputFiles.length === 0) {
-          spinner.fail(chalk.red('No valid image files found'));
-          process.exit(1);
+          throw new UserInputError('No valid image files found', undefined, undefined);
         }
 
         const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
@@ -136,7 +139,7 @@ export function affineCommand(imageCmd: Command): void {
           console.log(chalk.blue('\nConfiguration:'));
           console.log(chalk.dim(`  Matrix: [${matrix.join(', ')}]`));
           console.log(chalk.dim(`  Interpolator: ${options.interpolator || 'bilinear'}`));
-          console.log(chalk.dim(`  Quality: ${options.quality || 90}`));
+          console.log(chalk.dim(`  Quality: ${quality}`));
         }
 
         if (options.dryRun) {
@@ -146,7 +149,6 @@ export function affineCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -167,11 +169,11 @@ export function affineCommand(imageCmd: Command): void {
 
             const outputExt = path.extname(outputPath).toLowerCase();
             if (outputExt === '.jpg' || outputExt === '.jpeg') {
-              pipeline.jpeg({ quality: options.quality || 90 });
+              pipeline.jpeg({ quality });
             } else if (outputExt === '.png') {
-              pipeline.png({ quality: options.quality || 90 });
+              pipeline.png({ quality });
             } else if (outputExt === '.webp') {
-              pipeline.webp({ quality: options.quality || 90 });
+              pipeline.webp({ quality });
             }
 
             await pipeline.toFile(outputPath);
@@ -192,12 +194,15 @@ export function affineCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image', '../../package.json');
       } catch (error) {
         spinner.fail(chalk.red('Failed to apply affine transformation'));
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error(chalk.red(errorMessage));
-        process.exit(1);
+        if (error instanceof MediaProcError) {
+          console.error(chalk.red(error.message));
+          process.exit(error.exitCode);
+        } else {
+          console.error(chalk.red(error instanceof Error ? error.message : String(error)));
+          process.exit(EXIT_CODES.INTERNAL);
+        }
       }
     });
 }

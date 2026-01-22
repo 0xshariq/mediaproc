@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance, sharp } from '../utils/sharp.js';
 import path from 'path';
@@ -158,7 +158,6 @@ export function watermarkCommand(imageCmd: Command): void {
           if (watermarkType === 'text') {
             console.log(chalk.dim(`  Text watermark with font size: ${options.fontSize || 48}px`));
           }
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -287,7 +286,6 @@ export function watermarkCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Processing failed'));

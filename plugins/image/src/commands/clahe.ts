@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { ImageOptions } from '../index.js';
 
@@ -120,7 +120,6 @@ export function claheCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -158,7 +157,6 @@ export function claheCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image', '../../package.json');
       } catch (error) {
         spinner.fail(chalk.red('Failed to apply CLAHE'));
         if (options.verbose) {

@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp, normalizeColor } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, normalizeColor } from '@mediaproc/core';
 import type { FilterOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import path from 'node:path';
@@ -114,7 +114,6 @@ export function tintCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -163,7 +162,6 @@ export function tintCommand(imageCmd: Command): void {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
         console.log(chalk.dim(`  Color: ${options.color || '#0000ff'}`));
-        showPluginBranding('Image', '../../package.json');
       } catch (error) {
         spinner.fail(chalk.red('Failed to apply tint'));
         if (options.verbose) {

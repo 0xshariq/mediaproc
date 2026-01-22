@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import type { ResizeOptions } from '../types.js';
 import { createSharpInstance, sharp } from '../utils/sharp.js';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import path from 'node:path';
 
 
@@ -136,7 +136,6 @@ export function resizeCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -220,8 +219,6 @@ export function resizeCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-
-        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to resize images'));

@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, MediaProcError, ErrorType, EXIT_CODES } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import path from 'node:path';
@@ -85,12 +85,21 @@ export function optimizeCommand(imageCmd: Command): void {
         if (errors.length > 0) {
           spinner.fail(chalk.red('Validation failed:'));
           errors.forEach(err => console.log(chalk.red(`  ✗ ${err}`)));
-          process.exit(1);
+          throw new MediaProcError({
+            message: 'Input validation failed',
+            type: ErrorType.Validation,
+            exitCode: EXIT_CODES.VALIDATION,
+            details: errors
+          });
         }
 
         if (inputFiles.length === 0) {
           spinner.fail(chalk.red('No valid image files found'));
-          process.exit(1);
+          throw new MediaProcError({
+            message: 'No valid image files found',
+            type: ErrorType.UserInput,
+            exitCode: EXIT_CODES.USER_INPUT,
+          });
         }
 
         const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
@@ -99,7 +108,14 @@ export function optimizeCommand(imageCmd: Command): void {
 
         spinner.succeed(chalk.green(`Found ${inputFiles.length} image(s) to process`));
 
-        const quality = options.aggressive ? 70 : (options.quality || 85);
+        let quality = options.aggressive ? 70 : (options.quality || 85);
+        if (isNaN(quality) || quality < 1 || quality > 100) {
+          throw new MediaProcError({
+            message: 'Quality must be an integer between 1 and 100',
+            type: ErrorType.UserInput,
+            exitCode: EXIT_CODES.USER_INPUT,
+          });
+        }
 
         if (options.verbose) {
           console.log(chalk.blue('\nConfiguration:'));
@@ -114,7 +130,6 @@ export function optimizeCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -166,16 +181,19 @@ export function optimizeCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to optimize image'));
-        if (options.verbose) {
-          console.error(chalk.red('Error details:'), error);
+        if (error && typeof error === 'object' && 'exitCode' in error && typeof error.exitCode === 'number') {
+          process.exit(error.exitCode);
         } else {
-          console.error(chalk.red((error as Error).message));
+          if (options.verbose) {
+            console.error(chalk.red('Error details:'), error);
+          } else {
+            console.error(chalk.red((error && error.message) || String(error)));
+          }
+          process.exit(EXIT_CODES.INTERNAL);
         }
-        process.exit(1);
       }
     });
 }

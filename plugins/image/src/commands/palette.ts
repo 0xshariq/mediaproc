@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { ImageOptions } from '../types.js';
 
@@ -102,7 +102,6 @@ export function paletteCommand(imageCmd: Command): void {
             console.log(chalk.dim(`  [${index + 1}/${totalFiles}] ${file}`));
           });
           console.log(chalk.dim(`\n  Total files: ${totalFiles}`));
-          showPluginBranding('Image', '../../package.json');
           process.exit(0);
         }
 
@@ -221,7 +220,6 @@ export function paletteCommand(imageCmd: Command): void {
         if (failCount > 0 && failCount === totalFiles) {
           process.exit(1);
         }
-        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to validate input'));

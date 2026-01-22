@@ -4,7 +4,7 @@ import ora from 'ora';
 
 import type { ConvertOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 
 
 interface ConvertOptionsExtended extends ConvertOptions {
@@ -124,7 +124,6 @@ export function convertCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -184,8 +183,6 @@ export function convertCommand(imageCmd: Command): void {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
         console.log(chalk.dim(`  Target format: ${options.format.toUpperCase()}`));
-
-        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to convert images'));

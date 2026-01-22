@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { stat } from 'node:fs/promises';
@@ -118,7 +118,6 @@ export function compressCommand(imageCmd: Command): void {
             console.log(chalk.gray(`   Output: ${outputFile}`));
             console.log(chalk.gray(`   Quality: ${options.quality || 75}`));
             console.log(chalk.gray(`   Lossy: ${options.lossy ? 'Yes' : 'No'}`));
-            showPluginBranding('Image', '../../package.json');
             continue;
           }
 
@@ -197,7 +196,6 @@ export function compressCommand(imageCmd: Command): void {
         console.log();
         console.log(chalk.green.bold('✓ Compression Complete!'));
         console.log(chalk.gray(`   Processed: ${inputFiles.length} image(s)`));
-        showPluginBranding('Image', '../../package.json');
       } catch (error) {
         spinner.fail(chalk.red('Error during compression'));
         console.error(chalk.red(`Error: ${(error as Error).message}`));

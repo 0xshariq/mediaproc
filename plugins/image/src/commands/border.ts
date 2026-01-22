@@ -2,7 +2,9 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding, normalizeColor } from '@mediaproc/core';
+
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, normalizeColor } from '@mediaproc/core';
+import { MediaProcError, ValidationError, UserInputError, EXIT_CODES } from '@mediaproc/core';
 import type { BorderOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 
@@ -79,19 +81,22 @@ export function borderCommand(imageCmd: Command): void {
       const spinner = ora('Validating inputs...').start();
 
       try {
+        // Validate quality
+        const quality = typeof options.quality === 'number' ? options.quality : 90;
+        if (isNaN(quality) || quality < 1 || quality > 100) {
+          throw new ValidationError('Quality must be an integer between 1 and 100', { quality }, undefined);
+        }
+
         const { inputFiles, outputPath, errors } = validatePaths(input, options.output, {
           allowedExtensions: IMAGE_EXTENSIONS,
         });
 
         if (errors.length > 0) {
-          spinner.fail(chalk.red('Validation failed:'));
-          errors.forEach(err => console.log(chalk.red(`  ✗ ${err}`)));
-          process.exit(1);
+          throw new ValidationError('Validation failed', errors, undefined);
         }
 
         if (inputFiles.length === 0) {
-          spinner.fail(chalk.red('No valid image files found'));
-          process.exit(1);
+          throw new UserInputError('No valid image files found', undefined, undefined);
         }
 
         const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
@@ -104,6 +109,7 @@ export function borderCommand(imageCmd: Command): void {
           console.log(chalk.blue('\nConfiguration:'));
           console.log(chalk.dim(`  Border width: ${options.width || 10}px`));
           console.log(chalk.dim(`  Border color: ${options.color || '#000000'}`));
+          console.log(chalk.dim(`  Quality: ${quality}`));
         }
 
         if (options.dryRun) {
@@ -113,7 +119,6 @@ export function borderCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -153,16 +158,16 @@ export function borderCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to add border'));
-        if (options.verbose) {
-          console.error(chalk.red('Error details:'), error);
+        if (error instanceof MediaProcError) {
+          console.error(chalk.red(error.message));
+          process.exit(error.exitCode);
         } else {
-          console.error(chalk.red((error as Error).message));
+          console.error(chalk.red(error instanceof Error ? error.message : String(error)));
+          process.exit(EXIT_CODES.INTERNAL);
         }
-        process.exit(1);
       }
     });
 }

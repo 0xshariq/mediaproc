@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, createStandardHelp } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { ImageOptions } from '../types.js';
 
@@ -31,6 +31,7 @@ export function gridCommand(imageCmd: Command): void {
     .option('-g, --gap <pixels>', 'Gap between images in pixels (default: 10)', parseInt, 10)
     .option('-b, --background <color>', 'Background color (default: #FFFFFF)', '#FFFFFF')
     .option('-o, --output <path>', 'Output file path (default: grid.jpg)')
+    .option('-q, --quality <quality>', 'Output quality 1-100 (default: 90)', parseInt, 90)
     .option('--dry-run', 'Show what would be done without executing')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-v, --verbose', 'Verbose output')
@@ -106,8 +107,8 @@ export function gridCommand(imageCmd: Command): void {
       const spinner = ora('Creating grid...').start();
 
       try {
-        // Validate all input files (don't pass output since grid creates a single file)
-        const { inputFiles, errors } = validatePaths(images.join(','), undefined, {
+        // Validate all input files and output path using core helpers
+        const { inputFiles, errors } = validatePaths(images.join(','), options.output, {
           allowedExtensions: IMAGE_EXTENSIONS,
         });
 
@@ -125,8 +126,23 @@ export function gridCommand(imageCmd: Command): void {
         const validImages = inputFiles;
         const imageCount = validImages.length;
 
-        // Resolve output path - grid creates a single output file
-        const outputPath = options.output || 'grid.jpg';
+        // Use resolveOutputPaths to get output path
+        const outputMap = require('@mediaproc/core').resolveOutputPaths(validImages, options.output || 'grid.jpg', {
+          newExtension: '.jpg',
+        });
+        // For grid, only one output file is created
+        const outputPath = outputMap.values().next().value;
+
+        // Validate quality
+        let quality = Number(options.quality);
+        if (isNaN(quality) || quality < 1 || quality > 100) {
+          const { MediaProcError, ErrorType, EXIT_CODES } = require('@mediaproc/core');
+          throw new MediaProcError({
+            message: 'Quality must be an integer between 1 and 100',
+            type: ErrorType.UserInput,
+            exitCode: EXIT_CODES.USER_INPUT,
+          });
+        }
 
         // Calculate grid dimensions
         let columns = options.columns;
@@ -142,8 +158,9 @@ export function gridCommand(imageCmd: Command): void {
           columns = Math.ceil(imageCount / rows);
         }
 
-        const cellWidth = options.width || 300;
-        const cellHeight = options.height || 300;
+        // Use user-supplied cell size (already handled by Commander defaults)
+        const cellWidth = options.width ?? 300;
+        const cellHeight = options.height ?? 300;
         const gap = options.gap || 10;
         const background = options.background || '#FFFFFF';
 
@@ -158,6 +175,7 @@ export function gridCommand(imageCmd: Command): void {
           console.log(chalk.dim(`  Gap: ${gap}px`));
           console.log(chalk.dim(`  Canvas: ${gridWidth}x${gridHeight}`));
           console.log(chalk.dim(`  Output: ${outputPath}`));
+          console.log(chalk.dim(`  Quality: ${quality}`));
           spinner.start('Processing...');
         }
 
@@ -167,7 +185,6 @@ export function gridCommand(imageCmd: Command): void {
           console.log(chalk.dim(`  Images: ${imageCount}`));
           console.log(chalk.dim(`  Layout: ${columns}x${rows}`));
           console.log(chalk.dim(`  Output size: ${gridWidth}x${gridHeight}`));
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -180,6 +197,7 @@ export function gridCommand(imageCmd: Command): void {
             background: background
           }
         }).png().toBuffer();
+        
 
         // Process and position images
         const composites = [];
@@ -207,9 +225,20 @@ export function gridCommand(imageCmd: Command): void {
         }
 
         // Composite all images onto canvas
-        await createSharpInstance(canvas)
-          .composite(composites)
-          .toFile(outputPath);
+        let sharpInstance = createSharpInstance(canvas).composite(composites);
+        const ext = require('path').extname(outputPath).toLowerCase();
+        if (ext === '.jpg' || ext === '.jpeg') {
+          sharpInstance = sharpInstance.jpeg({ quality });
+        } else if (ext === '.png') {
+          sharpInstance = sharpInstance.png({ quality });
+        } else if (ext === '.webp') {
+          sharpInstance = sharpInstance.webp({ quality });
+        } else if (ext === '.avif') {
+          sharpInstance = sharpInstance.avif({ quality });
+        } else if (ext === '.tiff' || ext === '.tif') {
+          sharpInstance = sharpInstance.tiff({ quality });
+        }
+        await sharpInstance.toFile(outputPath);
 
         const outputStats = fs.statSync(outputPath);
 
@@ -219,7 +248,6 @@ export function gridCommand(imageCmd: Command): void {
         console.log(chalk.dim(`  Cell size: ${cellWidth}x${cellHeight}`));
         console.log(chalk.dim(`  Output: ${outputPath} (${gridWidth}x${gridHeight})`));
         console.log(chalk.dim(`  File size: ${(outputStats.size / 1024).toFixed(2)}KB`));
-        showPluginBranding('Image', '../../package.json');
       } catch (error) {
         spinner.fail(chalk.red('Failed to create grid'));
         if (options.verbose) {

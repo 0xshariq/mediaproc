@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import type { FilterOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import path from 'node:path';
@@ -110,7 +110,7 @@ export function medianCommand(imageCmd: Command): void {
 
         if (options.verbose) {
           console.log(chalk.blue('\nConfiguration:'));
-          console.log(chalk.dim(`  Filter size: ${options.size || 3}`));
+          console.log(chalk.dim(`  Filter size: ${options.size}`));
           console.log(chalk.dim(`  Quality: ${options.quality || 90}`));
         }
 
@@ -121,7 +121,6 @@ export function medianCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -135,8 +134,14 @@ export function medianCommand(imageCmd: Command): void {
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 
           try {
+            // Validate filter size
+            let filterSize = Number(options.size);
+            if (isNaN(filterSize) || filterSize < 1 || filterSize > 50) {
+              throw new Error('Filter size must be a number between 1 and 50');
+            }
+
             const metadata = await createSharpInstance(inputFile).metadata();
-            const pipeline = createSharpInstance(inputFile).median(options.size || 3);
+            const pipeline = createSharpInstance(inputFile).median(filterSize);
 
             const outputExt = path.extname(outputPath).toLowerCase();
             if (outputExt === '.jpg' || outputExt === '.jpeg') {
@@ -169,7 +174,6 @@ export function medianCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to apply median filter'));

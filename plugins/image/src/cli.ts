@@ -48,7 +48,9 @@ import { linearCommand } from './commands/linear.js';
 import { recombCommand } from './commands/recomb.js';
 import { compressCommand } from './commands/compress.js';
 import { infoCommand } from './commands/info.js';
-import { explainPreActionHook, getVersion } from '@mediaproc/core';
+import { explainPreActionHook, getVersion, showPluginBranding } from '@mediaproc/core';
+// Dynamically read version from package.json
+export const version = getVersion(require.resolve('../package.json'));
 
 const program = new Command();
 
@@ -133,6 +135,9 @@ compressCommand(program);
 infoCommand(program);
 
 program.hook('preAction', explainPreActionHook);
+program.hook('postAction', () => {
+  showPluginBranding('Image', require.resolve('../package.json'));
+});
 
 program.parse(process.argv);
 

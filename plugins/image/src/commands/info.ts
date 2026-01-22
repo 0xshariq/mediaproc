@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import { stat } from 'node:fs/promises';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 
@@ -184,7 +184,6 @@ export function infoCommand(imageCmd: Command): void {
 
               console.log();
             }
-            showPluginBranding('Image', '../../package.json');
           } catch (error) {
             console.error(chalk.red(`\n✗ Failed to read ${fileName}`));
             console.error(chalk.red(`   Error: ${(error as Error).message}`));

@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, createStandardHelp } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { ImageOptions } from '../types.js';
 
@@ -27,6 +27,7 @@ export function stackCommand(imageCmd: Command): void {
     .option('-g, --gap <pixels>', 'Gap between images in pixels (default: 0)', parseInt, 0)
     .option('-b, --background <color>', 'Background color for gaps (default: transparent)', 'rgba(0,0,0,0)')
     .option('-o, --output <path>', 'Output file path (default: stacked.png)')
+    .option('-q, --quality <quality>', 'Output quality 1-100 (default: 90)', parseInt, 90)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
@@ -93,13 +94,8 @@ export function stackCommand(imageCmd: Command): void {
       const spinner = ora('Preparing images...').start();
 
       try {
-        if (images.length < 2) {
-          spinner.fail(chalk.red('Need at least 2 images to stack'));
-          process.exit(1);
-        }
-
-        // Validate all input files
-        const { inputFiles, errors } = validatePaths(images.join(','), undefined, {
+        // Validate all input files and output path using core helpers
+        const { inputFiles, errors } = validatePaths(images.join(','), options.output, {
           allowedExtensions: IMAGE_EXTENSIONS,
         });
 
@@ -114,24 +110,34 @@ export function stackCommand(imageCmd: Command): void {
           process.exit(1);
         }
 
-        // Use validated files
         const validImages = inputFiles;
-        for (const img of validImages) {
-          if (!fs.existsSync(img)) {
-            spinner.fail(chalk.red(`Image not found: ${img}`));
-            process.exit(1);
-          }
+
+        // Use resolveOutputPaths to get output path
+        const outputMap = require('@mediaproc/core').resolveOutputPaths(validImages, options.output || 'stacked.png', {
+          newExtension: '.png',
+        });
+        // For stack, only one output file is created
+        const outputPath = outputMap.values().next().value;
+
+        // Validate quality
+        let quality = Number(options.quality);
+        if (isNaN(quality) || quality < 1 || quality > 100) {
+          const { MediaProcError, ErrorType, EXIT_CODES } = require('@mediaproc/core');
+          throw new MediaProcError({
+            message: 'Quality must be an integer between 1 and 100',
+            type: ErrorType.UserInput,
+            exitCode: EXIT_CODES.USER_INPUT,
+          });
         }
 
         const direction = options.direction === 'vertical' ? 'vertical' : 'horizontal';
         const align = options.align || 'center';
         const gap = options.gap || 0;
         const background = options.background || 'rgba(0,0,0,0)';
-        const outputPath = options.output || 'stacked.png';
 
         // Load all images and get dimensions
         const imageDimensions = await Promise.all(
-          images.map(async (img) => {
+          validImages.map(async (img) => {
             const meta = await createSharpInstance(img).metadata();
             return {
               path: img,
@@ -146,31 +152,31 @@ export function stackCommand(imageCmd: Command): void {
         let canvasHeight: number;
 
         if (direction === 'horizontal') {
-          canvasWidth = imageDimensions.reduce((sum, img) => sum + img.width, 0) + gap * (images.length - 1);
+          canvasWidth = imageDimensions.reduce((sum, img) => sum + img.width, 0) + gap * (validImages.length - 1);
           canvasHeight = Math.max(...imageDimensions.map(img => img.height));
         } else {
           canvasWidth = Math.max(...imageDimensions.map(img => img.width));
-          canvasHeight = imageDimensions.reduce((sum, img) => sum + img.height, 0) + gap * (images.length - 1);
+          canvasHeight = imageDimensions.reduce((sum, img) => sum + img.height, 0) + gap * (validImages.length - 1);
         }
 
         if (options.verbose) {
           spinner.info(chalk.blue('Configuration:'));
-          console.log(chalk.dim(`  Images: ${images.length}`));
+          console.log(chalk.dim(`  Images: ${validImages.length}`));
           console.log(chalk.dim(`  Direction: ${direction}`));
           console.log(chalk.dim(`  Alignment: ${align}`));
           console.log(chalk.dim(`  Gap: ${gap}px`));
           console.log(chalk.dim(`  Canvas: ${canvasWidth}x${canvasHeight}`));
           console.log(chalk.dim(`  Output: ${outputPath}`));
+          console.log(chalk.dim(`  Quality: ${quality}`));
           spinner.start('Processing...');
         }
 
         if (options.dryRun) {
           spinner.info(chalk.yellow('Dry run mode - no changes will be made'));
           console.log(chalk.green('✓ Would stack images:'));
-          console.log(chalk.dim(`  Images: ${images.length}`));
+          console.log(chalk.dim(`  Images: ${validImages.length}`));
           console.log(chalk.dim(`  Direction: ${direction}`));
           console.log(chalk.dim(`  Output size: ${canvasWidth}x${canvasHeight}`));
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -188,7 +194,7 @@ export function stackCommand(imageCmd: Command): void {
         const composites = [];
         let currentPos = 0;
 
-        for (let i = 0; i < images.length; i++) {
+        for (let i = 0; i < validImages.length; i++) {
           const img = imageDimensions[i];
           let left: number, top: number;
 
@@ -230,19 +236,29 @@ export function stackCommand(imageCmd: Command): void {
         }
 
         // Composite all images
-        await createSharpInstance(canvas)
-          .composite(composites)
-          .toFile(outputPath);
+        let sharpInstance = createSharpInstance(canvas).composite(composites);
+        const ext = require('path').extname(outputPath).toLowerCase();
+        if (ext === '.jpg' || ext === '.jpeg') {
+          sharpInstance = sharpInstance.jpeg({ quality });
+        } else if (ext === '.png') {
+          sharpInstance = sharpInstance.png({ quality });
+        } else if (ext === '.webp') {
+          sharpInstance = sharpInstance.webp({ quality });
+        } else if (ext === '.avif') {
+          sharpInstance = sharpInstance.avif({ quality });
+        } else if (ext === '.tiff' || ext === '.tif') {
+          sharpInstance = sharpInstance.tiff({ quality });
+        }
+        await sharpInstance.toFile(outputPath);
 
         const outputStats = fs.statSync(outputPath);
 
         spinner.succeed(chalk.green('✓ Images stacked successfully!'));
-        console.log(chalk.dim(`  Images: ${images.length}`));
+        console.log(chalk.dim(`  Images: ${validImages.length}`));
         console.log(chalk.dim(`  Direction: ${direction}`));
         console.log(chalk.dim(`  Alignment: ${align}`));
         console.log(chalk.dim(`  Output: ${outputPath} (${canvasWidth}x${canvasHeight})`));
         console.log(chalk.dim(`  File size: ${(outputStats.size / 1024).toFixed(2)}KB`));
-        showPluginBranding('Image', '../../package.json');
       } catch (error) {
         spinner.fail(chalk.red('Failed to stack images'));
         if (options.verbose) {

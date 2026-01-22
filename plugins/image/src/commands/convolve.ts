@@ -11,7 +11,7 @@ interface ConvolveOptionsExtended extends ConvolveOptions {
   custom?: string;
 }
 
-// Predefined kernels
+// Predefined kernels (expanded)
 const KERNELS = {
   sharpen: [[0, -1, 0], [-1, 5, -1], [0, -1, 0]],
   emboss: [[-2, -1, 0], [-1, 1, 1], [0, 1, 2]],
@@ -19,7 +19,12 @@ const KERNELS = {
   'box-blur': [[1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9]],
   'gaussian-blur': [[1 / 16, 2 / 16, 1 / 16], [2 / 16, 4 / 16, 2 / 16], [1 / 16, 2 / 16, 1 / 16]],
   laplacian: [[0, 1, 0], [1, -4, 1], [0, 1, 0]],
-  'high-pass': [[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]]
+  'high-pass': [[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]],
+  'motion-blur': [[1 / 9, 0, 0, 0, 0, 0, 0, 0, 1 / 9], [0, 1 / 9, 0, 0, 0, 0, 0, 1 / 9, 0], [0, 0, 1 / 9, 0, 0, 0, 1 / 9, 0, 0], [0, 0, 0, 1 / 9, 0, 1 / 9, 0, 0, 0], [0, 0, 0, 0, 1 / 9, 0, 0, 0, 0], [0, 0, 0, 1 / 9, 0, 1 / 9, 0, 0, 0], [0, 0, 1 / 9, 0, 0, 0, 1 / 9, 0, 0], [0, 1 / 9, 0, 0, 0, 0, 0, 1 / 9, 0], [1 / 9, 0, 0, 0, 0, 0, 0, 0, 1 / 9]],
+  sobel: [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]],
+  prewitt: [[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]],
+  outline: [[-1, -1, -1], [-1, 8, -1], [-1, -1, -1]],
+  customedge: [[0, 1, 0], [1, -4, 1], [0, 1, 0]]
 };
 
 export function convolveCommand(imageCmd: Command): void {
@@ -112,8 +117,12 @@ export function convolveCommand(imageCmd: Command): void {
           try {
             kernel = JSON.parse(options.custom);
             kernelName = 'custom';
+            // Validate custom kernel is square (3x3, 5x5, etc.)
+            if (!Array.isArray(kernel) || kernel.length < 3 || !kernel.every(row => Array.isArray(row) && row.length === kernel.length)) {
+              throw new Error('Custom kernel must be a square matrix (e.g., 3x3, 5x5)');
+            }
           } catch (e) {
-            spinner.fail(chalk.red('Invalid custom kernel JSON format'));
+            spinner.fail(chalk.red('Invalid custom kernel JSON format or shape: must be a square matrix'));
             process.exit(1);
           }
         } else {
