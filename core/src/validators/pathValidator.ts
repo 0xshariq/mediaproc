@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { AUDIO_EXTENSIONS, IMAGE_EXTENSIONS, VIDEO_EXTENSIONS } from '../utils/constants/supportedExtensions.js';
+import { MediaProcError, ErrorType, EXIT_CODES } from '../errors/index.js';
 
 /**
  * Parse input path and return array of files
@@ -120,7 +121,11 @@ export function resolveOutputPaths(
     if (outputExt) {
       // Output has extension - it's a file path
       if (inputFiles.length > 1) {
-        throw new Error('Cannot specify a file output path for multiple input files. Use a directory instead.');
+        throw new MediaProcError({
+          message: 'Cannot specify a file output path for multiple input files. Use a directory instead.',
+          type: ErrorType.UserInput,
+          exitCode: EXIT_CODES.USER_INPUT,
+        });
       }
       // Single file with explicit output file
       isExplicitFile = true;
@@ -135,8 +140,17 @@ export function resolveOutputPaths(
   if (isExplicitFile && inputFiles.length === 1) {
     // Create parent directory if needed
     const parentDir = path.dirname(outputDir);
-    if (!fs.existsSync(parentDir)) {
-      fs.mkdirSync(parentDir, { recursive: true });
+    try {
+      if (!fs.existsSync(parentDir)) {
+        fs.mkdirSync(parentDir, { recursive: true });
+      }
+    } catch (err) {
+      throw new MediaProcError({
+        message: `Failed to create output directory: ${parentDir}`,
+        type: ErrorType.FileSystem,
+        exitCode: EXIT_CODES.FS_ERROR,
+        details: err,
+      });
     }
     outputMap.set(inputFiles[0], outputDir);
     return outputMap;
@@ -144,8 +158,17 @@ export function resolveOutputPaths(
 
   // Case 2: Multiple files or directory output
   // Create output directory if it doesn't exist
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
+  try {
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+  } catch (err) {
+    throw new MediaProcError({
+      message: `Failed to create output directory: ${outputDir}`,
+      type: ErrorType.FileSystem,
+      exitCode: EXIT_CODES.FS_ERROR,
+      details: err,
+    });
   }
 
   // Map each input file to output path
@@ -195,6 +218,17 @@ export function validatePaths(
     // If output has extension but multiple input files
     if (outputExt && inputFiles.length > 1) {
       errors.push('Cannot specify a file output path for multiple input files. Use a directory instead.');
+    }
+
+    // Check if output path is a directory and not writable
+    try {
+      if (fs.existsSync(resolvedOutput) && fs.statSync(resolvedOutput).isDirectory()) {
+        fs.accessSync(resolvedOutput, fs.constants.W_OK);
+      } else if (!fs.existsSync(path.dirname(resolvedOutput))) {
+        fs.mkdirSync(path.dirname(resolvedOutput), { recursive: true });
+      }
+    } catch (err) {
+      errors.push(`Output path is not writable: ${resolvedOutput}`);
     }
   }
 
