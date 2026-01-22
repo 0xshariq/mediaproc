@@ -4,7 +4,7 @@ import { stat, writeFile, unlink } from 'fs/promises';
 import { join, dirname } from 'path';
 import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuration } from '../utils/ffmpeg.js';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
-import { AUDIO_EXTENSIONS, parseInputPaths, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { AUDIO_EXTENSIONS, parseInputPaths, createStandardHelp } from '@mediaproc/core';
 import ora from 'ora';
 
 export function mergeCommand(audioCmd: Command): void {
@@ -128,7 +128,6 @@ export function mergeCommand(audioCmd: Command): void {
           console.log(chalk.yellow('\n[DRY RUN] Would execute:'));
           console.log(chalk.dim(`ffmpeg ${args.join(' ')}`));
           await unlink(concatFile);
-          showPluginBranding('Audio', '../../package.json');
           return;
         }
 
@@ -152,7 +151,6 @@ export function mergeCommand(audioCmd: Command): void {
           spinner.succeed(chalk.green('Merge complete'));
           console.log(chalk.green(`✓ Output: ${options.output}`));
           console.log(chalk.dim(`Duration: ${formatDuration(totalDuration)} • Size: ${formatFileSize(outputStat.size)}`));
-          showPluginBranding('Audio', '../../package.json');
         } catch (error) {
           await unlink(concatFile).catch(() => { });
           spinner.fail(chalk.red('Merge failed'));

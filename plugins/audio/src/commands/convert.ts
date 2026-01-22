@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { stat } from 'fs/promises';
 import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuration } from '../utils/ffmpeg.js';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
-import { parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, showPluginBranding, AUDIO_EXTENSIONS } from '@mediaproc/core';
+import { parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, AUDIO_EXTENSIONS } from '@mediaproc/core';
 import ora from 'ora';
 
 export function convertCommand(audioCmd: Command): void {
@@ -164,7 +164,6 @@ export function convertCommand(audioCmd: Command): void {
           if (options.dryRun) {
             console.log(chalk.yellow('\n[DRY RUN] Would execute:'));
             console.log(chalk.dim(`ffmpeg ${args.join(' ')}`));
-            showPluginBranding('Audio', '../../package.json');
             continue;
           };
 
@@ -196,8 +195,6 @@ export function convertCommand(audioCmd: Command): void {
         if (inputPaths.length > 1) {
           console.log(chalk.green(`\n✓ Converted ${inputPaths.length} files successfully`));
         }
-
-        showPluginBranding('Audio', '../../package.json');
 
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));

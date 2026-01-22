@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { stat } from 'fs/promises';
 import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuration, parseTime } from '../utils/ffmpeg.js';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
-import { AUDIO_EXTENSIONS, parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { AUDIO_EXTENSIONS, parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp } from '@mediaproc/core';
 import ora from 'ora';
 
 export function trimCommand(audioCmd: Command): void {
@@ -146,7 +146,6 @@ export function trimCommand(audioCmd: Command): void {
           if (options.dryRun) {
             console.log(chalk.yellow('\n[DRY RUN] Would execute:'));
             console.log(chalk.dim(`ffmpeg ${args.join(' ')}`));
-            showPluginBranding('Audio', '../../package.json');
             continue;
           }
 
@@ -176,7 +175,6 @@ export function trimCommand(audioCmd: Command): void {
         if (inputPaths.length > 1) {
           console.log(chalk.green(`\n✓ Trimmed ${inputPaths.length} files successfully`));
         }
-        showPluginBranding('Audio', '../../package.json');
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
         process.exit(1);
