@@ -2,9 +2,7 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { getVersion, showBranding } from '@mediaproc/core';
 import { PluginManager } from './plugin-manager.js';
 import { addCommand } from './commands/add.js';
 import { removeCommand } from './commands/remove.js';
@@ -26,10 +24,9 @@ import { explainPreActionHook } from '@mediaproc/core';
 const program = new Command();
 const pluginManager = new PluginManager();
 
-// Get version from package.json
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
+
+// Get version from core branding utility
+const version = getVersion(require.resolve('../package.json'));
 
 /**
  * Auto-load installed plugins
@@ -51,7 +48,7 @@ export async function cli(): Promise<void> {
   program
     .name('mediaproc')
     .description('Modern, plugin-based media processing CLI')
-    .version(packageJson.version);
+    .version(version);
 
   // Plugin management commands
   addCommand(program, pluginManager);
@@ -83,6 +80,10 @@ export async function cli(): Promise<void> {
     program.outputHelp();
   }
   program.hook('preAction', explainPreActionHook);
+  // Show CLI branding after all commands
+  program.hook('postAction', () => {
+    showBranding(require.resolve('../package.json'));
+  });
 }
 
 // Run CLI if this is the main module

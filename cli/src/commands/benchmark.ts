@@ -1,6 +1,5 @@
 import { Command } from 'commander';
 import * as os from 'os';
-import { showBranding } from '@mediaproc/core';
 
 interface BenchmarkResult {
   operation: string;
@@ -31,7 +30,6 @@ export const benchmarkCommand = new Command()
 
     console.log('\n⚠️  Please specify --system or --plugin + --operation\n');
     benchmarkCommand.help();
-    showBranding();
   });
 
 async function runSystemBenchmark(json: boolean): Promise<void> {

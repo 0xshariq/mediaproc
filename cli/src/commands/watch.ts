@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
-import { showBranding } from '@mediaproc/core';
 
 interface WatchConfig {
   directory: string;
@@ -93,7 +92,6 @@ watchCommand
     } else {
       console.log('\n✓ Stopped all watchers\n');
     }
-    showBranding();
   });
 
 function buildWatchRules(options: any): WatchRule[] {

@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { getPluginsByCategory } from '../plugin-registry.js';
-import { showBranding } from '@mediaproc/core';
 
 export function helpCommand(program: Command): void {
   program
@@ -59,6 +58,5 @@ export function helpCommand(program: Command): void {
       console.log(chalk.dim(`  -g, --global                 # Install globally`));
       console.log(chalk.dim(`  -l, --local                  # Install locally`));
       console.log('');
-      showBranding();
     });
 }

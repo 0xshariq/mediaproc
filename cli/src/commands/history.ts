@@ -1,5 +1,4 @@
 import { Command } from 'commander';
-import { showBranding } from '@mediaproc/core';
 import { HistoryManager } from '../history-manager.js';
 
 const historyManager = new HistoryManager();
@@ -14,7 +13,6 @@ export const historyCommand = new Command()
     if (options.clear) {
       historyManager.clearHistory();
       console.log('✓ History cleared');
-      showBranding();
       return;
     }
 
@@ -29,13 +27,11 @@ export const historyCommand = new Command()
       console.log('\nTip: You can help improve MediaProc by sharing anonymized usage insights.');
       console.log('Your data is never sent automatically.');
       console.log('Use: mediaproc history --export');
-      showBranding();
       return;
     }
 
     if (history.length === 0) {
       console.log('\n📝 No command history yet');
-      showBranding();
       return;
     }
 
@@ -69,8 +65,6 @@ historyCommand
     // In a real implementation, this would actually execute the command
     console.log('⚠️  Note: Command replay requires full implementation');
     console.log(`   Run manually: mediaproc ${entry.command} ${entry.args.join(' ')}`);
-
-    showBranding();
   });
 
 // Add search subcommand
@@ -89,11 +83,9 @@ historyCommand
 
     if (matches.length === 0) {
       console.log('\nNo matching history entries found.');
-      showBranding();
       return;
     }
 
     console.log(`\nTotal matching history entries: ${matches.length}`);
     historyManager.summarizeHistory(matches);
-    showBranding();
   });

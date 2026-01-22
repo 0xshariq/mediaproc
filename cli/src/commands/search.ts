@@ -1,5 +1,4 @@
 import { Command } from 'commander';
-import { showBranding } from '@mediaproc/core';
 
 interface SearchResult {
   plugin: string;
@@ -28,8 +27,6 @@ export const searchCommand = new Command()
         console.log('   • Check installed plugins: \x1b[36mmediaproc list\x1b[0m');
         console.log('   • Install more plugins: \x1b[36mmediaproc add <plugin>\x1b[0m');
         console.log('   • View all available commands: \x1b[36mmediaproc <plugin> --help\x1b[0m');
-        
-        showBranding();
         return;
       }
 
@@ -64,11 +61,8 @@ export const searchCommand = new Command()
       }
 
       console.log(`\n💡 Get detailed help: \x1b[36mmediaproc <plugin> <command> --help\x1b[0m`);
-      
-      showBranding();
     } catch (error) {
       console.error(`\n❌ Search failed: ${error instanceof Error ? error.message : 'Unknown error'}\n`);
-      showBranding();
       process.exit(1);
     }
   });

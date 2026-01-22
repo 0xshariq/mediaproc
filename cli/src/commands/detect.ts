@@ -2,7 +2,6 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { existsSync } from 'fs';
 import { extname } from 'path';
-import { showBranding } from '@mediaproc/core';
 
 /**
  * Detect media file type and suggest appropriate plugin
@@ -99,6 +98,5 @@ export function detectCommand(program: Command): void {
             }
 
             console.log('');
-            showBranding();
         });
 }

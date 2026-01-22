@@ -3,7 +3,6 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { execa } from 'execa';
 import type { PluginManager } from '../plugin-manager.js';
-import { showBranding } from '@mediaproc/core';
 
 /**
  * Check if a plugin is installed globally
@@ -115,7 +114,6 @@ export function removeCommand(program: Command, pluginManager: PluginManager): v
 
         console.log(chalk.dim(`\nPlugin has been completely removed ${scope}`));
         console.log(chalk.dim('View remaining plugins: ') + chalk.white('mediaproc list'));
-        showBranding();
       } catch (error) {
         spinner.fail(chalk.red(`Failed to remove ${plugin}`));
         const errorMessage = error instanceof Error ? error.message : String(error);

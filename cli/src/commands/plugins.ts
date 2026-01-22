@@ -2,7 +2,6 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { getPluginsByCategory } from '../plugin-registry.js';
 import type { PluginManager } from '../plugin-manager.js';
-import { showBranding } from '@mediaproc/core';
 
 export function pluginsCommand(program: Command, pluginManager: PluginManager): void {
   program
@@ -95,6 +94,5 @@ export function pluginsCommand(program: Command, pluginManager: PluginManager): 
       console.log(chalk.dim('\n📥 Install any plugin: ') + chalk.white('mediaproc add <plugin-name>'));
       console.log(chalk.dim('📋 Show installed plugins: ') + chalk.white('mediaproc list'));
       console.log('');
-      showBranding();
     });
 }

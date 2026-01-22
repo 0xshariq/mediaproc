@@ -2,7 +2,6 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { execSync } from 'child_process';
 import type { Command } from 'commander';
-import { showBranding } from '@mediaproc/core';
 
 /**
  * Plugin type detection
@@ -254,7 +253,6 @@ export function updateCommand(program: Command): void {
         }
 
         console.log(chalk.dim('\n💡 Tip: Run a command to use the updated version, or restart your terminal.'));
-        showBranding();
       } catch (error) {
         spinner.fail(chalk.red('Failed to update plugin(s)'));
         if (error instanceof Error) {

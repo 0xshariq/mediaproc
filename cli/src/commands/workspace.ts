@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
-import { showBranding } from '@mediaproc/core';
 
 interface WorkspaceConfig {
   name: string;
@@ -60,7 +59,6 @@ workspaceCommand
       console.log(`Using ${options.preset} preset settings`);
     }
     console.log('');
-    showBranding();
   });
 
 // Use workspace
@@ -87,7 +85,6 @@ workspaceCommand
     );
 
     console.log(`\n✓ Workspace "${name}" is now active\n`);
-    showBranding();
   });
 
 // List workspaces
@@ -127,7 +124,6 @@ workspaceCommand
     });
 
     console.log('\n' + '━'.repeat(60) + '\n');
-    showBranding();
   });
 
 // Add rule
@@ -160,7 +156,6 @@ workspaceCommand
     console.log(`\n✓ Rule added to workspace "${workspace}"\n`);
     console.log(`Pattern: ${rule.pattern}`);
     console.log(`Command: ${rule.command}\n`);
-    showBranding();
   });
 
 // Process with workspace
@@ -195,7 +190,6 @@ workspaceCommand
     } else {
       console.log('⚠️  Note: Actual processing requires full implementation\n');
     }
-    showBranding();
   });
 
 // Delete workspace
@@ -213,7 +207,6 @@ workspaceCommand
 
     fs.unlinkSync(workspacePath);
     console.log(`\n✓ Workspace "${name}" deleted\n`);
-    showBranding();
   });
 
 function ensureWorkspaceDirectory(): void {

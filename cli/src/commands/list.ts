@@ -2,7 +2,6 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { detectPluginType } from '../plugin-registry.js';
 import type { PluginManager } from '../plugin-manager.js';
-import { showBranding } from '@mediaproc/core';
 
 export function listCommand(program: Command, pluginManager: PluginManager): void {
   program
@@ -105,6 +104,5 @@ export function listCommand(program: Command, pluginManager: PluginManager): voi
       console.log(chalk.dim('   Remove: ') + chalk.white('mediaproc remove <plugin-name>'));
       console.log(chalk.dim('   Browse all: ') + chalk.white('mediaproc plugins'));
       console.log('');
-      showBranding();
     });
 }

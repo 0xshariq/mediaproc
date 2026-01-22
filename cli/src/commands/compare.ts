@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
-import { showBranding } from '@mediaproc/core';
 
 interface FileComparison {
   file1: string;
@@ -45,7 +44,6 @@ export const compareCommand = new Command()
     if (options.preview) {
       console.log('\n⚠️  Visual preview requires full implementation\n');
     }
-    showBranding();
   });
 
 async function compareFiles(file1: string, file2: string, detailed: boolean): Promise<FileComparison> {
