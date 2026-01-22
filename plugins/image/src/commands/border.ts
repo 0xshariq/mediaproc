@@ -2,9 +2,10 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding, normalizeColor } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, normalizeColor } from '@mediaproc/core';
 import type { BorderOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
+import path from 'node:path';
 
 interface BorderOptionsExtended extends BorderOptions {
   help?: boolean;
@@ -113,7 +114,6 @@ export function borderCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -127,15 +127,25 @@ export function borderCommand(imageCmd: Command): void {
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 
           try {
-            await createSharpInstance(inputFile)
+            let pipeline = createSharpInstance(inputFile)
               .extend({
                 top: options.width || 10,
                 bottom: options.width || 10,
                 left: options.width || 10,
                 right: options.width || 10,
                 background: normalizeColor(options.color || '#000000', 'auto')
-              })
-              .toFile(outputPath);
+              });
+
+            const outputExt = path.extname(outputPath).toLowerCase();
+            if (outputExt === '.jpg' || outputExt === '.jpeg') {
+              pipeline = pipeline.jpeg({ quality: options.quality });
+            } else if (outputExt === '.png') {
+              pipeline = pipeline.png({ quality: options.quality });
+            } else if (outputExt === '.webp') {
+              pipeline = pipeline.webp({ quality: options.quality });
+            }
+
+            await pipeline.toFile(outputPath);
 
             spinner.succeed(chalk.green(`✓ ${fileName} processed`));
             successCount++;
@@ -153,7 +163,6 @@ export function borderCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to add border'));

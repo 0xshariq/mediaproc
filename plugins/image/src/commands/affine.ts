@@ -2,7 +2,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import path from 'node:path';
@@ -146,7 +146,6 @@ export function affineCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -160,6 +159,7 @@ export function affineCommand(imageCmd: Command): void {
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 
           try {
+
             const pipeline = createSharpInstance(inputFile).affine(matrix as [number, number, number, number], {
               background: options.background || 'transparent',
               interpolator: options.interpolator as any || 'bilinear'
@@ -167,11 +167,11 @@ export function affineCommand(imageCmd: Command): void {
 
             const outputExt = path.extname(outputPath).toLowerCase();
             if (outputExt === '.jpg' || outputExt === '.jpeg') {
-              pipeline.jpeg({ quality: options.quality || 90 });
+              pipeline.jpeg({ quality: options.quality });
             } else if (outputExt === '.png') {
-              pipeline.png({ quality: options.quality || 90 });
+              pipeline.png({ quality: options.quality });
             } else if (outputExt === '.webp') {
-              pipeline.webp({ quality: options.quality || 90 });
+              pipeline.webp({ quality: options.quality });
             }
 
             await pipeline.toFile(outputPath);
@@ -192,7 +192,6 @@ export function affineCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image', '../../package.json');
       } catch (error) {
         spinner.fail(chalk.red('Failed to apply affine transformation'));
         const errorMessage = error instanceof Error ? error.message : String(error);

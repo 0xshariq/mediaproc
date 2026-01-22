@@ -2,7 +2,7 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import type { FilterOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import path from 'node:path';
@@ -107,7 +107,6 @@ export function blurCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -125,11 +124,11 @@ export function blurCommand(imageCmd: Command): void {
 
             const outputExt = path.extname(outputPath).toLowerCase();
             if (outputExt === '.jpg' || outputExt === '.jpeg') {
-              pipeline.jpeg({ quality: options.quality || 90 });
+              pipeline.jpeg({ quality: options.quality });
             } else if (outputExt === '.png') {
-              pipeline.png({ quality: options.quality || 90 });
+              pipeline.png({ quality: options.quality });
             } else if (outputExt === '.webp') {
-              pipeline.webp({ quality: options.quality || 90 });
+              pipeline.webp({ quality: options.quality });
             }
 
             await pipeline.toFile(outputPath);
@@ -150,7 +149,6 @@ export function blurCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to blur images'));

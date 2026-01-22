@@ -184,13 +184,14 @@ export function optimizeCommand(imageCmd: Command): void {
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to optimize image'));
-        if (error && typeof error === 'object' && 'exitCode' in error && typeof error.exitCode === 'number') {
-          process.exit(error.exitCode);
+        if (error && typeof error === 'object' && 'exitCode' in error && typeof (error as any).exitCode === 'number') {
+          process.exit((error as any).exitCode);
         } else {
           if (options.verbose) {
             console.error(chalk.red('Error details:'), error);
           } else {
-            console.error(chalk.red((error && error.message) || String(error)));
+            const msg = (error && typeof error === 'object' && 'message' in error) ? (error as any).message : String(error);
+            console.error(chalk.red(msg));
           }
           process.exit(EXIT_CODES.INTERNAL);
         }

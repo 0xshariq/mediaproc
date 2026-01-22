@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, IMAGE_EXTENSIONS, getFileName, showPluginBranding, createStandardHelp } from '@mediaproc/core';
+import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import path from 'path';
 import { ImageOptions } from '../types.js';
@@ -173,6 +173,7 @@ export function batchCommand(imageCmd: Command): void {
 
             // Apply operation
             switch (options.operation.toLowerCase()) {
+
               case 'resize':
                 if (options.width || options.height) {
                   pipeline = pipeline.resize(options.width, options.height, { fit: 'inside' });
@@ -181,13 +182,13 @@ export function batchCommand(imageCmd: Command): void {
 
               case 'convert':
                 if (options.format) {
-                  pipeline = pipeline.toFormat(options.format as any, { quality: options.quality || 90 });
+                  pipeline = pipeline.toFormat(options.format as any, { quality: options.quality });
                 }
                 break;
 
               case 'optimize':
                 pipeline = pipeline.toFormat(path.extname(inputFile).slice(1) as any, {
-                  quality: options.quality || 85
+                  quality: options.quality
                 });
                 break;
 
@@ -240,7 +241,6 @@ export function batchCommand(imageCmd: Command): void {
         if (failed > 0) {
           console.log(chalk.yellow(`  Failed: ${failed}`));
         }
-        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Batch processing failed'));

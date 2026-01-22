@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 
 import * as fs from 'fs';
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import type { ImageOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import path from 'path';
@@ -148,9 +148,8 @@ export function booleanCommand(imageCmd: Command): void {
       if (options.dryRun) {
         spinner.info(chalk.yellow('Dry run mode - no changes will be made'));
         console.log(chalk.green(`✓ Would perform ${operation.toUpperCase()} operation on ${inputFiles.length} file(s):`));
-        inputFiles.forEach(f => console.log(chalk.dim(`  - ${f}`)));
-        console.log(chalk.dim(`  Operand: ${options.operand}`));
-        showPluginBranding('Image', '../../package.json');
+          inputFiles.forEach(f => console.log(chalk.dim(`  - ${f}`)));
+          console.log(chalk.dim(`  Operand: ${options.operand}`));
         return;
       }
 
@@ -167,11 +166,11 @@ export function booleanCommand(imageCmd: Command): void {
 
           const outputExt = path.extname(outputPath).toLowerCase();
           if (outputExt === '.jpg' || outputExt === '.jpeg') {
-            pipeline.jpeg({ quality: options.quality || 90 });
+            pipeline.jpeg({ quality: options.quality });
           } else if (outputExt === '.png') {
-            pipeline.png({ quality: options.quality || 90 });
+            pipeline.png({ quality: options.quality });
           } else if (outputExt === '.webp') {
-            pipeline.webp({ quality: options.quality || 90 });
+            pipeline.webp({ quality: options.quality });
           }
 
           await pipeline.toFile(outputPath);
@@ -192,7 +191,6 @@ export function booleanCommand(imageCmd: Command): void {
       if (failCount > 0) {
         console.log(chalk.red(`  ✗ Failed: ${failCount}`));
       }
-      showPluginBranding('Image', '../../package.json');
 
     } catch (error) {
       spinner.fail(chalk.red('Processing failed'));

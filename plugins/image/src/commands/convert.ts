@@ -137,21 +137,22 @@ export function convertCommand(imageCmd: Command): void {
 
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 
+
           try {
             const metadata = await createSharpInstance(inputFile).metadata();
             let pipeline = createSharpInstance(inputFile);
 
             // Apply format-specific options
             if (options.format === 'jpg' || options.format === 'jpeg') {
-              pipeline.jpeg({ quality: options.quality || 90, progressive: options.progressive || false });
+              pipeline.jpeg({ quality: options.quality, progressive: options.progressive || false });
             } else if (options.format === 'png') {
-              pipeline.png({ quality: options.quality || 90, compressionLevel: options.compression || 9, progressive: options.progressive || false });
+              pipeline.png({ quality: options.quality, compressionLevel: options.compression || 9, progressive: options.progressive || false });
             } else if (options.format === 'webp') {
-              pipeline.webp({ quality: options.quality || 90 });
+              pipeline.webp({ quality: options.quality });
             } else if (options.format === 'avif') {
-              pipeline.avif({ quality: options.quality || 90 });
+              pipeline.avif({ quality: options.quality });
             } else if (options.format === 'tiff') {
-              pipeline.tiff({ quality: options.quality || 90 });
+              pipeline.tiff({ quality: options.quality });
             } else if (options.format === 'gif') {
               pipeline.gif();
             }
