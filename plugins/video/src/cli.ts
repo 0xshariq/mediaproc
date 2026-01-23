@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { register } from './register.js';
-import { explainPreActionHook, getVersion, showPluginBranding } from '@mediaproc/core';
+import { explainPreActionHook, showPluginBranding } from '@mediaproc/core';
 
 const program = new Command();
 program
@@ -37,10 +37,10 @@ Professional video processing powered by FFmpeg. Compress, transcode, edit, and 
 
 📚 Use 'mediaproc-video <command> --help' for detailed command documentation.
   `)
-  .version(getVersion('../package.json'));
+  .version('1.4.0');
 program.hook('preAction', explainPreActionHook);
 program.hook('postAction', () => {
-  showPluginBranding('Video', getVersion('../package.json'));
+  showPluginBranding('Video');
 });
 register(program);
 
