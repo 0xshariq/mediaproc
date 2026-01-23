@@ -3,7 +3,8 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 /**
- * Get version from package.json
+ * Get plugin version from package.json
+ * @param packageJsonPath - Path to the package json file
  */
 export function getVersion(packageJsonPath: string): string {
   try {
@@ -16,6 +17,7 @@ export function getVersion(packageJsonPath: string): string {
 
 /**
  * Get CLI version from root package.json
+ * @param packageJsonPath - Path to the package json file
  */
 export function getCliVersion(packageJsonPath: string): string {
   try {

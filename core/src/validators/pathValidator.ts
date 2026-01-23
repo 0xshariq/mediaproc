@@ -1,6 +1,6 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { AUDIO_EXTENSIONS, IMAGE_EXTENSIONS, VIDEO_EXTENSIONS } from '../utils/constants/supportedExtensions.js';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { ANIMATION_EXTENSIONS, AUDIO_EXTENSIONS, DOCUMENT_EXTENSIONS, IMAGE_EXTENSIONS, VIDEO_EXTENSIONS, THREED_EXTENSIONS } from '../utils/constants/supportedExtensions.js';
 import { MediaProcError, ErrorType, EXIT_CODES } from '../errors/index.js';
 
 /**
@@ -12,7 +12,7 @@ import { MediaProcError, ErrorType, EXIT_CODES } from '../errors/index.js';
  */
 export function parseInputPaths(
   inputPath: string,
-  allowedExtensions: string[] = IMAGE_EXTENSIONS || VIDEO_EXTENSIONS || AUDIO_EXTENSIONS
+  allowedExtensions: string[] = IMAGE_EXTENSIONS || VIDEO_EXTENSIONS || AUDIO_EXTENSIONS || ANIMATION_EXTENSIONS || DOCUMENT_EXTENSIONS || THREED_EXTENSIONS
 ): string[] {
   const files: string[] = [];
 
