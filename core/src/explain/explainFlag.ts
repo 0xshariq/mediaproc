@@ -6,7 +6,7 @@ import { ExplainContext, ExplainMode } from '../types/explainTypes.js';
 import os from 'os';
 import fs from 'fs';
 import path from 'path';
-import { getPhrase } from './phrases.js';
+import { getPhrase } from '../utils/phrases.js';
 import { getEffectId } from '../utils/constants/effectNamespaces.js';
 
 

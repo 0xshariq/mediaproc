@@ -1,7 +1,8 @@
 import { ExplainContext } from '../../types/explainTypes.js';
 import chalk from 'chalk';
 import boxen from 'boxen';
-import { getPhrase } from '../phrases.js';
+import { getPhrase } from '../../utils/phrases.js';
+import { COMMON_PHRASES } from '../../utils/constants/commonPhrases.js';
 
 export function explainHumanTemplate(context: ExplainContext): string {
     let lines: string[] = [];
@@ -46,7 +47,7 @@ export function explainHumanTemplate(context: ExplainContext): string {
         ];
         for (const effect of context.effects) {
             let phrase: string = '';
-            const effectPhrase = getPhrase(effect as keyof typeof import('../phrases.js').COMMON_PHRASES, context.plugin);
+            const effectPhrase = getPhrase(effect as keyof typeof COMMON_PHRASES, context.plugin);
             if (typeof effectPhrase === 'function') {
                 if (contextArgPhrases.includes(effect)) {
                     phrase = (effectPhrase as (args: { context: ExplainContext }) => string)({ context });

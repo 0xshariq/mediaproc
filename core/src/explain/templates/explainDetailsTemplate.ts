@@ -2,7 +2,8 @@
 import { ExplainContext } from '../../types/explainTypes.js';
 import chalk from 'chalk';
 import boxen from 'boxen';
-import { getPhrase } from '../phrases.js';
+import { getPhrase } from '../../utils/phrases.js';
+import { COMMON_PHRASES } from '../../utils/constants/commonPhrases.js';
 
 export function explainDetailsTemplate(context: ExplainContext): string {
     function safe(val: any): string {
@@ -67,7 +68,7 @@ export function explainDetailsTemplate(context: ExplainContext): string {
         lines.push(chalk.bgGreenBright.black.bold(getPhrase('effectsHeader', context.plugin) || ' What will happen: '));
         for (const effect of context.effects) {
             let phrase: string = '';
-            const effectPhrase = getPhrase(effect as keyof typeof import('../phrases.js').COMMON_PHRASES, context.plugin);
+            const effectPhrase = getPhrase(effect as keyof typeof COMMON_PHRASES, context.plugin);
             if (typeof effectPhrase === 'function') {
                 const contextArgPhrases = [
                     'externalTool', 'dimensionsChange', 'formatConversion', 'qualityChange',
