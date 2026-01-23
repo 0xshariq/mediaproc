@@ -30,10 +30,8 @@ import { vignetteCommand } from './commands/vignette.js';
 import { batchCommand } from './commands/batch.js';
 import { pixelateCommand } from './commands/pixelate.js';
 import { paletteCommand } from './commands/palette.js';
-import { gridCommand } from './commands/grid.js';
 import { splitCommand } from './commands/split.js';
 import { metadataCommand } from './commands/metadata-cmd.js';
-import { stackCommand } from './commands/stack.js';
 import { mirrorCommand } from './commands/mirror.js';
 import { dominantColorCommand } from './commands/dominant-color.js';
 import { flopCommand } from './commands/flop.js';
@@ -49,8 +47,7 @@ import { recombCommand } from './commands/recomb.js';
 import { compressCommand } from './commands/compress.js';
 import { infoCommand } from './commands/info.js';
 import { explainPreActionHook, getVersion, showPluginBranding } from '@mediaproc/core';
-// Dynamically read version from package.json
-export const version = getVersion(require.resolve('../package.json'));
+
 
 const program = new Command();
 
@@ -66,8 +63,8 @@ Professional image processing powered by Sharp. Transform, optimize, and enhance
   • Color & Tone (6 commands): modulate, gamma, tint, grayscale, negate, normalize
   • Effects & Filters (9 commands): blur, sharpen, median, sepia, vignette, pixelate, threshold, dilate, erode
   • Advanced Operations (6 commands): composite, extract, border, clahe, convolve, boolean
-  • Smart/AI Operations (6 commands): smart-crop, auto-enhance, palette, dominant-color, grid, batch
-  • Utility (10 commands): compress, convert, optimize, info, watermark, stats, split, stack, mirror, metadata
+  • Smart/AI Operations (6 commands):  palette, dominant-color, batch
+  • Utility (10 commands): compress, convert, optimize, info, watermark, stats, split, mirror, metadata
 
 📂 Format Support:
   Input:  JPG, PNG, WebP, AVIF, TIFF, GIF, SVG, HEIF
@@ -115,10 +112,8 @@ vignetteCommand(program);
 batchCommand(program);
 pixelateCommand(program);
 paletteCommand(program);
-gridCommand(program);
 splitCommand(program);
 metadataCommand(program);
-stackCommand(program);
 mirrorCommand(program);
 dominantColorCommand(program);
 flopCommand(program);
@@ -136,7 +131,7 @@ infoCommand(program);
 
 program.hook('preAction', explainPreActionHook);
 program.hook('postAction', () => {
-  showPluginBranding('Image', require.resolve('../package.json'));
+  showPluginBranding('Image', getVersion('../package.json'));
 });
 
 program.parse(process.argv);

@@ -7,7 +7,7 @@ import type { Sharp } from 'sharp';
  * @returns Sharp instance
  */
 export function createSharpInstance(input: string | Buffer | { create: { width: number; height: number; channels: 3 | 4; background?: string | object } }): Sharp {
-    return sharp(input as any);
+    return sharp(input as string | Buffer);
 }
 
 /**

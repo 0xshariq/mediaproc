@@ -310,7 +310,7 @@ done
 
 ## 📋 Commands Overview
 
-All **48 commands** organized by category:
+All **46 commands** organized by category:
 
 ### 🔄 Transform & Resize (9 commands)
 
@@ -362,7 +362,6 @@ All **48 commands** organized by category:
 
 - **palette** - Extract dominant color palettes (2-256 colors)
 - **dominant-color** - Quick dominant color extraction
-- **grid** - Combine images into collage layouts
 - **batch** - Process multiple images at once with any operation
 
 ### 🔧 Utility (10 commands)
@@ -374,7 +373,6 @@ All **48 commands** organized by category:
 - **info** - Display comprehensive image information
 - **stats** - Detailed technical image statistics
 - **split** - Split image into grid tiles
-- **stack** - Stack images horizontally/vertically
 - **mirror** - Create mirror/kaleidoscope effects (horizontal, vertical, quad)
 - **metadata** - View, export, or remove EXIF data
 

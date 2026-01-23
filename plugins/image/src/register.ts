@@ -29,10 +29,8 @@ import { vignetteCommand } from './commands/vignette.js';
 import { batchCommand } from './commands/batch.js';
 import { pixelateCommand } from './commands/pixelate.js';
 import { paletteCommand } from './commands/palette.js';
-import { gridCommand } from './commands/grid.js';
 import { splitCommand } from './commands/split.js';
 import { metadataCommand } from './commands/metadata-cmd.js';
-import { stackCommand } from './commands/stack.js';
 import { mirrorCommand } from './commands/mirror.js';
 import { dominantColorCommand } from './commands/dominant-color.js';
 import { flopCommand } from './commands/flop.js';
@@ -47,11 +45,12 @@ import { linearCommand } from './commands/linear.js';
 import { recombCommand } from './commands/recomb.js';
 import { compressCommand } from './commands/compress.js';
 import { infoCommand } from './commands/info.js';
-import { version as imagePluginVersion } from './cli.js'
+import { getVersion } from '@mediaproc/core';
 
 
 export const name = '@mediaproc/image';
-export const version = imagePluginVersion;
+
+export const version = getVersion('../package.json');
 
 export function register(program: Command): void {
   const imageCmd = program
@@ -109,7 +108,6 @@ export function register(program: Command): void {
   // Smart/AI operations
   pixelateCommand(imageCmd);
   paletteCommand(imageCmd);
-  gridCommand(imageCmd);
   dominantColorCommand(imageCmd);
 
   // Batch operations
@@ -117,7 +115,6 @@ export function register(program: Command): void {
 
   // Utility operations
   splitCommand(imageCmd);
-  stackCommand(imageCmd);
   mirrorCommand(imageCmd);
   metadataCommand(imageCmd);
 
