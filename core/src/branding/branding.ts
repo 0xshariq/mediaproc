@@ -1,64 +1,45 @@
-import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-
 /**
- * Get plugin version from package.json
- * @param packageJsonPath - Path to the package json file
+ * Enhanced branding utilities for MediaProc.
+ * No version logic, just a beautiful, informative message.
  */
-export function getVersion(packageJsonPath: string): string {
-  try {
-    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-    return packageJson.version || '0.0.0';
-  } catch {
-    return '0.0.0';
-  }
+
+const SLOGAN = 'Automate, Analyze, Create. All your media, one CLI.';
+const DOCS_URL = 'https://docs-mediaproc.vercel.app/';
+const GITHUB_URL = 'https://github.com/0xshariq/mediaproc';
+const DISCORD_URL = 'https://discord.gg/TxNsD5kM';
+const ABOUT = 'MediaProc is an open-source, cross-platform CLI toolkit for processing, transforming, and automating media workflows. Built for creators, developers, and teams who want powerful tools with simple commands.';
+
+function printBrandingHeader(title: string) {
+  console.log('\n' + '═'.repeat(60));
+  console.log(`  💙 ${title}`);
+  console.log(`  🏷️  ${SLOGAN}`);
+  console.log('═'.repeat(60));
+}
+
+function printBrandingFooter() {
+  console.log(`  📚 Documentation: \x1b[36m${DOCS_URL}\x1b[0m`);
+  console.log(`  ⭐ Star us: \x1b[36m${GITHUB_URL}\x1b[0m`);
+  console.log(`  💬 Join our Discord: \x1b[36m${DISCORD_URL}\x1b[0m`);
+  console.log('═'.repeat(60));
+  console.log(`  ℹ️  ${ABOUT}`);
+  console.log('═'.repeat(60) + '\n');
 }
 
 /**
- * Get CLI version from root package.json
- * @param packageJsonPath - Path to the package json file
+ * Show CLI branding footer with enhanced message
  */
-export function getCliVersion(packageJsonPath: string): string {
-  try {
-    // For ES modules, use import.meta.url
-    if (typeof import.meta.url !== 'undefined') {
-      const currentDir = dirname(fileURLToPath(import.meta.url));
-      const packagePath = join(currentDir, packageJsonPath);
-      return getVersion(packagePath);
-    }
-    // Fallback: try from process.cwd()
-    const packagePath = join(process.cwd(), packageJsonPath);
-    return getVersion(packagePath);
-  } catch {
-    return '0.6.0'; // Fallback version
-  }
+export function showBranding(): void {
+  printBrandingHeader('Powered by MediaProc CLI');
+  printBrandingFooter();
 }
 
 /**
- * Show CLI branding footer with documentation and GitHub links
- * @param packageJsonPath - Path to main cli's package json
- */
-export function showBranding(packageJsonPath: string): void {
-  const version = getCliVersion(packageJsonPath);
-  console.log('\n' + '─'.repeat(60));
-  console.log(`  💙 Powered by MediaProc CLI v${version}`);
-  console.log('  📚 Documentation: \x1b[36mhttps://docs-mediaproc.vercel.app/\x1b[0m');
-  console.log('  ⭐ Star us: \x1b[36mhttps://github.com/0xshariq/mediaproc\x1b[0m');
-  console.log('─'.repeat(60) + '\n');
-}
-
-/**
- * Show plugin branding footer with version
+ * Show plugin branding footer with enhanced message
  * @param pluginName - Name of the plugin (e.g., 'image', 'video', 'audio')
- * @param pluginPackageJsonPath - Path to plugin's package.json
  */
-export function showPluginBranding(pluginName: string, pluginPackageJsonPath: string): void {
-  const version = getVersion(pluginPackageJsonPath);
-  console.log('\n' + '─'.repeat(60));
-  console.log(`  💙 ${pluginName.charAt(0).toUpperCase() + pluginName.slice(1)} Plugin v${version} · Powered by MediaProc`);
-  console.log('  📚 Documentation: \x1b[36mhttps://docs-mediaproc.vercel.app/\x1b[0m');
-  console.log('  ⭐ Star us: \x1b[36mhttps://github.com/0xshariq/mediaproc\x1b[0m');
-  console.log('─'.repeat(60) + '\n');
+export function showPluginBranding(pluginName: string): void {
+  const displayName = pluginName.charAt(0).toUpperCase() + pluginName.slice(1);
+  printBrandingHeader(`${displayName} Plugin · Powered by MediaProc`);
+  printBrandingFooter();
 }
 
