@@ -3,7 +3,6 @@ import { Command } from 'commander';
 import { register } from './register.js';
 import { explainPreActionHook, getVersion, showPluginBranding } from '@mediaproc/core';
 
-export const version = getVersion(require.resolve('../package.json'));
 const program = new Command();
 program
   .name('mediaproc-audio')
@@ -99,7 +98,7 @@ Professional audio processing powered by FFmpeg/FFprobe. Convert, normalize, tri
   .version(getVersion('../package.json'));
 program.hook('preAction', explainPreActionHook);
 program.hook('postAction', () => {
-  showPluginBranding('Audio', require.resolve('../package.json'));
+  showPluginBranding('Audio', getVersion('../package.json'));
 });
 register(program);
 program.parse(process.argv);
