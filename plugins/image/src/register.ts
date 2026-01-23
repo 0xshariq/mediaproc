@@ -45,12 +45,11 @@ import { linearCommand } from './commands/linear.js';
 import { recombCommand } from './commands/recomb.js';
 import { compressCommand } from './commands/compress.js';
 import { infoCommand } from './commands/info.js';
-import { getVersion } from '@mediaproc/core';
 
 
 export const name = '@mediaproc/image';
 
-export const version = getVersion('../package.json');
+export const version = '1.4.0';
 
 export function register(program: Command): void {
   const imageCmd = program

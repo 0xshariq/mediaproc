@@ -46,7 +46,7 @@ import { linearCommand } from './commands/linear.js';
 import { recombCommand } from './commands/recomb.js';
 import { compressCommand } from './commands/compress.js';
 import { infoCommand } from './commands/info.js';
-import { explainPreActionHook, getVersion, showPluginBranding } from '@mediaproc/core';
+import { explainPreActionHook, showPluginBranding } from '@mediaproc/core';
 
 
 const program = new Command();
@@ -63,7 +63,7 @@ Professional image processing powered by Sharp. Transform, optimize, and enhance
   • Color & Tone (6 commands): modulate, gamma, tint, grayscale, negate, normalize
   • Effects & Filters (9 commands): blur, sharpen, median, sepia, vignette, pixelate, threshold, dilate, erode
   • Advanced Operations (6 commands): composite, extract, border, clahe, convolve, boolean
-  • Smart/AI Operations (6 commands):  palette, dominant-color, batch
+  • Smart/AI Operations (6 commands): palette, dominant-color, batch
   • Utility (10 commands): compress, convert, optimize, info, watermark, stats, split, mirror, metadata
 
 📂 Format Support:
@@ -79,7 +79,7 @@ Professional image processing powered by Sharp. Transform, optimize, and enhance
 
 📚 Use 'mediaproc-image <command> --help' for detailed command documentation.
   `)
-  .version(getVersion('../package.json'));
+  .version('1.4.0');
 
 // Register all commands directly (no "image" prefix in standalone mode)
 resizeCommand(program);
@@ -131,7 +131,7 @@ infoCommand(program);
 
 program.hook('preAction', explainPreActionHook);
 program.hook('postAction', () => {
-  showPluginBranding('Image', getVersion('../package.json'));
+  showPluginBranding('Image');
 });
 
 program.parse(process.argv);
