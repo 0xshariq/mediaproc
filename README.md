@@ -91,7 +91,7 @@ mediaproc image --help
 
 Included with CLI installation:
 
-#### Image Plugin (48 commands)
+#### Image Plugin (46 commands)
 
 ```bash
 mediaproc image resize photo.jpg --width 1920
