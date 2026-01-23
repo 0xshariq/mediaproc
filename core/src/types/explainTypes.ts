@@ -103,7 +103,10 @@ export interface ExplainDecision {
 }
 
 
+export type ExplainFlowStep = { step: string; type: 'static' | 'conditional' };
+
 export interface ExplainContext {
+  explainVersion?: string;
   schemaVersion?: string; // Tier 3 placeholder
   summary?: string; // Tier 2: summary line
   exitCode?: number; // Tier 3 placeholder
@@ -151,9 +154,10 @@ export interface ExplainContext {
     errors?: string[];
     warnings?: string[];
     confidence?: string; // Tier 4 placeholder
-    whatWillNotHappen?: string[]; // Tier 4 placeholder
+    confidenceScore?: number; // Numeric confidence score for JSON mode
+    whatWillNotHappen?: string[];
   };
-  explainFlow?: string[];
+  explainFlow?: ExplainFlowStep[];
 
   // Environment info
   environment?: {

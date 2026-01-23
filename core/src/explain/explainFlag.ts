@@ -1,12 +1,13 @@
 
 import chalk from 'chalk';
 import { explainFormatter } from '../formatters/explainFormatter.js';
-import { getCliVersion, getVersion } from '../branding/branding.js';
 import { ExplainContext, ExplainMode } from '../types/explainTypes.js';
+
 import os from 'os';
 import fs from 'fs';
 import path from 'path';
 import { getPhrase } from './phrases.js';
+import { getEffectId } from '../utils/constants/effectNamespaces.js';
 
 
 /**
@@ -123,34 +124,23 @@ export function explainFlag({
     }
   }
 
-  // Build ExplainContext with plugin/command info and version
-  // Get CLI and plugin version using branding utilities
-  let cliVersion: string | undefined = undefined;
-  let pluginVersion: string | undefined = undefined;
+  // Build ExplainContext with plugin/command info (no version logic)
   let plugin: string | undefined = undefined;
-  try {
-    cliVersion = getCliVersion('../../../cli/package.json');
-    // Try to get plugin version from parent command's package.json if available
-    if (command?.parent?.name?.()) {
-      // Assume plugin package.json is at ../../plugins/<plugin>/package.json
-      plugin = command.parent.name();
-      const pluginPath = `../../plugins/${plugin}/package.json`;
-      pluginVersion = getVersion(pluginPath);
-    }
-  } catch (error) {
-    console.error(chalk.red('Error retrieving version information:'), error);
+  if (command?.parent?.name?.()) {
+    plugin = command.parent.name();
   }
 
-  // Step 1: Add effects/primitives to context (plugin-agnostic)
+  // Step 1: Add effects/primitives to context (plugin-aware, generic fallback)
   const effects: string[] = [];
-  if (inputPath) effects.push('inputRead');
-  if (outputPath) effects.push('outputWrite');
-  if (usedFlags['width'] || usedFlags['height']) effects.push('dimensionsChange');
-  if (usedFlags['quality']) effects.push('qualityChange');
-  if (usedFlags['format']) effects.push('formatConversion');
-  if (usedFlags['metadata']) effects.push('metadataPreserved');
-  if (usedFlags['tool'] || command?.parent?.name?.()) effects.push('externalTool');
-  if (usedFlags['noNetwork']) effects.push('noNetwork');
+  // Always use detected plugin name for effect ID, fallback to generic
+  if (inputPath) effects.push(getEffectId(plugin, 'inputRead'));
+  if (outputPath) effects.push(getEffectId(plugin, 'outputWrite'));
+  if (usedFlags['width'] || usedFlags['height']) effects.push(getEffectId(plugin, 'dimensionsChange'));
+  if (usedFlags['quality']) effects.push(getEffectId(plugin, 'qualityChange'));
+  if (usedFlags['format']) effects.push(getEffectId(plugin, 'formatConversion'));
+  if (usedFlags['metadata']) effects.push(getEffectId(plugin, 'metadataPreserved'));
+  if (usedFlags['tool'] || command?.parent?.name?.()) effects.push(getEffectId(plugin, 'externalTool'));
+  if (usedFlags['noNetwork']) effects.push(getEffectId(plugin, 'noNetwork'));
   // Add more effects for other plugin types as needed
 
   // Dynamic summary using enhanced phrases
@@ -166,16 +156,16 @@ export function explainFlag({
   if (usedFlags['cleanup']) sideEffects.push(getPhrase('cleanup', plugin)());
   // Add more side effects as needed
 
-  // Dynamic explainFlow for any plugin
-  // Will Deprecate after v1 release in favor of more detailed plugin-specific flows
-  const explainFlow: string[] = [
-    getPhrase('validation', plugin)(),
-    'Check input and output paths for validity and existence.',
-    'Prepare configuration for processing (flags/options).',
-    'Execute main processing logic for each input.',
-    getPhrase('logging', plugin)(),
-    getPhrase('cleanup', plugin)(),
-    'Show summary and any errors encountered.'
+  // Tag explainFlow steps as static or conditional for DETAILS mode
+  type ExplainFlowStep = { step: string; type: 'static' | 'conditional' };
+  const explainFlow: ExplainFlowStep[] = [
+    { step: getPhrase('validation', plugin)(), type: 'static' },
+    { step: 'Check input and output paths for validity and existence.', type: 'static' },
+    { step: 'Prepare configuration for processing (flags/options).', type: 'static' },
+    { step: 'Execute main processing logic for each input.', type: 'conditional' },
+    { step: getPhrase('logging', plugin)(), type: 'static' },
+    { step: getPhrase('cleanup', plugin)(), type: 'static' },
+    { step: 'Show summary and any errors encountered.', type: 'static' }
   ];
 
   // Technical details (plugin-agnostic)
@@ -183,20 +173,26 @@ export function explainFlag({
     tool: command?.parent?.name?.() || 'unknown',
     library: options.library || 'unknown',
     performance: options.performance || 'optimized for batch processing',
-    fileFormats: options.fileFormats || [],
-    compressionRatio: options.compressionRatio || '',
-    estimatedTime: options.estimatedTime || '',
-    memoryUsage: options.memoryUsage || '',
+    fileFormats: options.fileFormats || []
   };
+  // Only add advanced fields if they are present and not empty
+  if (options.compressionRatio != null && options.compressionRatio !== '') {
+    technical.compressionRatio = options.compressionRatio;
+  }
+  if (options.estimatedTime != null && options.estimatedTime !== '') {
+    technical.estimatedTime = options.estimatedTime;
+  }
+  if (options.memoryUsage != null && options.memoryUsage !== '') {
+    technical.memoryUsage = options.memoryUsage;
+  }
 
   let context: ExplainContext = {
+    explainVersion: '1.0',
     schemaVersion: '1.0',
     command: commandName,
-    plugin,
-    cliVersion,
-    pluginVersion,
+    plugin: plugin ?? undefined,
     timestamp: new Date().toISOString(),
-    user: process.env.USER || process.env.USERNAME || 'unknown',
+    user: process.env.USER || process.env.USERNAME || undefined,
     platform: `${os.platform()} ${os.arch()}`,
     mode,
     summary: '', // will set below
@@ -213,14 +209,15 @@ export function explainFlag({
     effects,
     outcome: {
       result: '', // will set below
-      sideEffects,
+      sideEffects: sideEffects.length > 0 ? sideEffects : undefined,
       errors: [],
       warnings: [],
       confidence: 'high',
+      confidenceScore: 0.95,
       whatWillNotHappen: [getPhrase('noNetwork', plugin)()],
     },
-    explainFlow, // Will Deprecate after v1 release in favor of more detailed plugin-specific flows
-    environment, // Will Deprecate aftbeforeer v1 release
+    explainFlow,
+    environment,
     explainOnly,
     technical,
     exitCode: 0,

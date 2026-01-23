@@ -12,10 +12,17 @@ export function explainDetailsTemplate(context: ExplainContext): string {
     }
     let lines: string[] = [];
 
+
     // Gradient header
     lines.push(
         chalk.bgMagentaBright.white.bold(getPhrase('detailsHeader', context.plugin) || '  EXPLANATION (DETAILS)  ')
     );
+
+    // One-line summary at top (anchor)
+    if (context.summary) {
+        lines.push('');
+        lines.push(chalk.bold.cyan(`Summary: ${context.summary}`));
+    }
 
     // Explain-only mode
     if (context.explainOnly) {
@@ -81,13 +88,32 @@ export function explainDetailsTemplate(context: ExplainContext): string {
         }
     }
 
-    // Internal workflow (details mode)
+    // Render explainFlow with static/conditional logic (reduce repetition)
     if (context.explainFlow && Array.isArray(context.explainFlow) && context.explainFlow.length > 0) {
+        const staticSteps = context.explainFlow.filter(f => f.type === 'static');
+        const conditionalSteps = context.explainFlow.filter(f => f.type === 'conditional');
+        if (staticSteps.length > 0) {
+            lines.push('');
+            lines.push(chalk.bgCyanBright.black.bold(' Standard execution steps: '));
+            for (const s of staticSteps) {
+                lines.push(chalk.cyanBright(`  • ${s.step}`));
+            }
+        }
+        if (conditionalSteps.length > 0) {
+            lines.push('');
+            lines.push(chalk.bgGreenBright.black.bold(' Steps affected by flags/context: '));
+            for (const s of conditionalSteps) {
+                lines.push(chalk.greenBright(`  • ${s.step}`));
+            }
+        }
+    }
+
+    // Overview: What will NOT happen (assumptions)
+    if (context.outcome && context.outcome.whatWillNotHappen && context.outcome.whatWillNotHappen.length > 0) {
         lines.push('');
-        lines.push(chalk.bgCyanBright.black.bold(getPhrase('technicalWorkflowHeader', context.plugin) || ' Internal Workflow: '));
-        for (const step of context.explainFlow) {
-            let safeStep = (typeof step === 'function') ? '[function]' : safe(step);
-            lines.push(chalk.greenBright(`  • ${safeStep}`));
+        lines.push(chalk.bgRedBright.white.bold(getPhrase('whatWillNotHappenHeader', context.plugin) || ' What will NOT happen: '));
+        for (const n of context.outcome.whatWillNotHappen) {
+            lines.push(chalk.redBright(`  • ${n}`));
         }
     }
 
@@ -145,15 +171,7 @@ export function explainDetailsTemplate(context: ExplainContext): string {
         }
     }
 
-    // Environment info (only if present and relevant)
-    if (context.environment && typeof context.environment === 'object' && Object.keys(context.environment).length > 0) {
-        lines.push('');
-        lines.push(chalk.bgGray.white.bold(getPhrase('environmentHeader', context.plugin) || ' Environment: '));
-        if (context.environment.cwd) lines.push(chalk.bold(`  cwd: ${safe(context.environment.cwd)}`));
-        if (context.environment.os) lines.push(chalk.bold(`  OS: ${safe(context.environment.os)}`));
-        if (context.environment.nodeVersion) lines.push(chalk.bold(`  Node: ${safe(context.environment.nodeVersion)}`));
-        if (context.environment.shell) lines.push(chalk.bold(`  Shell: ${safe(context.environment.shell)}`));
-    }
+    // ...removed environment dump from details mode as per v1 plan...
 
     // Custom plugin sections
     if (context.customSections && Array.isArray(context.customSections)) {
@@ -169,19 +187,7 @@ export function explainDetailsTemplate(context: ExplainContext): string {
         }
     }
 
-    // Diagram placeholder
-    lines.push('');
-    if (context.diagram) {
-        // If diagram is a string, render as ASCII art in a box
-        lines.push(boxen(context.diagram, {
-            padding: 1,
-            borderColor: 'cyan',
-            borderStyle: 'round',
-            backgroundColor: 'black',
-        }));
-    } else {
-        lines.push(chalk.bgWhiteBright.gray(getPhrase('diagramPlaceholder', context.plugin) || ' Diagram: [future diagram rendering here] '));
-    }
+    // ...removed diagram placeholder and related code as per v1 plan...
 
     // Tips
     lines.push('');

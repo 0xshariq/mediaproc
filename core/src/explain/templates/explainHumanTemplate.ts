@@ -10,9 +10,10 @@ export function explainHumanTemplate(context: ExplainContext): string {
     // Header
     lines.push(chalk.bgBlueBright.white.bold(getPhrase('header', context.plugin) || '  EXPLANATION  '));
 
-    // Summary
+    // One-line summary at top (anchor)
     if (context.summary) {
-        lines.push(chalk.bgCyanBright.black.bold((getPhrase('summaryHeader', context.plugin) || ' Summary: ')) + chalk.bgCyanBright.white(' ' + context.summary + ' '));
+        lines.push('');
+        lines.push(chalk.bold.cyan(`Summary: ${context.summary}`));
     }
 
     // Explain-only mode
@@ -26,17 +27,15 @@ export function explainHumanTemplate(context: ExplainContext): string {
         if (typeof val === 'function') return '[function]';
         return String(val);
     }
-    lines.push(chalk.bgWhiteBright.gray(
-        (getPhrase('contextEnrichmentPrefix', context.plugin) || ' Timestamp: ') +
-        `${safe(context.timestamp)} | ${getPhrase('user', context.plugin) || 'User:'} ${safe(context.user)} | ${getPhrase('platform', context.plugin) || 'Platform:'} ${safe(context.platform)} | ${getPhrase('mode', context.plugin) || 'Mode:'} ${safe(context.mode)} `
-    ));
+    // ...removed environment dump from human mode as per v1 plan...
 
-    // Plugin/command info
-    if (context.plugin) {
+    // Plugin/command info (hide internal fields in human mode unless requested)
+    // Only show plugin name if not generic or if user requests details (future: add flag for verbose)
+    if (context.plugin && context.plugin !== 'generic') {
         lines.push(chalk.bgWhiteBright.blue.bold((getPhrase('pluginInfoPrefix', context.plugin) || ' This command uses the ') + `"${context.plugin}"` + (getPhrase('pluginInfoSuffix', context.plugin) || ' plugin. ')));
     }
 
-    // Overview: What will happen
+    // Overview: What will happen (effects)
     lines.push('');
     lines.push(chalk.bgGreenBright.black.bold(getPhrase('whatWillHappenHeader', context.plugin) || ' What will happen: '));
     if (context.effects && context.effects.length > 0) {
@@ -64,6 +63,14 @@ export function explainHumanTemplate(context: ExplainContext): string {
     } else {
         lines.push(chalk.greenBright('  • The command will use default settings.'));
     }
+    // Overview: What will NOT happen (assumptions)
+    if (context.outcome && context.outcome.whatWillNotHappen && context.outcome.whatWillNotHappen.length > 0) {
+        lines.push('');
+        lines.push(chalk.bgRedBright.white.bold(getPhrase('whatWillNotHappenHeader', context.plugin) || ' What will NOT happen: '));
+        for (const n of context.outcome.whatWillNotHappen) {
+            lines.push(chalk.redBright(`  • ${n}`));
+        }
+    }
 
     // Overview: Result
     if (context.outcome && context.outcome.result) {
@@ -72,15 +79,8 @@ export function explainHumanTemplate(context: ExplainContext): string {
         lines.push(chalk.yellowBright(`  • ${safe(context.outcome.result)}`));
     }
 
-    // Overview: Flags used
-    if (context.usedFlags && Object.keys(context.usedFlags).length > 0) {
-        lines.push('');
-        lines.push(chalk.bgGray.white.bold(getPhrase('flagsUsedHeader', context.plugin) || ' Flags Used: '));
-        for (const [k, v] of Object.entries(context.usedFlags)) {
-            let valueStr = typeof v.value === 'function' ? '[function]' : safe(v.value);
-            lines.push(chalk.gray(`    - ${k}: ${valueStr} (${v.source})`));
-        }
-    }
+    // Overview: Flags used (hide in human mode unless requested)
+    // (future: add flag for verbose/advanced)
 
     // Why these choices were made
     if (context.decisions && context.decisions.length > 0) {
