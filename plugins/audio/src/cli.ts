@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { register } from './register.js';
-import { explainPreActionHook, getVersion, showPluginBranding } from '@mediaproc/core';
+import { explainPreActionHook, showPluginBranding } from '@mediaproc/core';
 
 const program = new Command();
 program
@@ -95,10 +95,10 @@ Professional audio processing powered by FFmpeg/FFprobe. Convert, normalize, tri
 📚 Detailed Help:
   Use 'mediaproc-audio <command> --help' for comprehensive documentation on each command.
   `)
-  .version(getVersion('../package.json'));
+  .version('1.2.0');
 program.hook('preAction', explainPreActionHook);
 program.hook('postAction', () => {
-  showPluginBranding('Audio', getVersion('../package.json'));
+  showPluginBranding('Audio');
 });
 register(program);
 program.parse(process.argv);

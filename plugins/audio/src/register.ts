@@ -4,12 +4,11 @@ import { normalizeCommand } from './commands/normalize.js';
 import { trimCommand } from './commands/trim.js';
 import { mergeCommand } from './commands/merge.js';
 import { extractCommand } from './commands/extract.js';
-import { getVersion } from '@mediaproc/core';
 
 
 export const name = '@mediaproc/audio';
 
-export const version = getVersion('../package.json');
+export const version = '1.2.0';
 
 export function register(program: Command): void {
   const audioCmd = program
