@@ -27,6 +27,7 @@ export function splitCommand(imageCmd: Command): void {
     .option('-r, --rows <number>', 'Number of rows', parseInt)
     .option('-c, --columns <number>', 'Number of columns', parseInt)
     .option('-o, --output <directory>', 'Output directory (default: ./tiles)')
+    .option('-q, --quality <quality>', 'Quality (1-100, only for JPEG, WebP, AVIF; for PNG, maps to compression level; ignored for others)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
@@ -201,14 +202,43 @@ export function splitCommand(imageCmd: Command): void {
 
                 const outputPath = path.join(fileOutputDir, `tile_${row}_${col}${inputPath.ext}`);
 
-                await createSharpInstance(imageBuffer)
+                let tile = createSharpInstance(imageBuffer)
                   .extract({
                     left,
                     top,
                     width: tileWidth,
                     height: tileHeight
-                  })
-                  .toFile(outputPath);
+                  });
+                const outputExt = path.extname(outputPath).toLowerCase();
+                if (outputExt === '.jpg' || outputExt === '.jpeg' || outputExt === '.webp' || outputExt === '.avif') {
+                  if (typeof options.quality === 'number' && !isNaN(options.quality)) {
+                    if (outputExt === '.jpg' || outputExt === '.jpeg') {
+                      tile = tile.jpeg({ quality: options.quality });
+                    } else if (outputExt === '.webp') {
+                      tile = tile.webp({ quality: options.quality });
+                    } else if (outputExt === '.avif') {
+                      tile = tile.avif({ quality: options.quality });
+                    }
+                  } else {
+                    if (outputExt === '.jpg' || outputExt === '.jpeg') {
+                      tile = tile.jpeg();
+                    } else if (outputExt === '.webp') {
+                      tile = tile.webp();
+                    } else if (outputExt === '.avif') {
+                      tile = tile.avif();
+                    }
+                  }
+                } else if (outputExt === '.png') {
+                  // For PNG, map quality (1-100) to compressionLevel (0-9)
+                  if (typeof options.quality === 'number' && !isNaN(options.quality)) {
+                    const compressionLevel = Math.round(9 - (options.quality / 100) * 9);
+                    tile = tile.png({ compressionLevel });
+                  } else {
+                    tile = tile.png();
+                  }
+                }
+                // For other formats, do not apply quality
+                await tile.toFile(outputPath);
 
                 spinner.text = `Splitting ${fileName}... ${((row * columns + col + 1) / totalTiles * 100).toFixed(0)}%`;
               }

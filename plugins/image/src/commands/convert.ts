@@ -18,7 +18,6 @@ export function convertCommand(imageCmd: Command): void {
     .option('-f, --format <format>', 'Output format: jpg, png, webp, avif, tiff, gif, webp')
     .option('-o, --output <path>', 'Output file path')
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
-    .option('--compression <level>', 'PNG compression level (0-9)', parseInt, 9)
     .option('--progressive', 'Use progressive/interlaced format')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')

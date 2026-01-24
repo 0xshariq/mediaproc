@@ -18,7 +18,7 @@ export function trimCommand(imageCmd: Command): void {
     .description('Trim/remove border edges from image')
     .option('-t, --threshold <value>', 'Threshold for edge detection (1-100, default: 10)', parseInt, 10)
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')

@@ -13,7 +13,7 @@ export function grayscaleCommand(imageCmd: Command): void {
     .alias('greyscale')
     .description('Convert image to grayscale (black and white)')
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
@@ -27,7 +27,6 @@ export function grayscaleCommand(imageCmd: Command): void {
           usage: ['grayscale <input>', 'grayscale <input> -o <output>', 'greyscale <input>'],
           options: [
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-grayscale.<ext>)' },
-            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '-q, --quality <quality>', description: 'Output quality (1-100). Optional. Applies to JPEG/WEBP/AVIF. For PNG, maps to compression level (higher quality = lower compression). Ignored for other formats.' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },

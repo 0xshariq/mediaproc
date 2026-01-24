@@ -22,7 +22,7 @@ export function modulateCommand(imageCmd: Command): void {
     .option('-s, --saturation <value>', 'Saturation multiplier (0.1-10, default: 1)', parseFloat, 1)
     .option('--hue <degrees>', 'Hue rotation in degrees (-360 to 360, default: 0)', parseInt, 0)
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')

@@ -20,7 +20,7 @@ export function rotateCommand(imageCmd: Command): void {
     .option('-a, --angle <degrees>', 'Rotation angle in degrees (default: 90)', parseFloat, 90)
     .option('--background <color>', 'Background color for areas outside image (default: transparent)', 'transparent')
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100, only for JPEG, WebP, AVIF; for PNG, maps to compression level; ignored for others)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
@@ -36,7 +36,7 @@ export function rotateCommand(imageCmd: Command): void {
             { flag: '-a, --angle <degrees>', description: 'Rotation angle in degrees (default: 90)' },
             { flag: '--background <color>', description: 'Background color for empty areas (default: transparent)' },
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-rotated.<ext>)' },
-            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
+            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (optional, only for JPEG, WebP, AVIF; for PNG, maps to compression level; ignored for others)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
@@ -48,7 +48,7 @@ export function rotateCommand(imageCmd: Command): void {
             { command: 'rotate photo.jpg -a 45', description: 'Rotate 45° clockwise' },
             { command: 'rotate image.png -a 30 --background white', description: 'Rotate with white background' }
           ],
-          tips: ['Use transparent background for PNGs', 'Negative angles rotate counter-clockwise']
+          tips: ['Use transparent background for PNGs', 'Negative angles rotate counter-clockwise', 'The quality flag only affects JPEG, WebP, AVIF, and PNG (as compression level).']
         });
         process.exit(0);
       }
@@ -110,13 +110,34 @@ export function rotateCommand(imageCmd: Command): void {
             });
 
             const outputExt = path.extname(outputPath).toLowerCase();
-            if (outputExt === '.jpg' || outputExt === '.jpeg') {
-              pipeline.jpeg({ quality: options.quality });
+            if (outputExt === '.jpg' || outputExt === '.jpeg' || outputExt === '.webp' || outputExt === '.avif') {
+              if (typeof options.quality === 'number' && !isNaN(options.quality)) {
+                if (outputExt === '.jpg' || outputExt === '.jpeg') {
+                  pipeline.jpeg({ quality: options.quality });
+                } else if (outputExt === '.webp') {
+                  pipeline.webp({ quality: options.quality });
+                } else if (outputExt === '.avif') {
+                  pipeline.avif({ quality: options.quality });
+                }
+              } else {
+                if (outputExt === '.jpg' || outputExt === '.jpeg') {
+                  pipeline.jpeg();
+                } else if (outputExt === '.webp') {
+                  pipeline.webp();
+                } else if (outputExt === '.avif') {
+                  pipeline.avif();
+                }
+              }
             } else if (outputExt === '.png') {
-              pipeline.png({ quality: options.quality });
-            } else if (outputExt === '.webp') {
-              pipeline.webp({ quality: options.quality });
+              // For PNG, map quality (1-100) to compressionLevel (0-9)
+              if (typeof options.quality === 'number' && !isNaN(options.quality)) {
+                const compressionLevel = Math.round(9 - (options.quality / 100) * 9);
+                pipeline.png({ compressionLevel });
+              } else {
+                pipeline.png();
+              }
             }
+            // For other formats, do not apply quality
 
             await pipeline.toFile(outputPath);
 

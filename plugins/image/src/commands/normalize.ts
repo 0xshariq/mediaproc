@@ -16,7 +16,7 @@ export function normalizeCommand(imageCmd: Command): void {
     .command('normalize <input>')
     .description('Normalize image (enhance contrast)')
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')

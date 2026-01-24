@@ -14,7 +14,7 @@ export function flopCommand(imageCmd: Command): void {
     .command('flop <input>')
     .description('Flip image horizontally (mirror left-right)')
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-v, --verbose', 'Verbose output');

@@ -20,7 +20,7 @@ export function gammaCommand(imageCmd: Command): void {
     .option('-g, --gamma <value>', 'Gamma value (1-3, default: 2.2)', parseFloat, 2.2)
     .option('--gamma-out <value>', 'Output gamma (optional)', parseFloat)
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
