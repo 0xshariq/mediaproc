@@ -18,8 +18,8 @@ importers:
         specifier: ^0.61.0
         version: 0.61.0
       '@mediaproc/core':
-        specifier: ^1.6.0
-        version: 1.6.0
+        specifier: ^1.6.1
+        version: 1.6.1
       boxen:
         specifier: ^8.0.1
         version: 8.0.1
@@ -991,8 +991,8 @@ packages:
   '@mediaproc/core@1.2.2':
     resolution: {integrity: sha512-SqQQHEbyWaYIlDKh9Ch2h7cqWJIGu8uriZ0u+7GgHrkkpdZGVbRFGfdNRYS1AgLfA+QCFfYcf/3Y/cW7iaafAg==}
 
-  '@mediaproc/core@1.6.0':
-    resolution: {integrity: sha512-wfdx15wclJTrXpZDRNkcKRmcD3lI0MUuhIuPkRmV+2Q7pS4WN7aKv0tycfOFs9QM+/Xm2t27hzGfRb8N/ZGBVw==}
+  '@mediaproc/core@1.6.1':
+    resolution: {integrity: sha512-hEplpfUC2LwNcxy+FJht8qh0C2aEThu5jfUnIkfSPACFIzs+e+aiTOZT1xXx9hMtP0NFBGOvgkh0xMQL0KLt8A==}
 
   '@mediaproc/image@1.3.6':
     resolution: {integrity: sha512-w+r8IhfEkV8mCGcQ+8iKADemq12vGsdO5qZTMWOQyh6tnffWEgrKTHjmbZKbZlPynSwkzi3Mp5vz87deXeBKmg==}
@@ -3761,13 +3761,13 @@ snapshots:
     dependencies:
       chalk: 5.6.2
 
-  '@mediaproc/core@1.6.0':
+  '@mediaproc/core@1.6.1':
     dependencies:
       chalk: 5.6.2
 
   '@mediaproc/image@1.3.6':
     dependencies:
-      '@mediaproc/core': 1.6.0
+      '@mediaproc/core': 1.6.1
       chalk: 5.6.2
       commander: 14.0.2
       ora: 9.0.0
