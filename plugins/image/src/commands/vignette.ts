@@ -22,6 +22,7 @@ export function vignetteCommand(imageCmd: Command): void {
     .option('-s, --strength <value>', 'Vignette strength 0-100 (default: 50)', parseFloat, 50)
     .option('-o, --output <path>', 'Output file path')
     .option('--dry-run', 'Show what would be done without executing')
+      .option('-q, --quality <quality>', 'Output quality (optional; only for JPEG, WEBP, AVIF; mapped to compressionLevel for PNG; ignored for other formats)', parseInt)
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for vignette command')
@@ -33,6 +34,7 @@ export function vignetteCommand(imageCmd: Command): void {
           description: 'Add vignette effect by darkening or lightening the edges of an image. Creates focus on the center and adds artistic mood.',
           usage: ['vignette <input>', 'vignette <input> -s 70', 'vignette <input> -o artistic.jpg'],
           options: [
+                        { flag: '-q, --quality <quality>', description: 'Output quality (optional; only for JPEG, WEBP, AVIF; mapped to compressionLevel for PNG; ignored for other formats)' },
             { flag: '-s, --strength <value>', description: 'Vignette strength 0-100 (default: 50)' },
             { flag: '-o, --output <path>', description: 'Output file path' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
@@ -145,12 +147,29 @@ export function vignetteCommand(imageCmd: Command): void {
               </svg>
             `);
 
-            await createSharpInstance(inputFile)
+            let pipeline = createSharpInstance(inputFile)
               .composite([{
                 input: vignetteOverlay,
                 blend: 'multiply'
-              }])
-              .toFile(outputPath);
+              }]);
+
+            const outputExt = path.extname(outputPath).toLowerCase();
+            if (outputExt === '.jpg' || outputExt === '.jpeg' || outputExt === '.webp' || outputExt === '.avif') {
+              if (typeof options.quality === 'number') {
+                if (outputExt === '.jpg' || outputExt === '.jpeg') pipeline = pipeline.jpeg({ quality: options.quality });
+                else if (outputExt === '.webp') pipeline = pipeline.webp({ quality: options.quality });
+                else if (outputExt === '.avif') pipeline = pipeline.avif({ quality: options.quality });
+              }
+            } else if (outputExt === '.png') {
+              if (typeof options.quality === 'number') {
+                const compressionLevel = 9 - Math.round((options.quality / 100) * 9);
+                pipeline = pipeline.png({ compressionLevel });
+              } else {
+                pipeline = pipeline.png();
+              }
+            }
+
+            await pipeline.toFile(outputPath);
 
             spinner.succeed(chalk.green(`✓ ${fileName} processed`));
             successCount++;

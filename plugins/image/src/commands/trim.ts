@@ -18,7 +18,7 @@ export function trimCommand(imageCmd: Command): void {
     .description('Trim/remove border edges from image')
     .option('-t, --threshold <value>', 'Threshold for edge detection (1-100, default: 10)', parseInt, 10)
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
+    .option('-q, --quality <quality>', 'Output quality (optional; only for JPEG, WEBP, AVIF; mapped to compressionLevel for PNG; ignored for other formats)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
@@ -33,7 +33,7 @@ export function trimCommand(imageCmd: Command): void {
           options: [
             { flag: '-t, --threshold <value>', description: 'Edge detection threshold 1-100 (default: 10, higher = more aggressive)' },
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-trimmed.<ext>)' },
-            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
+            { flag: '-q, --quality <quality>', description: 'Output quality (optional; only for JPEG, WEBP, AVIF; mapped to compressionLevel for PNG; ignored for other formats)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
@@ -127,12 +127,19 @@ export function trimCommand(imageCmd: Command): void {
             const pipeline = createSharpInstance(inputFile).trim({ threshold: options.threshold || 10 });
 
             const outputExt = path.extname(outputPath).toLowerCase();
-            if (outputExt === '.jpg' || outputExt === '.jpeg') {
-              pipeline.jpeg({ quality: options.quality });
+            if (outputExt === '.jpg' || outputExt === '.jpeg' || outputExt === '.webp' || outputExt === '.avif') {
+              if (typeof options.quality === 'number') {
+                if (outputExt === '.jpg' || outputExt === '.jpeg') pipeline.jpeg({ quality: options.quality });
+                else if (outputExt === '.webp') pipeline.webp({ quality: options.quality });
+                else if (outputExt === '.avif') pipeline.avif({ quality: options.quality });
+              }
             } else if (outputExt === '.png') {
-              pipeline.png({ quality: options.quality });
-            } else if (outputExt === '.webp') {
-              pipeline.webp({ quality: options.quality });
+              if (typeof options.quality === 'number') {
+                const compressionLevel = 9 - Math.round((options.quality / 100) * 9);
+                pipeline.png({ compressionLevel });
+              } else {
+                pipeline.png();
+              }
             }
 
             await pipeline.toFile(outputPath);
