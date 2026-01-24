@@ -17,7 +17,7 @@ export function convertCommand(imageCmd: Command): void {
     .description('Convert image to different format')
     .option('-f, --format <format>', 'Output format: jpg, png, webp, avif, tiff, gif, webp')
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--compression <level>', 'PNG compression level (0-9)', parseInt, 9)
     .option('--progressive', 'Use progressive/interlaced format')
     .option('--dry-run', 'Show what would be done without executing')
@@ -34,7 +34,7 @@ export function convertCommand(imageCmd: Command): void {
           options: [
             { flag: '-f, --format <format>', description: 'Output format: jpg, png, webp, avif, tiff, gif (default: webp)' },
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>.<format>)' },
-            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
+            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (optional, only applies to JPEG, WEBP, AVIF; for PNG, mapped to compression level)' },
             { flag: '--compression <level>', description: 'PNG compression level 0-9 (default: 9)' },
             { flag: '--progressive', description: 'Use progressive/interlaced format' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
@@ -107,7 +107,9 @@ export function convertCommand(imageCmd: Command): void {
         if (options.verbose) {
           console.log(chalk.blue('\nConfiguration:'));
           console.log(chalk.dim(`  Format: ${options.format.toUpperCase()}`));
-          console.log(chalk.dim(`  Quality: ${options.quality || 90}`));
+          if (typeof options.quality !== 'undefined') {
+            console.log(chalk.dim(`  Quality: ${options.quality}`));
+          }
           if (options.compression) {
             console.log(chalk.dim(`  Compression: ${options.compression}`));
           }
@@ -137,25 +139,45 @@ export function convertCommand(imageCmd: Command): void {
 
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 
-
           try {
             const metadata = await createSharpInstance(inputFile).metadata();
             let pipeline = createSharpInstance(inputFile);
 
             // Apply format-specific options
             if (options.format === 'jpg' || options.format === 'jpeg') {
-              pipeline.jpeg({ quality: options.quality, progressive: options.progressive || false });
-            } else if (options.format === 'png') {
-              pipeline.png({ quality: options.quality, compressionLevel: options.compression || 9, progressive: options.progressive || false });
+              if (typeof options.quality === 'number') {
+                pipeline.jpeg({ quality: options.quality, progressive: options.progressive || false });
+              } else {
+                pipeline.jpeg({ progressive: options.progressive || false });
+              }
             } else if (options.format === 'webp') {
-              pipeline.webp({ quality: options.quality });
+              if (typeof options.quality === 'number') {
+                pipeline.webp({ quality: options.quality });
+              } else {
+                pipeline.webp();
+              }
             } else if (options.format === 'avif') {
-              pipeline.avif({ quality: options.quality });
+              if (typeof options.quality === 'number') {
+                pipeline.avif({ quality: options.quality });
+              } else {
+                pipeline.avif();
+              }
+            } else if (options.format === 'png') {
+              let compressionLevel = 9;
+              if (typeof options.quality === 'number') {
+                compressionLevel = Math.round((100 - Math.max(1, Math.min(100, options.quality))) * 9 / 99);
+              }
+              pipeline.png({ compressionLevel, progressive: options.progressive || false });
             } else if (options.format === 'tiff') {
-              pipeline.tiff({ quality: options.quality });
+              if (typeof options.quality === 'number') {
+                pipeline.tiff({ quality: options.quality });
+              } else {
+                pipeline.tiff();
+              }
             } else if (options.format === 'gif') {
               pipeline.gif();
             }
+            // For other formats, do not set quality
 
             await pipeline.toFile(outputPath);
 

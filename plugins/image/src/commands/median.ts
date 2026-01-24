@@ -13,12 +13,20 @@ interface MedianOptions extends FilterOptions {
 }
 
 export function medianCommand(imageCmd: Command): void {
+  // Custom parser for filter size
+  function parseFilterSize(val: string | boolean) {
+    // If -s is passed without a value, Commander sets val to true
+    if (val === true) return 3;
+    const n = Number(val);
+    if (isNaN(n) || n < 1 || n > 50) return 3;
+    return n;
+  }
   imageCmd
     .command('median <input>')
     .description('Apply median filter (noise reduction)')
-    .option('-s, --size <size>', 'Filter size (1-50, default: 3)', parseInt, 3)
+    .option('-s, --size <size>', 'Filter size (1-50, default: 3)', parseFilterSize, 3)
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
@@ -106,11 +114,14 @@ export function medianCommand(imageCmd: Command): void {
           suffix: '-median',
         });
 
+        // Commander now guarantees filterSize is a valid number between 1 and 50
+        const filterSize = options.size;
+
         spinner.succeed(chalk.green(`Found ${inputFiles.length} image(s) to process`));
 
         if (options.verbose) {
           console.log(chalk.blue('\nConfiguration:'));
-          console.log(chalk.dim(`  Filter size: ${options.size}`));
+          console.log(chalk.dim(`  Filter size: ${filterSize}`));
           console.log(chalk.dim(`  Quality: ${options.quality}`));
         }
 
@@ -134,23 +145,29 @@ export function medianCommand(imageCmd: Command): void {
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 
           try {
-            // Validate filter size
-            let filterSize = Number(options.size);
-            if (isNaN(filterSize) || filterSize < 1 || filterSize > 50) {
-              throw new Error('Filter size must be a number between 1 and 50');
-            }
-
+            // Use already validated filterSize
             const metadata = await createSharpInstance(inputFile).metadata();
             const pipeline = createSharpInstance(inputFile).median(filterSize);
 
             const outputExt = path.extname(outputPath).toLowerCase();
+            const quality = typeof options.quality === 'number' ? options.quality : 90;
             if (outputExt === '.jpg' || outputExt === '.jpeg') {
-              pipeline.jpeg({ quality: options.quality });
-            } else if (outputExt === '.png') {
-              pipeline.png({ quality: options.quality });
+              pipeline.jpeg({ quality });
             } else if (outputExt === '.webp') {
-              pipeline.webp({ quality: options.quality });
+              pipeline.webp({ quality });
+            } else if (outputExt === '.avif') {
+              pipeline.avif({ quality });
+            } else if (outputExt === '.png') {
+              // PNG uses compressionLevel (0-9), map quality 1-100 to 9-0 (higher quality = lower compression)
+              let compressionLevel = 6;
+              if (typeof options.quality === 'number') {
+                compressionLevel = Math.round(9 - (quality / 100) * 9);
+                if (compressionLevel < 0) compressionLevel = 0;
+                if (compressionLevel > 9) compressionLevel = 9;
+              }
+              pipeline.png({ compressionLevel });
             }
+            // For other formats, do not set quality
 
             await pipeline.toFile(outputPath);
 

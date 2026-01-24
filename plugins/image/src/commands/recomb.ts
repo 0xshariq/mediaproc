@@ -18,7 +18,7 @@ export function recombCommand(imageCmd: Command): void {
     .description('Recombine RGB channels using matrix')
     .option('--matrix <values>', 'Recombination matrix (3x3) as JSON', '[[1,0,0],[0,1,0],[0,0,1]]')
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100, only for JPEG, WebP, AVIF; for PNG, maps to compression level; ignored for others)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
@@ -36,7 +36,7 @@ export function recombCommand(imageCmd: Command): void {
           options: [
             { flag: '--matrix <values>', description: '3x3 matrix as JSON array (default: identity)' },
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-recomb.<ext>)' },
-            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
+            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (optional, only for JPEG, WebP, AVIF; for PNG, maps to compression level; ignored for others)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
@@ -130,7 +130,7 @@ export function recombCommand(imageCmd: Command): void {
         if (options.verbose) {
           console.log(chalk.blue('\nConfiguration:'));
           console.log(chalk.dim(`  Matrix: ${JSON.stringify(matrix)}`));
-          console.log(chalk.dim(`  Quality: ${options.quality || 90}`));
+          console.log(chalk.dim(`  Quality: ${options.quality}`));
         }
 
         if (options.dryRun) {
@@ -156,13 +156,34 @@ export function recombCommand(imageCmd: Command): void {
             const pipeline = createSharpInstance(inputFile).recomb(matrix as [[number, number, number], [number, number, number], [number, number, number]]);
 
             const outputExt = path.extname(outputPath).toLowerCase();
-            if (outputExt === '.jpg' || outputExt === '.jpeg') {
-              pipeline.jpeg({ quality: options.quality || 90 });
+            if (outputExt === '.jpg' || outputExt === '.jpeg' || outputExt === '.webp' || outputExt === '.avif') {
+              if (typeof options.quality === 'number' && !isNaN(options.quality)) {
+                if (outputExt === '.jpg' || outputExt === '.jpeg') {
+                  pipeline.jpeg({ quality: options.quality });
+                } else if (outputExt === '.webp') {
+                  pipeline.webp({ quality: options.quality });
+                } else if (outputExt === '.avif') {
+                  pipeline.avif({ quality: options.quality });
+                }
+              } else {
+                if (outputExt === '.jpg' || outputExt === '.jpeg') {
+                  pipeline.jpeg();
+                } else if (outputExt === '.webp') {
+                  pipeline.webp();
+                } else if (outputExt === '.avif') {
+                  pipeline.avif();
+                }
+              }
             } else if (outputExt === '.png') {
-              pipeline.png({ quality: options.quality || 90 });
-            } else if (outputExt === '.webp') {
-              pipeline.webp({ quality: options.quality || 90 });
+              // For PNG, map quality (1-100) to compressionLevel (0-9)
+              if (typeof options.quality === 'number' && !isNaN(options.quality)) {
+                const compressionLevel = Math.round(9 - (options.quality / 100) * 9);
+                pipeline.png({ compressionLevel });
+              } else {
+                pipeline.png();
+              }
             }
+            // For other formats, do not apply quality
 
             await pipeline.toFile(outputPath);
 

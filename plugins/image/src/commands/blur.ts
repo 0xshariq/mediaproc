@@ -13,7 +13,7 @@ export function blurCommand(imageCmd: Command): void {
     .description('Apply blur effect to image')
     .option('-s, --sigma <sigma>', 'Blur strength (0.3-1000, default: 10)', parseFloat, 10)
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--help', 'Display help for blur command')
@@ -33,7 +33,7 @@ export function blurCommand(imageCmd: Command): void {
           options: [
             { flag: '-s, --sigma <sigma>', description: 'Blur strength (0.3-1000, default: 10)' },
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-blurred.<ext>)' },
-            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
+            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (optional, only applies to JPEG, WEBP, AVIF; for PNG, mapped to compression level)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
@@ -97,7 +97,9 @@ export function blurCommand(imageCmd: Command): void {
         if (options.verbose) {
           console.log(chalk.blue('\nConfiguration:'));
           console.log(chalk.dim(`  Sigma: ${options.sigma || 10}`));
-          console.log(chalk.dim(`  Quality: ${options.quality || 90}`));
+          if (typeof options.quality !== 'undefined') {
+            console.log(chalk.dim(`  Quality: ${options.quality}`));
+          }
         }
 
         if (options.dryRun) {
@@ -124,12 +126,31 @@ export function blurCommand(imageCmd: Command): void {
 
             const outputExt = path.extname(outputPath).toLowerCase();
             if (outputExt === '.jpg' || outputExt === '.jpeg') {
-              pipeline.jpeg({ quality: options.quality });
-            } else if (outputExt === '.png') {
-              pipeline.png({ quality: options.quality });
+              if (typeof options.quality === 'number') {
+                pipeline.jpeg({ quality: options.quality });
+              } else {
+                pipeline.jpeg();
+              }
             } else if (outputExt === '.webp') {
-              pipeline.webp({ quality: options.quality });
+              if (typeof options.quality === 'number') {
+                pipeline.webp({ quality: options.quality });
+              } else {
+                pipeline.webp();
+              }
+            } else if (outputExt === '.avif') {
+              if (typeof options.quality === 'number') {
+                pipeline.avif({ quality: options.quality });
+              } else {
+                pipeline.avif();
+              }
+            } else if (outputExt === '.png') {
+              let compressionLevel = 9;
+              if (typeof options.quality === 'number') {
+                compressionLevel = Math.round((100 - Math.max(1, Math.min(100, options.quality))) * 9 / 99);
+              }
+              pipeline.png({ compressionLevel });
             }
+            // For other formats, do not set quality
 
             await pipeline.toFile(outputPath);
 

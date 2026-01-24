@@ -20,7 +20,7 @@ export function booleanCommand(imageCmd: Command): void {
     .requiredOption('--operation <op>', 'Boolean operation: and, or, eor (XOR)','and')
     .requiredOption('--operand <path>', 'Second image for operation')
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-v, --verbose', 'Verbose output');
@@ -142,6 +142,7 @@ export function booleanCommand(imageCmd: Command): void {
         console.log(chalk.dim(`  Found ${inputFiles.length} file(s)`));
         console.log(chalk.dim(`  Operand: ${options.operand}`));
         console.log(chalk.dim(`  Operation: ${operation.toUpperCase()}`));
+        console.log(chalk.dim(`  Quality: ${options.quality}`));
         spinner.start('Processing...');
       }
 
@@ -165,13 +166,24 @@ export function booleanCommand(imageCmd: Command): void {
           const pipeline = createSharpInstance(inputFile).boolean(operandBuffer, operation as 'and' | 'or' | 'eor');
 
           const outputExt = path.extname(outputPath).toLowerCase();
+          const quality = typeof options.quality === 'number' ? options.quality : 90;
           if (outputExt === '.jpg' || outputExt === '.jpeg') {
-            pipeline.jpeg({ quality: options.quality });
-          } else if (outputExt === '.png') {
-            pipeline.png({ quality: options.quality });
+            pipeline.jpeg({ quality });
           } else if (outputExt === '.webp') {
-            pipeline.webp({ quality: options.quality });
+            pipeline.webp({ quality });
+          } else if (outputExt === '.avif') {
+            pipeline.avif({ quality });
+          } else if (outputExt === '.png') {
+            // PNG uses compressionLevel (0-9), map quality 1-100 to 9-0
+            let compressionLevel = 6;
+            if (typeof options.quality === 'number') {
+              compressionLevel = Math.round(9 - (quality / 100) * 9);
+              if (compressionLevel < 0) compressionLevel = 0;
+              if (compressionLevel > 9) compressionLevel = 9;
+            }
+            pipeline.png({ compressionLevel });
           }
+          // For other formats, do not set quality
 
           await pipeline.toFile(outputPath);
 

@@ -32,7 +32,7 @@ export function batchCommand(imageCmd: Command): void {
     .option('--width <pixels>', 'Width for resize operations', parseInt)
     .option('--height <pixels>', 'Height for resize operations', parseInt)
     .option('-f, --format <format>', 'Output format for convert operations')
-    .option('-q, --quality <quality>', 'Quality for optimization', parseInt)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
@@ -52,7 +52,7 @@ export function batchCommand(imageCmd: Command): void {
             { flag: '--width <pixels>', description: 'Width for resize operations' },
             { flag: '--height <pixels>', description: 'Height for resize operations' },
             { flag: '-f, --format <format>', description: 'Output format for convert operations' },
-            { flag: '-q, --quality <quality>', description: 'Quality for optimization/conversion' },
+            { flag: '-q, --quality <quality>', description: 'Output quality (1-100). Optional. Applies to JPEG/WEBP/AVIF. For PNG, maps to compression level (higher quality = lower compression). Ignored for other formats.' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }

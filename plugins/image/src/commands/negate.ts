@@ -17,7 +17,7 @@ export function negateCommand(imageCmd: Command): void {
     .command('negate <input>')
     .description('Create negative/inverted image')
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--alpha', 'Also negate alpha channel')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
@@ -32,7 +32,7 @@ export function negateCommand(imageCmd: Command): void {
           usage: ['negate <input>', 'negate <input> --alpha', 'negate <input> -o output.jpg'],
           options: [
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-negative.<ext>)' },
-            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
+            { flag: '-q, --quality <quality>', description: 'Output quality (1-100). Optional. Applies to JPEG/WEBP/AVIF. For PNG, maps to compression level (higher quality = lower compression). Ignored for other formats.' },
             { flag: '--alpha', description: 'Also invert alpha/transparency channel' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
@@ -92,7 +92,7 @@ export function negateCommand(imageCmd: Command): void {
         if (options.verbose) {
           console.log(chalk.blue('\nConfiguration:'));
           console.log(chalk.dim(`  Negate alpha: ${options.alpha ? 'yes' : 'no'}`));
-          console.log(chalk.dim(`  Quality: ${options.quality || 90}`));
+          console.log(chalk.dim(`  Quality: ${options.quality }`));
         }
 
         if (options.dryRun) {
@@ -120,11 +120,11 @@ export function negateCommand(imageCmd: Command): void {
 
             const outputExt = path.extname(outputPath).toLowerCase();
             if (outputExt === '.jpg' || outputExt === '.jpeg') {
-              pipeline.jpeg({ quality: options.quality || 90 });
+              pipeline.jpeg({ quality: options.quality  });
             } else if (outputExt === '.png') {
-              pipeline.png({ quality: options.quality || 90 });
+              pipeline.png({ quality: options.quality  });
             } else if (outputExt === '.webp') {
-              pipeline.webp({ quality: options.quality || 90 });
+              pipeline.webp({ quality: options.quality  });
             }
 
             await pipeline.toFile(outputPath);

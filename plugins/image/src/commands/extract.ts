@@ -5,13 +5,14 @@ import ora from 'ora';
 import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import type { ExtractOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
+import path from 'node:path';
 
 interface ExtractOptionsExtended extends ExtractOptions {
   help?: boolean;
 }
 
 export function extractCommand(imageCmd: Command): void {
-  imageCmd
+ imageCmd
     .command('extract <input>')
     .description('Extract color channels or specific regions from image')
     .option('-c, --channel <channel>', 'Extract channel: red, green, blue, alpha')
@@ -20,6 +21,7 @@ export function extractCommand(imageCmd: Command): void {
     .option('-w, --width <pixels>', 'Width for region extraction', parseInt)
     .option('-h, --height <pixels>', 'Height for region extraction', parseInt)
     .option('-o, --output <path>', 'Output file path')
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
@@ -39,6 +41,7 @@ export function extractCommand(imageCmd: Command): void {
             { flag: '-h, --height <pixels>', description: 'Height for region extraction' },
             { flag: '-o, --output <path>', description: 'Output file path' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '-q, --quality <quality>', description: 'Output quality (1-100). Optional. Applies to JPEG/WEBP/AVIF. For PNG, maps to compression level (higher quality = lower compression). Ignored for other formats.' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
@@ -177,6 +180,20 @@ export function extractCommand(imageCmd: Command): void {
                 width: options.width!,
                 height: options.height!
               });
+            }
+
+            const outputExt = path.extname(outputPath).toLowerCase();
+            if (options.quality !== undefined) {
+              if (outputExt === '.jpg' || outputExt === '.jpeg') {
+                pipeline = pipeline.jpeg({ quality: options.quality });
+              } else if (outputExt === '.webp') {
+                pipeline = pipeline.webp({ quality: options.quality });
+              } else if (outputExt === '.avif') {
+                pipeline = pipeline.avif({ quality: options.quality });
+              } else if (outputExt === '.png') {
+                pipeline = pipeline.png({ compressionLevel: options.quality });
+              }
+              // Ignore for other formats
             }
 
             await pipeline.toFile(outputPath);

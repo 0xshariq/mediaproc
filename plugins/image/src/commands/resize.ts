@@ -14,7 +14,7 @@ export function resizeCommand(imageCmd: Command): void {
     .option('-w, --width <width>', 'Width in pixels', parseInt)
     .option('-h, --height <height>', 'Height in pixels', parseInt)
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--fit <fit>', 'Fit mode: cover, contain, fill, inside, outside', 'cover')
     .option('--maintain-aspect-ratio', 'Maintain aspect ratio (default: true)', true)
     .option('--no-maintain-aspect-ratio', 'Do not maintain aspect ratio (uses fill mode)')
@@ -41,7 +41,7 @@ export function resizeCommand(imageCmd: Command): void {
             { flag: '-w, --width <width>', description: 'Width in pixels (auto if not specified)' },
             { flag: '-h, --height <height>', description: 'Height in pixels (auto if not specified)' },
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-resized.<ext>)' },
-            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
+            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (optional, only applies to JPEG, WEBP, AVIF; for PNG, mapped to compression level)' },
             { flag: '--fit <mode>', description: 'Fit mode: cover, contain, fill, inside, outside (default: cover)' },
             { flag: '--maintain-aspect-ratio', description: 'Maintain aspect ratio (default: true)' },
             { flag: '--no-maintain-aspect-ratio', description: 'Do not maintain aspect ratio (uses fill mode)' },
@@ -181,14 +181,31 @@ export function resizeCommand(imageCmd: Command): void {
             const outputExt = path.extname(outputPath).toLowerCase();
 
             if (outputExt === '.jpg' || outputExt === '.jpeg') {
-              pipeline.jpeg({ quality: options.quality || 90 });
+              if (typeof options.quality === 'number') {
+                pipeline.jpeg({ quality: options.quality });
+              } else {
+                pipeline.jpeg();
+              }
             } else if (outputExt === '.png') {
-              pipeline.png({ quality: options.quality || 90, compressionLevel: 9 });
+              // Map quality (1-100) to compressionLevel (0-9)
+              let compressionLevel = 9;
+              if (typeof options.quality === 'number') {
+                compressionLevel = Math.round((100 - Math.max(1, Math.min(100, options.quality))) * 9 / 99);
+              }
+              pipeline.png({ compressionLevel });
             } else if (outputExt === '.webp') {
-              pipeline.webp({ quality: options.quality || 90 });
+              if (typeof options.quality === 'number') {
+                pipeline.webp({ quality: options.quality });
+              } else {
+                pipeline.webp();
+              }
             } else if (outputExt === '.avif') {
-              pipeline.avif({ quality: options.quality || 90 });
-            }
+              if (typeof options.quality === 'number') {
+                pipeline.avif({ quality: options.quality });
+              } else {
+                pipeline.avif();
+              }
+            } // For other formats, ignore quality flag
 
             // Save the resized image
             await pipeline.toFile(outputPath);

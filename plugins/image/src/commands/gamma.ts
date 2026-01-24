@@ -14,7 +14,7 @@ interface GammaOptions extends FilterOptions {
 }
 
 export function gammaCommand(imageCmd: Command): void {
-  imageCmd
+ imageCmd
     .command('gamma <input>')
     .description('Apply gamma correction')
     .option('-g, --gamma <value>', 'Gamma value (1-3, default: 2.2)', parseFloat, 2.2)
@@ -36,7 +36,7 @@ export function gammaCommand(imageCmd: Command): void {
             { flag: '-g, --gamma <value>', description: 'Gamma value 1-3 (default: 2.2, standard sRGB)' },
             { flag: '--gamma-out <value>', description: 'Output gamma value (optional, for specific workflows)' },
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-gamma.<ext>)' },
-            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
+            { flag: '-q, --quality <quality>', description: 'Output quality (1-100). Optional. Applies to JPEG/WEBP/AVIF. For PNG, maps to compression level (higher quality = lower compression). Ignored for other formats.' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
@@ -109,7 +109,7 @@ export function gammaCommand(imageCmd: Command): void {
           if (options.gammaOut) {
             console.log(chalk.dim(`  Gamma out: ${options.gammaOut}`));
           }
-          console.log(chalk.dim(`  Quality: ${options.quality || 90}`));
+          console.log(chalk.dim(`  Quality: ${options.quality}`));
         }
 
         if (options.dryRun) {
@@ -140,11 +140,11 @@ export function gammaCommand(imageCmd: Command): void {
 
             const outputExt = path.extname(outputPath).toLowerCase();
             if (outputExt === '.jpg' || outputExt === '.jpeg') {
-              pipeline.jpeg({ quality: options.quality || 90 });
+              pipeline.jpeg({ quality: options.quality });
             } else if (outputExt === '.png') {
-              pipeline.png({ quality: options.quality || 90 });
+              pipeline.png({ quality: options.quality });
             } else if (outputExt === '.webp') {
-              pipeline.webp({ quality: options.quality || 90 });
+              pipeline.webp({ quality: options.quality });
             }
 
             await pipeline.toFile(outputPath);

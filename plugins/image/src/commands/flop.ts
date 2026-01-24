@@ -27,7 +27,7 @@ export function flopCommand(imageCmd: Command): void {
       usage: ['flop <input>', 'flop <input> -o output.jpg'],
       options: [
         { flag: '-o, --output <path>', description: 'Output file path (default: <input>-flopped.<ext>)' },
-        { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
+            { flag: '-q, --quality <quality>', description: 'Output quality (1-100). Optional. Applies to JPEG/WEBP/AVIF. For PNG, maps to compression level (higher quality = lower compression). Ignored for other formats.' },
         { flag: '--dry-run', description: 'Preview changes without executing' },
         { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
         { flag: '-v, --verbose', description: 'Show detailed output' }
@@ -70,7 +70,7 @@ export function flopCommand(imageCmd: Command): void {
 
       if (options.verbose) {
         console.log(chalk.blue('\nConfiguration:'));
-        console.log(chalk.dim(`  Quality: ${options.quality || 90}`));
+        console.log(chalk.dim(`  Quality: ${options.quality}`));
       }
 
       if (options.dryRun) {
@@ -98,11 +98,11 @@ export function flopCommand(imageCmd: Command): void {
 
           const outputExt = path.extname(outputPath).toLowerCase();
           if (outputExt === '.jpg' || outputExt === '.jpeg') {
-            pipeline.jpeg({ quality: options.quality || 90 });
+            pipeline.jpeg({ quality: options.quality });
           } else if (outputExt === '.png') {
-            pipeline.png({ quality: options.quality || 90 });
+            pipeline.png({ quality: options.quality });
           } else if (outputExt === '.webp') {
-            pipeline.webp({ quality: options.quality || 90 });
+            pipeline.webp({ quality: options.quality });
           }
 
           await pipeline.toFile(outputPath);

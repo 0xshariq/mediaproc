@@ -5,6 +5,7 @@ import ora from 'ora';
 import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { ImageOptions } from '../types.js';
+import path from 'node:path';
 
 interface MirrorOptions extends ImageOptions {
   input: string;
@@ -16,11 +17,12 @@ interface MirrorOptions extends ImageOptions {
 }
 
 export function mirrorCommand(imageCmd: Command): void {
-  imageCmd
+      imageCmd
     .command('mirror <input>')
     .description('Create mirror/kaleidoscope effects')
     .option('-m, --mode <mode>', 'Mirror mode: horizontal, vertical, both, quad (kaleidoscope) (default: horizontal)', 'horizontal')
     .option('-o, --output <path>', 'Output file path')
+    .option('-q, --quality <number>', 'Set output quality for JPEG, WEBP, AVIF (1-100), or compression level for PNG (0-9). Ignored for other formats. Optional, no default.', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
@@ -36,6 +38,7 @@ export function mirrorCommand(imageCmd: Command): void {
             { flag: '-m, --mode <mode>', description: 'Mirror mode: horizontal, vertical, both, quad (default: horizontal)' },
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-mirror-<mode>.ext)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '-q, --quality <number>', description: 'Set output quality for JPEG, WEBP, AVIF (1-100), or compression level for PNG (0-9). Ignored for other formats. Optional, no default.' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
@@ -248,7 +251,22 @@ export function mirrorCommand(imageCmd: Command): void {
                 .toBuffer();
             }
 
-            await createSharpInstance(resultBuffer).toFile(outputPath);
+            // Apply quality logic for output
+            const outputExt = path.extname(outputPath).toLowerCase();
+            let sharpOut = createSharpInstance(resultBuffer);
+            if (options.quality !== undefined) {
+              if (outputExt === '.jpg' || outputExt === '.jpeg') {
+                sharpOut = sharpOut.jpeg({ quality: options.quality });
+              } else if (outputExt === '.webp') {
+                sharpOut = sharpOut.webp({ quality: options.quality });
+              } else if (outputExt === '.avif') {
+                sharpOut = sharpOut.avif({ quality: options.quality });
+              } else if (outputExt === '.png') {
+                sharpOut = sharpOut.png({ compressionLevel: options.quality });
+              }
+              // Ignore for other formats
+            }
+            await sharpOut.toFile(outputPath);
 
             if (options.verbose || inputFiles.length === 1) {
               spinner.succeed(chalk.green(`✓ ${fileName}`));

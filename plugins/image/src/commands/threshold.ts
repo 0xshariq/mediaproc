@@ -139,11 +139,11 @@ export function thresholdCommand(imageCmd: Command): void {
 
           const outputExt = path.extname(outputPath).toLowerCase();
           if (outputExt === '.jpg' || outputExt === '.jpeg') {
-            pipeline.jpeg({ quality: options.quality || 90 });
+            pipeline.jpeg({ quality: options.quality });
           } else if (outputExt === '.png') {
-            pipeline.png({ quality: options.quality || 90 });
+            pipeline.png({ quality: options.quality });
           } else if (outputExt === '.webp') {
-            pipeline.webp({ quality: options.quality || 90 });
+            pipeline.webp({ quality: options.quality });
           }
 
           await pipeline.toFile(outputPath);

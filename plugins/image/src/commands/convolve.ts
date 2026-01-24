@@ -2,9 +2,10 @@ import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 
-import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp, showPluginBranding } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import type { ConvolveOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
+import path from 'node:path';
 
 interface ConvolveOptionsExtended extends ConvolveOptions {
   help?: boolean;
@@ -36,6 +37,7 @@ export function convolveCommand(imageCmd: Command): void {
     .option('--scale <value>', 'Kernel scale factor', parseFloat, 1)
     .option('--offset <value>', 'Kernel offset', parseFloat, 0)
     .option('-o, --output <path>', 'Output file path')
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
@@ -169,7 +171,6 @@ export function convolveCommand(imageCmd: Command): void {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
           });
-          showPluginBranding('Image', '../../package.json');
           return;
         }
 
@@ -184,15 +185,31 @@ export function convolveCommand(imageCmd: Command): void {
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 
           try {
-            await createSharpInstance(inputFile)
+            let pipeline = createSharpInstance(inputFile)
               .convolve({
                 width: kernelSize,
                 height: kernelSize,
                 kernel: flatKernel,
                 scale: options.scale,
                 offset: options.offset
-              })
-              .toFile(outputPath);
+              });
+
+            // Apply quality/compressionLevel if requested
+            const outputExt = path.extname(outputPath).toLowerCase();
+            if (options.quality !== undefined) {
+              if (outputExt === '.jpg' || outputExt === '.jpeg') {
+                pipeline = pipeline.jpeg({ quality: options.quality });
+              } else if (outputExt === '.webp') {
+                pipeline = pipeline.webp({ quality: options.quality });
+              } else if (outputExt === '.avif') {
+                pipeline = pipeline.avif({ quality: options.quality });
+              } else if (outputExt === '.png') {
+                pipeline = pipeline.png({ compressionLevel: options.quality });
+              }
+              // Ignore for other formats
+            }
+
+            await pipeline.toFile(outputPath);
 
             spinner.succeed(chalk.green(`✓ ${fileName} processed`));
             successCount++;
@@ -210,7 +227,6 @@ export function convolveCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        showPluginBranding('Image', '../../package.json');
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to apply convolution'));

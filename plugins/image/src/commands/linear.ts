@@ -13,7 +13,7 @@ interface LinearOptions extends ImageOptions {
 }
 
 export function linearCommand(imageCmd: Command): void {
-  const cmd = imageCmd
+ const cmd = imageCmd
     .command('linear <input>')
     .description('Apply linear formula: output = (a * input) + b')
     .option('-a, --a <value>', 'Multiplier (default: 1)', parseFloat, 1)
@@ -37,6 +37,7 @@ export function linearCommand(imageCmd: Command): void {
           { flag: '-o, --output <path>', description: 'Output file path (default: <input>-linear.<ext>)' },
           { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
           { flag: '--dry-run', description: 'Preview changes without executing' },
+          { flag: '-q, --quality <quality>', description: 'Output quality (1-100). Optional. Applies to JPEG/WEBP/AVIF. For PNG, maps to compression level (higher quality = lower compression). Ignored for other formats.' },
           { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
           { flag: '-v, --verbose', description: 'Show detailed output' }
         ],
@@ -119,7 +120,7 @@ export function linearCommand(imageCmd: Command): void {
       if (options.verbose) {
         console.log(chalk.blue('\nConfiguration:'));
         console.log(chalk.dim(`  Formula: (${a} * input) + ${b}`));
-        console.log(chalk.dim(`  Quality: ${options.quality || 90}`));
+        console.log(chalk.dim(`  Quality: ${options.quality}`));
       }
 
       if (options.dryRun) {
@@ -146,11 +147,11 @@ export function linearCommand(imageCmd: Command): void {
 
           const outputExt = path.extname(outputPath).toLowerCase();
           if (outputExt === '.jpg' || outputExt === '.jpeg') {
-            pipeline.jpeg({ quality: options.quality || 90 });
+            pipeline.jpeg({ quality: options.quality });
           } else if (outputExt === '.png') {
-            pipeline.png({ quality: options.quality || 90 });
+            pipeline.png({ quality: options.quality });
           } else if (outputExt === '.webp') {
-            pipeline.webp({ quality: options.quality || 90 });
+            pipeline.webp({ quality: options.quality });
           }
 
           await pipeline.toFile(outputPath);

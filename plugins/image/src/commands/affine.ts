@@ -22,7 +22,7 @@ export function affineCommand(imageCmd: Command): void {
     .option('--background <color>', 'Background color (default: transparent)', 'transparent')
     .option('--interpolator <type>', 'Interpolator: nearest, bilinear, bicubic, nohalo, lbb, vsqbs (default: bilinear)', 'bilinear')
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-v, --verbose', 'Verbose output')
@@ -42,7 +42,7 @@ export function affineCommand(imageCmd: Command): void {
             { flag: '--background <color>', description: 'Background color for empty areas' },
             { flag: '--interpolator <type>', description: 'Interpolation method (default: bilinear)' },
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-affine.<ext>)' },
-            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
+            { flag: '-q, --quality <quality>', description: 'Output quality (1-100). Optional. Applies to JPEG/WEBP/AVIF. For PNG, maps to compression level (higher quality = lower compression). Ignored for other formats.' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
@@ -136,7 +136,7 @@ export function affineCommand(imageCmd: Command): void {
           console.log(chalk.blue('\nConfiguration:'));
           console.log(chalk.dim(`  Matrix: [${matrix.join(', ')}]`));
           console.log(chalk.dim(`  Interpolator: ${options.interpolator || 'bilinear'}`));
-          console.log(chalk.dim(`  Quality: ${options.quality || 90}`));
+          console.log(chalk.dim(`  Quality: ${options.quality}`));
         }
 
         if (options.dryRun) {

@@ -21,11 +21,12 @@ export function pixelateCommand(imageCmd: Command): void {
     .description('Apply pixelate effect (mosaic/retro style)')
     .option('-p, --pixels <size>', 'Pixel size 2-50 (default: 10)', parseInt, 10)
     .option('-o, --output <path>', 'Output file path')
+    .option('--quality <number>', 'Set output quality for JPEG, WEBP, AVIF (1-100), or compression level for PNG (0-9). Ignored for other formats. Optional, no default.')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for pixelate command')
-    .action(async (input: string, options: PixelateOptions) => {
+    .action(async (input: string, options: PixelateOptions & { quality?: number }) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'pixelate',
@@ -35,6 +36,7 @@ export function pixelateCommand(imageCmd: Command): void {
           options: [
             { flag: '-p, --pixels <size>', description: 'Pixel size 2-50 (default: 10) - larger = more pixelated' },
             { flag: '-o, --output <path>', description: 'Output file path' },
+            { flag: '--quality <number>', description: 'Set output quality for JPEG, WEBP, AVIF (1-100), or compression level for PNG (0-9). Ignored for other formats. Optional, no default.' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
@@ -136,14 +138,22 @@ export function pixelateCommand(imageCmd: Command): void {
             const shrunkWidth = Math.floor(width / pixelSize);
             const shrunkHeight = Math.floor(height / pixelSize);
 
-            await createSharpInstance(inputFile)
-              .resize(shrunkWidth, shrunkHeight, {
-                kernel: 'nearest'
-              })
-              .resize(width, height, {
-                kernel: 'nearest'
-              })
-              .toFile(outputPath);
+            // Determine output format from extension
+            const outExt = outputPath.split('.').pop()?.toLowerCase();
+            let sharpInstance = createSharpInstance(inputFile)
+              .resize(shrunkWidth, shrunkHeight, { kernel: 'nearest' })
+              .resize(width, height, { kernel: 'nearest' });
+
+            if (options.quality !== undefined && outExt) {
+              if (["jpg", "jpeg", "webp", "avif"].includes(outExt)) {
+                sharpInstance = sharpInstance[outExt]({ quality: options.quality });
+              } else if (outExt === "png") {
+                sharpInstance = sharpInstance.png({ compressionLevel: options.quality });
+              }
+              // Ignore for other formats
+            }
+
+            await sharpInstance.toFile(outputPath);
 
             spinner.succeed(chalk.green(`✓ ${fileName} processed`));
             successCount++;

@@ -6,17 +6,19 @@ import * as fs from 'fs';
 import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import type { CompositeOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
+import path from 'path';
 
 interface CompositeOptionsExtended extends CompositeOptions {
   help?: boolean;
 }
 
 export function compositeCommand(imageCmd: Command): void {
-  imageCmd
+ imageCmd
     .command('composite <input>')
     .description('Overlay/composite one image on top of another')
     .requiredOption('--overlay <path>', 'Overlay image to composite')
     .option('-o, --output <path>', 'Output file path')
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--gravity <position>', 'Position: center, north, south, east, west, northeast, northwest, southeast, southwest', 'center')
     .option('--blend <mode>', 'Blend mode: over, multiply, screen, overlay, darken, lighten, add, saturate, etc.', 'over')
     .option('--left <pixels>', 'X position in pixels (overrides gravity)', parseInt)
@@ -42,6 +44,7 @@ export function compositeCommand(imageCmd: Command): void {
             { flag: '--left <pixels>', description: 'X position in pixels (overrides gravity)' },
             { flag: '--top <pixels>', description: 'Y position in pixels (overrides gravity)' },
             { flag: '--opacity <value>', description: 'Opacity 0-1 (default: 1)' },
+            { flag: '-q, --quality <quality>', description: 'Output quality (1-100). Optional. Applies to JPEG/WEBP/AVIF. For PNG, maps to compression level (higher quality = lower compression). Ignored for other formats.' },
             { flag: '--tile', description: 'Tile the overlay across the entire image' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
@@ -178,7 +181,24 @@ export function compositeCommand(imageCmd: Command): void {
             const fileName = getFileName(inputFile);
             const outputPath = outputPaths.get(inputFile)!;
 
-            await createSharpInstance(inputFile).composite([compositeOptions]).toFile(outputPath);
+            let pipeline = createSharpInstance(inputFile).composite([compositeOptions]);
+
+            // Apply quality/compressionLevel if requested
+            const outputExt = path.extname(outputPath).toLowerCase();
+            if (options.quality !== undefined) {
+              if (outputExt === '.jpg' || outputExt === '.jpeg') {
+                pipeline = pipeline.jpeg({ quality: options.quality });
+              } else if (outputExt === '.webp') {
+                pipeline = pipeline.webp({ quality: options.quality });
+              } else if (outputExt === '.avif') {
+                pipeline = pipeline.avif({ quality: options.quality });
+              } else if (outputExt === '.png') {
+                pipeline = pipeline.png({ compressionLevel: options.quality });
+              }
+              // Ignore for other formats
+            }
+
+            await pipeline.toFile(outputPath);
 
             spinner.succeed(chalk.green(`✓ ${fileName} composited`));
             successCount++;

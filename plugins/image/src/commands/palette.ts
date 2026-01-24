@@ -1,6 +1,8 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 import { validatePaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
@@ -12,6 +14,7 @@ interface PaletteOptions extends ImageOptions {
   dryRun?: boolean;
   verbose?: boolean;
   help?: boolean;
+  export?: string;
 }
 
 export function paletteCommand(imageCmd: Command): void {
@@ -21,6 +24,7 @@ export function paletteCommand(imageCmd: Command): void {
     .option('-c, --colors <count>', 'Number of colors to extract 1-10 (default: 5)', parseInt, 5)
     .option('--dry-run', 'Show what would be analyzed without executing')
     .option('-v, --verbose', 'Verbose output with hex codes')
+    .option('--export <path>', 'Export palette colors to JSON file')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for palette command')
     .action(async (input: string, options: PaletteOptions) => {
@@ -32,6 +36,7 @@ export function paletteCommand(imageCmd: Command): void {
           usage: ['palette <input>', 'palette <input> --colors 8', 'palette <input> -c 3 -v'],
           options: [
             { flag: '-c, --colors <count>', description: 'Number of colors to extract 1-10 (default: 5)' },
+            { flag: '--export <path>', description: 'Export palette colors to JSON file' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output with hex codes and RGB values' }
           ],
@@ -129,6 +134,47 @@ export function paletteCommand(imageCmd: Command): void {
 
             fileSpinner.succeed(chalk.green(`${fileNum} Color palette extracted!\n`));
 
+            // Prepare palette data for export
+            let paletteData: any = {};
+            if (stats.dominant) {
+              const { r, g, b } = stats.dominant;
+              const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`.toUpperCase();
+              paletteData.primary = { r, g, b, hex };
+            }
+            if (stats.channels && stats.channels.length >= 3) {
+              paletteData.channels = stats.channels.slice(0, 3).map((channel, index) => {
+                const names = ['Red', 'Green', 'Blue'];
+                return {
+                  channel: names[index],
+                  mean: Math.round(channel.mean),
+                  min: channel.min,
+                  max: channel.max
+                };
+              });
+              const avgR = Math.round(stats.channels[0].mean);
+              const avgG = Math.round(stats.channels[1].mean);
+              const avgB = Math.round(stats.channels[2].mean);
+              paletteData.average = {
+                r: avgR,
+                g: avgG,
+                b: avgB,
+                hex: `#${avgR.toString(16).padStart(2, '0')}${avgG.toString(16).padStart(2, '0')}${avgB.toString(16).padStart(2, '0')}`.toUpperCase()
+              };
+            }
+
+            // Export palette to JSON if requested
+            if (options.export !== undefined) {
+              let exportPath = options.export;
+              if (!exportPath) {
+                // If no path provided, use current dir and input file name
+                const base = path.basename(inputFile, path.extname(inputFile));
+                exportPath = path.join(process.cwd(), `${base}-palette.json`);
+              }
+              await fs.writeFile(exportPath, JSON.stringify(paletteData, null, 2), 'utf8');
+              console.log(chalk.green(`Palette exported to: ${exportPath}`));
+            }
+
+            // ...existing output logic...
             console.log(chalk.bold.cyan(`📷 Image: ${getFileName(inputFile)}`));
             console.log(chalk.dim(`   Size: ${metadata.width}x${metadata.height}`));
             console.log(chalk.dim(`   Format: ${metadata.format?.toUpperCase()}`));
@@ -136,65 +182,45 @@ export function paletteCommand(imageCmd: Command): void {
 
             console.log(chalk.bold.cyan(`🎨 Dominant Color Palette:\n`));
 
-            // Get dominant color
             if (stats.dominant) {
               const { r, g, b } = stats.dominant;
               const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`.toUpperCase();
-
               console.log(chalk.bold('  Primary Dominant Color:'));
               console.log(`  ${chalk.rgb(r, g, b)('██████')} RGB(${r}, ${g}, ${b}) ${chalk.dim(hex)}`);
               console.log('');
             }
-
-            // Get channel statistics for additional color information
             if (stats.channels && stats.channels.length >= 3) {
               console.log(chalk.bold('  Channel Analysis:'));
-
               const channels = ['Red', 'Green', 'Blue'];
               stats.channels.slice(0, 3).forEach((channel, index) => {
                 const channelName = channels[index];
                 const avgValue = Math.round(channel.mean);
                 const color = index === 0 ? [avgValue, 0, 0] : index === 1 ? [0, avgValue, 0] : [0, 0, avgValue];
-
                 console.log(`  ${channelName.padEnd(6)}: ${chalk.rgb(color[0], color[1], color[2])('██')} Avg: ${avgValue.toString().padStart(3)} (min: ${channel.min}, max: ${channel.max})`);
               });
               console.log('');
-            }
-
-            // Calculate additional color info
-            if (stats.channels && stats.channels.length >= 3) {
               const avgR = Math.round(stats.channels[0].mean);
               const avgG = Math.round(stats.channels[1].mean);
               const avgB = Math.round(stats.channels[2].mean);
-
               console.log(chalk.bold('  Average Image Tone:'));
               const avgHex = `#${avgR.toString(16).padStart(2, '0')}${avgG.toString(16).padStart(2, '0')}${avgB.toString(16).padStart(2, '0')}`.toUpperCase();
               console.log(`  ${chalk.rgb(avgR, avgG, avgB)('██████')} RGB(${avgR}, ${avgG}, ${avgB}) ${chalk.dim(avgHex)}`);
               console.log('');
-
-              // Determine overall tone
               const brightness = (avgR + avgG + avgB) / 3;
               const tone = brightness > 200 ? 'Very Light' : brightness > 150 ? 'Light' : brightness > 100 ? 'Medium' : brightness > 50 ? 'Dark' : 'Very Dark';
-
               console.log(chalk.dim(`  Overall Brightness: ${tone} (${Math.round(brightness)}/255)`));
-
-              // Color temperature
               const warmCool = avgR > avgB ? 'Warm' : avgR < avgB ? 'Cool' : 'Neutral';
               console.log(chalk.dim(`  Color Temperature: ${warmCool}`));
-
-              // Saturation estimate
               const maxChannel = Math.max(avgR, avgG, avgB);
               const minChannel = Math.min(avgR, avgG, avgB);
               const saturation = maxChannel === 0 ? 0 : ((maxChannel - minChannel) / maxChannel) * 100;
               console.log(chalk.dim(`  Saturation: ${saturation.toFixed(1)}%`));
             }
-
             if (options.verbose) {
               console.log('');
               console.log(chalk.dim('💡 Tip: Use these colors in your designs, websites, or branding!'));
               console.log(chalk.dim('   Copy hex codes directly for CSS/design tools.'));
             }
-
             successCount++;
           } catch (error) {
             failCount++;

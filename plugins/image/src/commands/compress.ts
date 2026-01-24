@@ -17,7 +17,7 @@ export function compressCommand(imageCmd: Command): void {
     .command('compress <input>')
     .description('Compress images with advanced quality control')
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Compression quality (1-100, default: 75)', parseInt, 75)
+    .option('-q, --quality <quality>', 'Compression quality (1-100)', parseInt)
     .option('--lossy', 'Use lossy compression for better size reduction')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
@@ -32,7 +32,7 @@ export function compressCommand(imageCmd: Command): void {
           usage: ['compress <input>', 'compress <input> -q <quality>', 'compress <input> --lossy'],
           options: [
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-compressed.<ext>)' },
-            { flag: '-q, --quality <quality>', description: 'Compression quality 1-100 (default: 75)' },
+            { flag: '-q, --quality <quality>', description: 'Compression quality 1-100 (optional, only applies to JPEG, WEBP, AVIF; for PNG, mapped to compression level)' },
             { flag: '--lossy', description: 'Enable lossy compression for maximum reduction' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
@@ -116,7 +116,9 @@ export function compressCommand(imageCmd: Command): void {
             console.log(chalk.cyan(`\n📋 Dry run: ${fileName}`));
             console.log(chalk.gray(`   Input: ${inputPath}`));
             console.log(chalk.gray(`   Output: ${outputFile}`));
-            console.log(chalk.gray(`   Quality: ${options.quality || 75}`));
+            if (typeof options.quality !== 'undefined') {
+              console.log(chalk.gray(`   Quality: ${options.quality}`));
+            }
             console.log(chalk.gray(`   Lossy: ${options.lossy ? 'Yes' : 'No'}`));
             continue;
           }
@@ -136,38 +138,59 @@ export function compressCommand(imageCmd: Command): void {
             let pipeline = sharp;
 
             if (format === 'jpeg' || format === 'jpg') {
-              pipeline = pipeline.jpeg({
-                quality: options.quality || 75,
-                progressive: true,
-                mozjpeg: options.lossy || false,
-                force: true,
-              });
+              if (typeof options.quality === 'number') {
+                pipeline = pipeline.jpeg({
+                  quality: options.quality,
+                  progressive: true,
+                  mozjpeg: options.lossy || false,
+                  force: true,
+                });
+              } else {
+                pipeline = pipeline.jpeg({
+                  progressive: true,
+                  mozjpeg: options.lossy || false,
+                  force: true,
+                });
+              }
             } else if (format === 'png') {
+              let compressionLevel = 9;
+              if (typeof options.quality === 'number') {
+                compressionLevel = Math.round((100 - Math.max(1, Math.min(100, options.quality))) * 9 / 99);
+              }
               pipeline = pipeline.png({
-                quality: options.quality || 75,
-                compressionLevel: 9,
+                compressionLevel,
                 palette: options.lossy || false,
                 force: true,
               });
             } else if (format === 'webp') {
-              pipeline = pipeline.webp({
-                quality: options.quality || 75,
-                lossless: !options.lossy,
-                force: true,
-              });
+              if (typeof options.quality === 'number') {
+                pipeline = pipeline.webp({
+                  quality: options.quality,
+                  lossless: !options.lossy,
+                  force: true,
+                });
+              } else {
+                pipeline = pipeline.webp({
+                  lossless: !options.lossy,
+                  force: true,
+                });
+              }
             } else if (format === 'avif') {
-              pipeline = pipeline.avif({
-                quality: options.quality || 75,
-                lossless: !options.lossy,
-                force: true,
-              });
+              if (typeof options.quality === 'number') {
+                pipeline = pipeline.avif({
+                  quality: options.quality,
+                  lossless: !options.lossy,
+                  force: true,
+                });
+              } else {
+                pipeline = pipeline.avif({
+                  lossless: !options.lossy,
+                  force: true,
+                });
+              }
             } else {
-              // For other formats, convert to JPEG with compression
-              pipeline = pipeline.jpeg({
-                quality: options.quality || 75,
-                progressive: true,
-                mozjpeg: options.lossy || false,
-              });
+              // For other formats, ignore quality flag
+              pipeline = pipeline;
             }
 
             await pipeline.toFile(outputFile);

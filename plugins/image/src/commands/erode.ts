@@ -14,7 +14,7 @@ export function erodeCommand(imageCmd: Command): void {
     .command('erode <input>')
     .description('Erode image (expand dark regions)')
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-v, --verbose', 'Verbose output');
@@ -116,7 +116,7 @@ export function erodeCommand(imageCmd: Command): void {
       if (options.verbose) {
         console.log(chalk.blue('\nConfiguration:'));
         console.log(chalk.dim(`  Operation: Morphological erosion (3x3 kernel)`));
-        console.log(chalk.dim(`  Quality: ${options.quality || 90}`));
+        console.log(chalk.dim(`  Quality: ${options.quality}`));
       }
 
       if (options.dryRun) {
@@ -149,13 +149,24 @@ export function erodeCommand(imageCmd: Command): void {
           const pipeline = createSharpInstance(inputFile).convolve(erodeKernel);
 
           const outputExt = path.extname(outputPath).toLowerCase();
+          const quality = typeof options.quality === 'number' ? options.quality : 90;
           if (outputExt === '.jpg' || outputExt === '.jpeg') {
-            pipeline.jpeg({ quality: options.quality });
-          } else if (outputExt === '.png') {
-            pipeline.png({ quality: options.quality });
+            pipeline.jpeg({ quality });
           } else if (outputExt === '.webp') {
-            pipeline.webp({ quality: options.quality });
+            pipeline.webp({ quality });
+          } else if (outputExt === '.avif') {
+            pipeline.avif({ quality });
+          } else if (outputExt === '.png') {
+            // PNG uses compressionLevel (0-9), map quality 1-100 to 9-0
+            let compressionLevel = 6;
+            if (typeof options.quality === 'number') {
+              compressionLevel = Math.round(9 - (quality / 100) * 9);
+              if (compressionLevel < 0) compressionLevel = 0;
+              if (compressionLevel > 9) compressionLevel = 9;
+            }
+            pipeline.png({ compressionLevel });
           }
+          // For other formats, do not set quality
 
           await pipeline.toFile(outputPath);
 

@@ -18,6 +18,7 @@ export function borderCommand(imageCmd: Command): void {
     .option('-w, --width <pixels>', 'Border width in pixels', parseInt, 10)
     .option('--color <color>', 'Border color (hex, rgb, or name)', '#000000')
     .option('-o, --output <path>', 'Output file path')
+    .option('-q, --quality <quality>', 'Output quality (1-100). Optional. Applies to JPEG/WEBP/AVIF. For PNG, maps to compression level (higher quality = lower compression). Ignored for other formats.', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
@@ -34,6 +35,7 @@ export function borderCommand(imageCmd: Command): void {
             { flag: '--color <color>', description: 'Border color - hex (#FF0000), rgb (rgb(255,0,0)), rgba(255,0,0,0.5), name (red), ascii (255,0,0)' },
             { flag: '-o, --output <path>', description: 'Output file path' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
+            { flag: '-q, --quality <quality>', description: 'Output quality (1-100). Optional. Applies to JPEG/WEBP/AVIF. For PNG, maps to compression level (higher quality = lower compression). Ignored for other formats.' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' },
             { flag: '--help', description: 'Display help for border command' }
@@ -105,6 +107,7 @@ export function borderCommand(imageCmd: Command): void {
           console.log(chalk.blue('\nConfiguration:'));
           console.log(chalk.dim(`  Border width: ${options.width || 10}px`));
           console.log(chalk.dim(`  Border color: ${options.color || '#000000'}`));
+          console.log(chalk.dim(`  Quality: ${options.quality}`));
         }
 
         if (options.dryRun) {

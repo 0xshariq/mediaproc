@@ -17,7 +17,7 @@ export function optimizeCommand(imageCmd: Command): void {
     .command('optimize <input>')
     .description('Optimize image size without quality loss')
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100, default: 85)', parseInt, 85)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--aggressive', 'More aggressive compression (lower quality)')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
@@ -32,7 +32,7 @@ export function optimizeCommand(imageCmd: Command): void {
           usage: ['optimize <input>', 'optimize <input> -q <quality>', 'optimize <input> --aggressive'],
           options: [
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-optimized.<ext>)' },
-            { flag: '-q, --quality <quality>', description: 'Quality 1-100 (default: 85)' },
+            { flag: '-q, --quality <quality>', description: 'Quality 1-100 (optional, only applies to JPEG, WEBP, AVIF; for PNG, mapped to compression level)' },
             { flag: '--aggressive', description: 'More aggressive compression (quality 70)' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
@@ -108,8 +108,11 @@ export function optimizeCommand(imageCmd: Command): void {
 
         spinner.succeed(chalk.green(`Found ${inputFiles.length} image(s) to process`));
 
-        let quality = options.aggressive ? 70 : (options.quality || 85);
-        if (isNaN(quality) || quality < 1 || quality > 100) {
+        let quality: number | undefined = options.quality;
+        if (options.aggressive) {
+          quality = 70;
+        }
+        if (typeof quality !== 'undefined' && (isNaN(quality) || quality < 1 || quality > 100)) {
           throw new MediaProcError({
             message: 'Quality must be an integer between 1 and 100',
             type: ErrorType.UserInput,
@@ -154,14 +157,30 @@ export function optimizeCommand(imageCmd: Command): void {
             // Apply format-specific optimization
             const outputExt = path.extname(outputPath).toLowerCase();
             if (outputExt === '.jpg' || outputExt === '.jpeg') {
-              pipeline.jpeg({ quality, progressive: true, mozjpeg: true });
+              if (typeof quality === 'number') {
+                pipeline.jpeg({ quality, progressive: true, mozjpeg: true });
+              } else {
+                pipeline.jpeg({ progressive: true, mozjpeg: true });
+              }
             } else if (outputExt === '.png') {
-              pipeline.png({ quality, compressionLevel: 9, progressive: true, effort: 10 });
+              let compressionLevel = 9;
+              if (typeof quality === 'number') {
+                compressionLevel = Math.round((100 - Math.max(1, Math.min(100, quality))) * 9 / 99);
+              }
+              pipeline.png({ compressionLevel, progressive: true, effort: 10 });
             } else if (outputExt === '.webp') {
-              pipeline.webp({ quality, effort: 6 });
+              if (typeof quality === 'number') {
+                pipeline.webp({ quality, effort: 6 });
+              } else {
+                pipeline.webp({ effort: 6 });
+              }
             } else if (outputExt === '.avif') {
-              pipeline.avif({ quality, effort: 9 });
-            }
+              if (typeof quality === 'number') {
+                pipeline.avif({ quality, effort: 9 });
+              } else {
+                pipeline.avif({ effort: 9 });
+              }
+            } // For other formats, ignore quality flag
 
             await pipeline.toFile(outputPath);
 

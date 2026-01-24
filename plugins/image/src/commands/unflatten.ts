@@ -84,7 +84,7 @@ export function unflattenCommand(imageCmd: Command): void {
 
       if (options.verbose) {
         console.log(chalk.blue('\nConfiguration:'));
-        console.log(chalk.dim(`  Quality: ${options.quality || 90}`));
+        console.log(chalk.dim(`  Quality: ${options.quality}`));
       }
 
       if (options.dryRun) {
@@ -112,11 +112,11 @@ export function unflattenCommand(imageCmd: Command): void {
           // Unflatten typically outputs PNG to preserve alpha
           const outputExt = path.extname(outputPath).toLowerCase();
           if (outputExt === '.png') {
-            pipeline.png({ quality: options.quality || 90 });
+            pipeline.png({ quality: options.quality  });
           } else if (outputExt === '.webp') {
-            pipeline.webp({ quality: options.quality || 90 });
+            pipeline.webp({ quality: options.quality  });
           } else {
-            pipeline.png({ quality: options.quality || 90 });
+            pipeline.png({ quality: options.quality  });
           }
 
           await pipeline.toFile(outputPath);

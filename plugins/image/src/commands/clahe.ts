@@ -5,6 +5,7 @@ import ora from 'ora';
 import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { ImageOptions } from '../index.js';
+import path from 'node:path';
 
 interface ClaheOptions extends ImageOptions {
   input: string;
@@ -18,13 +19,14 @@ interface ClaheOptions extends ImageOptions {
 }
 
 export function claheCommand(imageCmd: Command): void {
-  imageCmd
+    imageCmd
     .command('clahe <input>')
     .description('Apply CLAHE (Contrast Limited Adaptive Histogram Equalization)')
     .option('-w, --width <size>', 'Tile width in pixels (default: 3)', parseInt, 3)
     .option('-h, --height <size>', 'Tile height in pixels (default: 3)', parseInt, 3)
     .option('--max-slope <value>', 'Maximum slope for contrast limiting (default: 3)', parseFloat, 3)
     .option('-o, --output <path>', 'Output file path')
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
@@ -41,6 +43,7 @@ export function claheCommand(imageCmd: Command): void {
             { flag: '-h, --height <size>', description: 'Tile height in pixels (default: 3)' },
             { flag: '--max-slope <value>', description: 'Maximum slope for contrast limiting 1-5 (default: 3)' },
             { flag: '-o, --output <path>', description: 'Output file path' },
+            { flag: '-q, --quality <quality>', description: 'Output quality (1-100). Optional. Applies to JPEG/WEBP/AVIF. For PNG, maps to compression level (higher quality = lower compression). Ignored for other formats.' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
             { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
             { flag: '-v, --verbose', description: 'Show detailed output' }
@@ -133,13 +136,29 @@ export function claheCommand(imageCmd: Command): void {
           spinner.start(`Processing ${index + 1}/${inputFiles.length}: ${fileName}...`);
 
           try {
-            await createSharpInstance(inputFile)
+            let pipeline = createSharpInstance(inputFile)
               .clahe({
                 width: options.width || 3,
                 height: options.height || 3,
                 maxSlope: options.maxSlope || 3
-              })
-              .toFile(outputPath);
+              });
+
+            // Apply quality/compressionLevel if requested
+            const outputExt = path.extname(outputPath).toLowerCase();
+            if (options.quality !== undefined) {
+              if (outputExt === '.jpg' || outputExt === '.jpeg') {
+                pipeline = pipeline.jpeg({ quality: options.quality });
+              } else if (outputExt === '.webp') {
+                pipeline = pipeline.webp({ quality: options.quality });
+              } else if (outputExt === '.avif') {
+                pipeline = pipeline.avif({ quality: options.quality });
+              } else if (outputExt === '.png') {
+                pipeline = pipeline.png({ compressionLevel: options.quality });
+              }
+              // Ignore for other formats
+            }
+
+            await pipeline.toFile(outputPath);
 
             spinner.succeed(chalk.green(`✓ ${fileName} processed`));
             successCount++;
