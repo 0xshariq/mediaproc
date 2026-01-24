@@ -145,8 +145,12 @@ export function pixelateCommand(imageCmd: Command): void {
               .resize(width, height, { kernel: 'nearest' });
 
             if (options.quality !== undefined && outExt) {
-              if (["jpg", "jpeg", "webp", "avif"].includes(outExt)) {
-                sharpInstance = sharpInstance[outExt]({ quality: options.quality });
+              if (outExt === "jpg" || outExt === "jpeg") {
+                sharpInstance = sharpInstance.jpeg({ quality: options.quality });
+              } else if (outExt === "webp") {
+                sharpInstance = sharpInstance.webp({ quality: options.quality });
+              } else if (outExt === "avif") {
+                sharpInstance = sharpInstance.avif({ quality: options.quality });
               } else if (outExt === "png") {
                 sharpInstance = sharpInstance.png({ compressionLevel: options.quality });
               }

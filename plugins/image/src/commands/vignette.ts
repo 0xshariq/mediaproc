@@ -5,6 +5,7 @@ import ora from 'ora';
 import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 import { createSharpInstance } from '../utils/sharp.js';
 import { ImageOptions } from '../types.js';
+import path from 'node:path';
 
 interface VignetteOptions extends ImageOptions {
   input: string;
