@@ -107,7 +107,7 @@ mediaproc image watermark photo.jpg --text "Copyright 2026"
 
 [Full Image Plugin Documentation →](plugins/image/README.md)
 
-#### Video Plugin (6 commands)
+#### Video Plugin (7 commands)
 
 ```bash
 mediaproc video compress movie.mp4 --quality medium
