@@ -52,11 +52,14 @@
     "commander": "^14.0.2",
     "execa": "^9.6.1",
     "ghostscript4js": "^3.2.3",
+    "node-cron": "^4.2.1",
     "node-poppler": "^9.1.0",
     "ora": "^9.1.0",
     "shaka-player": "^4.16.14",
     "sharp": "^0.34.5",
-    "tesseract.js": "^7.0.0"
+    "tesseract.js": "^7.0.0",
+    "yaml": "^2.8.2",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25.0.10",
