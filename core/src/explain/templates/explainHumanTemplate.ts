@@ -1,171 +1,78 @@
 import { ExplainContext } from '../../types/explainTypes.js';
 import chalk from 'chalk';
 import boxen from 'boxen';
-import { getPhrase } from '../../utils/phrases.js';
-import { COMMON_PHRASES } from '../../utils/constants/commonPhrases.js';
+import { explainSentences } from '../explainSentences.js';
 
 export function explainHumanTemplate(context: ExplainContext): string {
     let lines: string[] = [];
-    // Centralized phrases
-
-    // Header
-    lines.push(chalk.bgBlueBright.white.bold(getPhrase('header', context.plugin) || '  EXPLANATION  '));
+    lines.push(chalk.bgBlueBright.white.bold(explainSentences.header()));
 
     // One-line summary at top (anchor)
-    if (context.summary) {
+    if (context.summary && context.inputs && context.outputs) {
+        const inputCount = context.inputs ? Object.keys(context.inputs).length : 0;
+        const fileType = context.inputs && inputCount > 0 ? Object.keys(context.inputs)[0] : 'file';
+        const operation = context.command || 'processed';
+        const outputPath = context.outputs && Object.values(context.outputs)[0] ? String(Object.values(context.outputs)[0]) : 'output';
         lines.push('');
-        lines.push(chalk.bold.cyan(`Summary: ${context.summary}`));
+        lines.push(chalk.bold.cyan(explainSentences.summary(inputCount, fileType, operation, outputPath)));
+    } else if (context.summary) {
+        lines.push('');
+        lines.push(chalk.bold.cyan(context.summary));
     }
 
     // Explain-only mode
     if (context.explainOnly) {
-        lines.push(chalk.bgYellow.black.bold(getPhrase('explainOnly', context.plugin) || ' [explain-only] No files were modified. '));
+        lines.push(chalk.bgYellow.black.bold(explainSentences.explainOnly()));
     }
 
-    // Context enrichment
-    function safe(val: any): string {
-        if (val === null || val === undefined || (typeof val === 'number' && Number.isNaN(val))) return 'N/A';
-        if (typeof val === 'function') return '[function]';
-        return String(val);
-    }
-    // ...removed environment dump from human mode as per v1 plan...
-
-    // Plugin/command info (hide internal fields in human mode unless requested)
-    // Only show plugin name if not generic or if user requests details (future: add flag for verbose)
+    // Plugin info (if not generic)
     if (context.plugin && context.plugin !== 'generic') {
-        lines.push(chalk.bgWhiteBright.blue.bold((getPhrase('pluginInfoPrefix', context.plugin) || ' This command uses the ') + `"${context.plugin}"` + (getPhrase('pluginInfoSuffix', context.plugin) || ' plugin. ')));
+        lines.push(chalk.bgWhiteBright.blue.bold(explainSentences.pluginInfo(context.plugin)));
     }
 
-    // Overview: What will happen (effects)
-    lines.push('');
-    lines.push(chalk.bgGreenBright.black.bold(getPhrase('whatWillHappenHeader', context.plugin) || ' What will happen: '));
-    if (context.effects && context.effects.length > 0) {
-        const contextArgPhrases = [
-            'externalTool', 'dimensionsChange', 'formatConversion', 'qualityChange',
-            'audioProcessing', 'videoProcessing', 'documentProcessing', 'streamProcessing',
-            'pipelineExecution', 'pluginAction', 'inputRead', 'outputWrite'
-        ];
-        for (const effect of context.effects) {
-            let phrase: string = '';
-            const effectPhrase = getPhrase(effect as keyof typeof COMMON_PHRASES, context.plugin);
-            if (typeof effectPhrase === 'function') {
-                if (contextArgPhrases.includes(effect)) {
-                    phrase = (effectPhrase as (args: { context: ExplainContext }) => string)({ context });
-                } else {
-                    phrase = (effectPhrase as () => string)();
-                }
-            } else if (typeof effectPhrase === 'string') {
-                phrase = effectPhrase;
-            } else {
-                phrase = String(effect);
-            }
-            lines.push(chalk.greenBright(`  • ${phrase}`));
+    // Inputs/Outputs (input context)
+    if (context.inputs && (context.inputs.inputPath || context.inputs.filesDetected)) {
+        lines.push('');
+        lines.push(chalk.bgGray.white.bold(explainSentences.commandInputs()));
+        if (context.inputs.inputPath) {
+            lines.push(chalk.gray(`Input path: ${context.inputs.inputPath}`));
         }
-    } else {
-        lines.push(chalk.greenBright('  • The command will use default settings.'));
+        if (context.inputs.filesDetected) {
+            lines.push(chalk.gray(`Files detected: ${context.inputs.filesDetected}`));
+        }
     }
-    // Overview: What will NOT happen (assumptions)
+
+    // What will happen (actions)
+    if (context.effects && context.effects.length > 0) {
+        lines.push('');
+        lines.push(chalk.bgGreenBright.black.bold(explainSentences.whatWillHappenHeader()));
+        lines.push(chalk.greenBright(explainSentences.actions(context.effects)));
+    }
+
+    // What will NOT happen (assumptions)
     if (context.outcome && context.outcome.whatWillNotHappen && context.outcome.whatWillNotHappen.length > 0) {
         lines.push('');
-        lines.push(chalk.bgRedBright.white.bold(getPhrase('whatWillNotHappenHeader', context.plugin) || ' What will NOT happen: '));
+        lines.push(chalk.bgRedBright.white.bold(explainSentences.whatWillNotHappenHeader()));
         for (const n of context.outcome.whatWillNotHappen) {
             lines.push(chalk.redBright(`  • ${n}`));
         }
     }
 
-    // Overview: Result
-    if (context.outcome && context.outcome.result) {
+    // Flags used (if any)
+    if (context.usedFlags && Object.keys(context.usedFlags).length > 0) {
         lines.push('');
-        lines.push(chalk.bgYellowBright.black.bold(getPhrase('resultHeader', context.plugin) || ' Result: '));
-        lines.push(chalk.yellowBright(`  • ${safe(context.outcome.result)}`));
+        lines.push(chalk.bgGray.white.bold(explainSentences.flagsUsedHeader()));
+        const flagsArr = Object.entries(context.usedFlags).map(([name, v]) => ({ name, value: v.value, source: v.source }));
+        lines.push(chalk.gray(explainSentences.flagsResolved(flagsArr)));
     }
 
-    // Overview: Flags used (hide in human mode unless requested)
-    // (future: add flag for verbose/advanced)
-
-    // Why these choices were made
-    if (context.decisions && context.decisions.length > 0) {
-        lines.push('');
-        lines.push(chalk.bgCyanBright.black.bold(getPhrase('whyChoicesHeader', context.plugin) || ' Why these choices were made: '));
-        for (const d of context.decisions) {
-            let src = d.provenance || d.reason || '';
-            let val = typeof d.value === 'function' ? '[function]' : d.value;
-            lines.push(chalk.cyanBright(`  • ${d.key}: ${val} (${src})`));
-        }
-    }
-
-    // Result/Outcome
-    if (context.outcome && context.outcome.result) {
-        lines.push('');
-        lines.push(chalk.bgYellowBright.black.bold(getPhrase('resultHeader', context.plugin) || ' Result: '));
-        let resultValue = safe(context.outcome.result);
-        lines.push(chalk.yellowBright(`  • ${resultValue}`));
-        if (context.outcome.sideEffects && Array.isArray(context.outcome.sideEffects) && context.outcome.sideEffects.length > 0) {
-            for (const s of context.outcome.sideEffects) {
-                let side = safe(s);
-                lines.push(chalk.yellowBright(`  • ${side}`));
-            }
-        }
-    }
-
-    // Placeholders for Tier 3/4
-    if (context.schemaVersion) {
-        lines.push(chalk.bgGray.white((getPhrase('schemaVersionPrefix', context.plugin) || '[schemaVersion: ') + `${context.schemaVersion}]`));
-    }
-    if (context.exitCode !== undefined) {
-        lines.push(chalk.bgGray.white((getPhrase('exitCodePrefix', context.plugin) || '[exitCode: ') + `${context.exitCode} // placeholder for future validation logic]`));
-    }
-    if (context.outcome && context.outcome.confidence) {
-        lines.push(chalk.bgGray.white((getPhrase('confidencePrefix', context.plugin) || '[confidence: ') + `${context.outcome.confidence} // placeholder for future confidence logic]`));
-    }
-
-    // What will NOT happen
-    if (context.outcome && context.outcome.whatWillNotHappen) {
-        lines.push('');
-        lines.push(chalk.bgRedBright.white.bold(getPhrase('whatWillNotHappenHeader', context.plugin) || ' What will NOT happen: '));
-        for (const n of context.outcome.whatWillNotHappen) {
-            lines.push(chalk.redBright(`  • ${n}`));
-        }
-    }
-
-    // Custom plugin sections
-    if (context.customSections && Array.isArray(context.customSections)) {
-        for (const section of context.customSections) {
-            if (section.items && section.items.length > 0) {
-                lines.push('');
-                lines.push(chalk.bgMagentaBright.white.bold(` ${section.title} `));
-                for (const item of section.items) {
-                    let safeItem = (typeof item === 'function') ? '[function]' : item;
-                    lines.push(chalk.magentaBright(`  • ${safeItem}`));
-                }
-            }
-        }
-    }
-
-    // Warnings for deprecated/ignored flags
-    if (context.deprecatedFlags && context.deprecatedFlags.length > 0) {
-        for (const flag of context.deprecatedFlags) {
-            const phrase = getPhrase('warningDeprecated', context.plugin);
-            if (typeof phrase === 'function') {
-                lines.push(chalk.bgYellow.black(phrase(flag)));
-            }
-        }
-    }
-
-    // Enhanced tips
+    // Tips
     lines.push('');
-    lines.push(chalk.bgWhiteBright.gray(getPhrase('tipHuman', context.plugin)));
-    lines.push(chalk.bgWhiteBright.gray(getPhrase('tipJson', context.plugin)));
+    lines.push(chalk.bgWhiteBright.gray(explainSentences.tipHuman()));
+    lines.push(chalk.bgWhiteBright.gray(explainSentences.tipJson()));
 
-    // Enhanced summary
-    lines.push('');
-    if (context.outcome && context.outcome.errors && context.outcome.errors.length > 0) {
-        lines.push(chalk.bgRedBright.white.bold(getPhrase('summaryFailure', context.plugin)));
-    } else if (context.outcome && context.outcome.warnings && context.outcome.warnings.length > 0) {
-        lines.push(chalk.bgYellowBright.black.bold(getPhrase('summaryPartial', context.plugin)));
-    }
     // Always print the summarySuccess phrase at the end for test compatibility
-    lines.push(chalk.bgGreenBright.black.bold(getPhrase('summarySuccess', context.plugin)));
+    lines.push(chalk.bgGreenBright.black.bold(explainSentences.summarySuccess()));
 
     // Wrap all in a single box with a blue gradient border
     return boxen(lines.join('\n'), {

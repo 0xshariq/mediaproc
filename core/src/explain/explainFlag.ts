@@ -2,12 +2,13 @@
 import chalk from 'chalk';
 import { explainFormatter } from '../formatters/explainFormatter.js';
 import { ExplainContext, ExplainMode } from '../types/explainTypes.js';
+import { detectInputFiles, detectOutputFiles } from '../utils/fileDetection.js';
 
 import os from 'os';
 import fs from 'fs';
 import path from 'path';
 import { getPhrase } from '../utils/phrases.js';
-import { getEffectId } from '../utils/constants/effectNamespaces.js';
+import { getEffectId } from '../constants/effectNamespaces.js';
 
 
 /**
@@ -43,6 +44,9 @@ export function explainFlag({
   let outputPath = '';
   let allInputs: Record<string, any> = {};
   let allOutputs: Record<string, any> = {};
+  let filesDetected = '';
+  let filesDetectedCount = 0;
+  let filesDetectedType = '';
   for (const k of inputKeys) {
     if (args[k]) { inputPath = args[k]; allInputs[k] = args[k]; }
     if (options[k]) { inputPath = options[k]; allInputs[k] = options[k]; }
@@ -50,6 +54,21 @@ export function explainFlag({
   for (const k of outputKeys) {
     if (args[k]) { outputPath = args[k]; allOutputs[k] = args[k]; }
     if (options[k]) { outputPath = options[k]; allOutputs[k] = options[k]; }
+  }
+  // Use robust file detection for output
+  let outputFilesDetected = '';
+  if (outputPath) {
+    const detectedOut = detectOutputFiles(outputPath);
+    if (detectedOut.exists) {
+      outputFilesDetected = `${detectedOut.files.length} file${detectedOut.files.length === 1 ? '' : 's'}`;
+    }
+  }
+  // Use robust file detection for input
+  if (inputPath) {
+    const detected = detectInputFiles(inputPath);
+    filesDetectedCount = detected.count;
+    filesDetectedType = detected.type !== 'unknown' ? detected.type : 'file';
+    filesDetected = `${filesDetectedCount} ${filesDetectedType}${filesDetectedCount === 1 ? '' : 's'}`;
   }
 
   // Gather used flags
@@ -196,8 +215,8 @@ export function explainFlag({
     platform: `${os.platform()} ${os.arch()}`,
     mode,
     summary: '', // will set below
-    inputs: { inputPath, outputPath, ...allInputs },
-    outputs: Object.keys(allOutputs).length > 0 ? allOutputs : undefined,
+    inputs: { inputPath, outputPath, filesDetected, ...allInputs },
+    outputs: Object.keys(allOutputs).length > 0 ? { ...allOutputs, outputFilesDetected } : undefined,
     usedFlags,
     omittedFlags: Object.keys(omittedFlags).length > 0 ? omittedFlags : undefined,
     decisions: Object.entries(usedFlags).map(([key, v]) => ({

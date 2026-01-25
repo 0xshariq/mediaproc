@@ -1,4 +1,4 @@
-import { CommonPhrases, ExplainContext } from "../../types";
+import { CommonPhrases, ExplainContext } from "../types/explainTypes.js";
 
 // Centralized reusable phrases for explain engine
 export const COMMON_PHRASES: CommonPhrases = {
