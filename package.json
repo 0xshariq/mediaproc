@@ -46,7 +46,7 @@
     "@gltf-transform/cli": "^4.3.0",
     "@gltf-transform/core": "^4.3.0",
     "@lottiefiles/dotlottie-web": "^0.61.0",
-    "@mediaproc/core": "^1.6.1",
+    "@mediaproc/core": "^1.7.0",
     "boxen": "^8.0.1",
     "chalk": "^5.6.2",
     "commander": "^14.0.2",
