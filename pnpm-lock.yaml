@@ -80,7 +80,7 @@ importers:
         version: link:../core
       '@mediaproc/image':
         specifier: ^1.2.1
-        version: 1.3.6
+        version: 1.4.0
       chalk:
         specifier: ^5.3.0
         version: 5.6.2
@@ -985,8 +985,8 @@ packages:
   '@mediaproc/core@1.6.1':
     resolution: {integrity: sha512-hEplpfUC2LwNcxy+FJht8qh0C2aEThu5jfUnIkfSPACFIzs+e+aiTOZT1xXx9hMtP0NFBGOvgkh0xMQL0KLt8A==}
 
-  '@mediaproc/image@1.3.6':
-    resolution: {integrity: sha512-w+r8IhfEkV8mCGcQ+8iKADemq12vGsdO5qZTMWOQyh6tnffWEgrKTHjmbZKbZlPynSwkzi3Mp5vz87deXeBKmg==}
+  '@mediaproc/image@1.4.0':
+    resolution: {integrity: sha512-cISBeHngFgRhLZAn9vxCYLvMrsHWA/BLJWMLlJf2F4dkhIL+tkQdXnt4ZU3r6eEfHGscDpCN9lT9rIlCHDTcow==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -3752,7 +3752,7 @@ snapshots:
     dependencies:
       chalk: 5.6.2
 
-  '@mediaproc/image@1.3.6':
+  '@mediaproc/image@1.4.0':
     dependencies:
       '@mediaproc/core': 1.6.1
       chalk: 5.6.2

@@ -57,14 +57,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/0xshariq/mediaproc-cli.git",
+    "url": "git+https://github.com/0xshariq/mediaproc.git",
     "directory": "core"
-  },
-  "dependencies": {
-    "chalk": "^5.3.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.10.0",
-    "typescript": "^5.3.3"
   }
 }
