@@ -5,6 +5,7 @@ import boxen from 'boxen';
 import { explainSentences } from '../explainSentences.js';
 
 export function explainDetailsTemplate(context: ExplainContext): string {
+
     function safe(val: any): string {
         if (val === null || val === undefined || (typeof val === 'number' && Number.isNaN(val))) return 'N/A';
         if (typeof val === 'function') return '[function]';
@@ -12,20 +13,48 @@ export function explainDetailsTemplate(context: ExplainContext): string {
     }
     let lines: string[] = [];
 
+    // Batch insight improvements (after lines is declared)
+    if (context.batch) {
+        lines.push('');
+        lines.push(chalk.bgCyanBright.black.bold('Batch Processing:'));
+        if (context.batch.size !== undefined) lines.push(chalk.cyanBright(`  Batch size: ${context.batch.size}`));
+        if (context.batch.mode) lines.push(chalk.cyanBright(`  Mode: ${context.batch.mode}`));
+        if (context.batch.summary) lines.push(chalk.cyanBright(`  Summary: ${context.batch.summary}`));
+    }
+
+    // Command context in technical details (after lines is declared)
+    lines.push('');
+    lines.push(chalk.bgWhiteBright.gray('Command Context:'));
+    lines.push(chalk.gray(`  Command: ${context.command || 'unknown'}`));
+    if (context.plugin) lines.push(chalk.gray(`  Plugin: ${context.plugin}`));
+    if (context.commandGroup) lines.push(chalk.gray(`  Group: ${context.commandGroup}`));
+    if (context.cliVersion) lines.push(chalk.gray(`  CLI Version: ${context.cliVersion}`));
+    if (context.pluginVersion) lines.push(chalk.gray(`  Plugin Version: ${context.pluginVersion}`));
+
+    // Execution steps (merged)
+    if (context.executionSteps && context.executionSteps.length > 0) {
+        lines.push('');
+        lines.push(chalk.bgMagentaBright.white.bold('Execution Steps:'));
+        for (const step of context.executionSteps) {
+            lines.push(chalk.magentaBright('  • ' + step));
+        }
+    }
+
 
     // Gradient header
-        lines.push(
-            chalk.bgMagentaBright.white.bold(explainSentences.detailsHeader())
-        );
+    lines.push(
+        chalk.bgMagentaBright.white.bold(explainSentences.detailsHeader())
+    );
 
-    // One-line summary at top (anchor)
+    // Improved summary line at top (anchor)
     if (context.summary && context.inputs && context.outputs) {
         const inputCount = context.inputs ? Object.keys(context.inputs).length : 0;
         const fileType = context.inputs && inputCount > 0 ? Object.keys(context.inputs)[0] : 'file';
+        const outputCount = context.outputs ? Object.keys(context.outputs).length : 0;
+        const outputType = context.outputs && outputCount > 0 ? Object.keys(context.outputs)[0] : 'output';
         const operation = context.command || 'processed';
-        const outputPath = context.outputs && Object.values(context.outputs)[0] ? String(Object.values(context.outputs)[0]) : 'output';
         lines.push('');
-        lines.push(chalk.bold.cyan(explainSentences.summary(inputCount, fileType, operation, outputPath)));
+        lines.push(chalk.bold.cyan(`This command will process ${inputCount} ${fileType}${inputCount === 1 ? '' : 's'} and produce ${outputCount} ${outputType}${outputCount === 1 ? '' : 's'} using the '${operation}' operation.`));
     } else if (context.summary) {
         lines.push('');
         lines.push(chalk.bold.cyan(context.summary));
@@ -42,7 +71,7 @@ export function explainDetailsTemplate(context: ExplainContext): string {
     if (context.plugin && context.mode && context.inputs) {
         const inputCount = context.inputs ? Object.keys(context.inputs).length : 0;
         const fileType = context.inputs && inputCount > 0 ? Object.keys(context.inputs)[0] : 'file';
-            lines.push(chalk.bgWhiteBright.gray(explainSentences.technicalContext(context.plugin, String(context.mode), inputCount, fileType)));
+        lines.push(chalk.bgWhiteBright.gray(explainSentences.technicalContext(context.plugin, String(context.mode), inputCount, fileType)));
     }
 
     // Inputs/Outputs (input context)
@@ -60,50 +89,71 @@ export function explainDetailsTemplate(context: ExplainContext): string {
     // What will happen (actions)
     if (context.effects && context.effects.length > 0) {
         lines.push('');
-            lines.push(chalk.bgGreenBright.black.bold(explainSentences.whatWillHappenHeader()));
-            lines.push(chalk.greenBright(explainSentences.actions(context.effects)));
+        lines.push(chalk.bgGreenBright.black.bold(explainSentences.whatWillHappenHeader()));
+        // Human-readable effects (existing)
+        lines.push(chalk.greenBright(explainSentences.actions(context.effects)));
+        // Technical primitives (effect IDs)
+        if (Array.isArray(context.effects) && context.effects.length > 0) {
+            lines.push(chalk.gray('(technical: ' + context.effects.join(', ') + ')'));
+        }
     }
 
     // Execution workflow (step-by-step)
     if (context.explainFlow && Array.isArray(context.explainFlow) && context.explainFlow.length > 0) {
         const steps = context.explainFlow.map(f => f.step);
         lines.push('');
-            lines.push(chalk.bgCyanBright.black.bold(explainSentences.technicalWorkflowHeader()));
-            lines.push(chalk.cyanBright(explainSentences.executionWorkflow(steps)));
+        lines.push(chalk.bgCyanBright.black.bold(explainSentences.technicalWorkflowHeader()));
+        lines.push(chalk.cyanBright(explainSentences.executionWorkflow(steps)));
     }
 
     // Overview: What will NOT happen (assumptions)
     if (context.outcome && context.outcome.whatWillNotHappen && context.outcome.whatWillNotHappen.length > 0) {
         lines.push('');
-            lines.push(chalk.bgRedBright.white.bold(explainSentences.whatWillNotHappenHeader()));
+        lines.push(chalk.bgRedBright.white.bold(explainSentences.whatWillNotHappenHeader()));
         for (const n of context.outcome.whatWillNotHappen) {
-            lines.push(chalk.redBright(`  • ${n}`));
+            if (typeof n === 'string') {
+                lines.push(chalk.redBright(`  • ${n}`));
+            } else if (n && typeof n === 'object' && 'reason' in n) {
+                const obj = n as { text?: string; title?: string; reason?: string };
+                lines.push(chalk.redBright(`  • ${obj.text || obj.title || 'Not applicable'}`));
+                lines.push(chalk.gray(`      Reason: ${obj.reason}`));
+            } else {
+                lines.push(chalk.redBright(`  • ${JSON.stringify(n)}`));
+            }
         }
     }
 
-    // Flags resolved
-    if (context.usedFlags && Object.keys(context.usedFlags).length > 0) {
+    // Unified Flags section
+    if (
+        (context.usedFlags && Object.keys(context.usedFlags).length > 0) ||
+        (context.omittedFlags && Object.keys(context.omittedFlags).length > 0) ||
+        (context.deprecatedFlags && context.deprecatedFlags.length > 0) ||
+        (context.ignoredFlags && context.ignoredFlags.length > 0)
+    ) {
         lines.push('');
-            lines.push(chalk.bgGray.white.bold(explainSentences.flagsUsedHeader()));
+        lines.push(chalk.bgGray.white.bold(explainSentences.flagsUsedHeader()));
+        // Used/user/default flags
+        if (context.usedFlags && Object.keys(context.usedFlags).length > 0) {
             const flagsArr = Object.entries(context.usedFlags).map(([name, v]) => ({ name, value: v.value, source: v.source }));
             lines.push(chalk.gray(explainSentences.flagsResolved(flagsArr)));
-    }
-    if (context.omittedFlags && Object.keys(context.omittedFlags).length > 0) {
-        lines.push(chalk.bgGray.white.bold(' Omitted/Unused Flags:'));
-        for (const [k, v] of Object.entries(context.omittedFlags)) {
-            lines.push(chalk.gray(`    - ${k}: default=${safe(v.defaultValue)} (${v.source})`));
         }
-    }
-    if (context.deprecatedFlags && context.deprecatedFlags.length > 0) {
-        lines.push(chalk.bgYellowBright.black.bold(' Deprecated Flags:'));
-        for (const flag of context.deprecatedFlags) {
-            lines.push(chalk.yellowBright(`    - ${flag}`));
+        // Omitted flags
+        if (context.omittedFlags && Object.keys(context.omittedFlags).length > 0) {
+            for (const [k, v] of Object.entries(context.omittedFlags)) {
+                lines.push(chalk.gray(`    - ${k}: default=${safe(v.defaultValue)} (${v.source}) [omitted]`));
+            }
         }
-    }
-    if (context.ignoredFlags && context.ignoredFlags.length > 0) {
-        lines.push(chalk.bgYellowBright.black.bold(' Ignored Flags:'));
-        for (const flag of context.ignoredFlags) {
-            lines.push(chalk.yellowBright(`    - ${flag}`));
+        // Deprecated flags
+        if (context.deprecatedFlags && context.deprecatedFlags.length > 0) {
+            for (const flag of context.deprecatedFlags) {
+                lines.push(chalk.yellowBright(`    - ${flag} [deprecated]`));
+            }
+        }
+        // Ignored flags
+        if (context.ignoredFlags && context.ignoredFlags.length > 0) {
+            for (const flag of context.ignoredFlags) {
+                lines.push(chalk.yellowBright(`    - ${flag} [ignored]`));
+            }
         }
     }
 
@@ -126,7 +176,7 @@ export function explainDetailsTemplate(context: ExplainContext): string {
     // Technical details
     if (context.technical && typeof context.technical === 'object' && Object.keys(context.technical).length > 0) {
         lines.push('');
-            lines.push(chalk.bgMagentaBright.white.bold(explainSentences.technicalDetailsHeader()));
+        lines.push(chalk.bgMagentaBright.white.bold(explainSentences.technicalDetailsHeader()));
         const detailsArr = Object.entries(context.technical).map(([k, v]) => `${k}: ${v}`);
         lines.push(chalk.gray(explainSentences.technicalDetails(detailsArr)));
     }

@@ -106,6 +106,13 @@ export interface ExplainDecision {
 export type ExplainFlowStep = { step: string; type: 'static' | 'conditional' };
 
 export interface ExplainContext {
+  // Batch processing context (optional)
+  batch?: {
+    size?: number;
+    mode?: string;
+    summary?: string;
+    [key: string]: any;
+  };
   explainVersion?: string;
   schemaVersion?: string; // Tier 3 placeholder
   summary?: string; // Tier 2: summary line
@@ -158,6 +165,7 @@ export interface ExplainContext {
     whatWillNotHappen?: string[];
   };
   explainFlow?: ExplainFlowStep[];
+  executionSteps?: string[];
 
   // Environment info
   environment?: {
