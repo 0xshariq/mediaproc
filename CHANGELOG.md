@@ -26,6 +26,32 @@ MediaProc is organized as a monorepo with the following packages:
 
 ---
 
+## [@mediaproc/core@1.7.0] - 2026-01-25
+
+### Added
+
+- Major improvements to the Explain Flag output system:
+  - Centralized phrasing and output logic for all explain templates.
+  - Dual-layer effects and merged execution steps for clearer, more accurate explanations.
+  - Unified flag display, command context, and batch insight in both human and details templates.
+  - Expanded "What Will Not Happen" section with robust handling of all entry types.
+  - Improved summary line and output consistency.
+  - Systematic implementation of all missing features from EXPLAIN_FLAG_IMPLEMENTATION.md.
+  - Comprehensive automated Vitest test coverage for all explain output features and edge cases.
+
+### Changed
+
+- Refactored explain templates for maintainability, safety, and user-friendliness.
+- Updated types and context to support new explain features (batch, executionSteps, etc.).
+- Improved error handling and output safety for all explain-related commands.
+
+### Fixed
+
+- Fixed runtime errors in explain output templates (e.g., whatWillNotHappen section).
+- Ensured all automated tests pass and output is robust to edge cases.
+
+---
+
 ## [@mediaproc/core@1.4.0], [@mediaproc/cli@0.8.0] - 2026-01-18
 
 ### Added
