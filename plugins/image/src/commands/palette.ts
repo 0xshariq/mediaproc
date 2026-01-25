@@ -165,10 +165,20 @@ export function paletteCommand(imageCmd: Command): void {
             // Export palette to JSON if requested
             if (options.export !== undefined) {
               let exportPath = options.export;
+              const fsSync = await import('node:fs');
+              let isDir = false;
+              try {
+                const stat = fsSync.existsSync(exportPath) && fsSync.statSync(exportPath);
+                isDir = stat && stat.isDirectory();
+              } catch {}
               if (!exportPath) {
                 // If no path provided, use current dir and input file name
                 const base = path.basename(inputFile, path.extname(inputFile));
                 exportPath = path.join(process.cwd(), `${base}-palette.json`);
+              } else if (isDir) {
+                // If export path is a directory, write each palette as a separate file inside
+                const base = path.basename(inputFile, path.extname(inputFile));
+                exportPath = path.join(exportPath, `${base}-palette.json`);
               }
               await fs.writeFile(exportPath, JSON.stringify(paletteData, null, 2), 'utf8');
               console.log(chalk.green(`Palette exported to: ${exportPath}`));
