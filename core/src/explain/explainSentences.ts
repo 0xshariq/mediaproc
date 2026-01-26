@@ -45,7 +45,6 @@ export const explainSentences = {
   warningsHeader: () => COMMON_PHRASES.warningsHeader,
   technicalDetailsHeader: () => COMMON_PHRASES.technicalDetailsHeader,
   environmentHeader: () => COMMON_PHRASES.environmentHeader,
-  diagramPlaceholder: () => COMMON_PHRASES.diagramPlaceholder,
   // Dynamic effect phrases
   inputRead: (context: any) => COMMON_PHRASES.inputRead({ context }),
   outputWrite: (context: any) => COMMON_PHRASES.outputWrite({ context }),

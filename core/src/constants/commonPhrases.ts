@@ -47,7 +47,6 @@ export const COMMON_PHRASES: CommonPhrases = {
     warningsHeader: ' Warnings: ',
     technicalDetailsHeader: ' Technical Details: ',
     environmentHeader: ' Environment: ',
-    diagramPlaceholder: ' Diagram: (visual summary or workflow will appear here) ',
     inputRead: ({ context }: { context: ExplainContext }) => `The input file "${context?.inputs?.inputPath ?? context?.inputs?.input ?? 'unknown'}" will be read from disk, ensuring the correct format and accessibility.`,
     outputWrite: ({ context }: { context: ExplainContext }) => `A new file will be written to the output path "${context?.outputs?.outputPath ?? context?.outputs?.output ?? 'unknown'}", with all changes applied.`,
     noNetwork: () => 'No network requests will be made, guaranteeing local-only processing.',

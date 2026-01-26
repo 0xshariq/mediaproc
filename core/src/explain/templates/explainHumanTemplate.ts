@@ -72,12 +72,12 @@ export function explainHumanTemplate(context: ExplainContext): string {
     if (context.effects && context.effects.length > 0) {
         lines.push('');
         lines.push(chalk.bgGreenBright.black.bold(explainSentences.whatWillHappenHeader()));
-            // Human-readable effects (existing)
-            lines.push(chalk.greenBright(explainSentences.actions(context.effects)));
-            // Technical primitives (effect IDs)
-            if (Array.isArray(context.effects) && context.effects.length > 0) {
-                lines.push('(technical: ' + context.effects.join(', ') + ')');
-            }
+        // Human-readable effects (existing)
+        lines.push(chalk.greenBright(explainSentences.actions(context.effects)));
+        // Technical primitives (effect IDs)
+        if (Array.isArray(context.effects) && context.effects.length > 0) {
+            lines.push('(technical: ' + context.effects.join(', ') + ')');
+        }
     }
 
     // What will NOT happen (assumptions)

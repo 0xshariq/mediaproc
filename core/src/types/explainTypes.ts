@@ -49,7 +49,6 @@ export interface CommonPhrases {
   warningsHeader: string;
   technicalDetailsHeader: string;
   environmentHeader: string;
-  diagramPlaceholder: string;
 
   // Dynamic effect phrases (functions)
   inputRead: (args: { context: ExplainContext }) => string;
