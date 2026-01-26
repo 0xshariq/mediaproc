@@ -8,7 +8,7 @@ import os from 'os';
 import fs from 'fs';
 import path from 'path';
 import { getPhrase } from './phrases/phrases.js';
-import { getEffectId } from './naming/effectNamespaces.js';
+import { getEffectId } from './constants/effectNamespaces.js';
 
 
 /**

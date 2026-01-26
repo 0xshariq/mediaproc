@@ -1,4 +1,4 @@
-import { COMMON_PHRASES } from './commonPhrases.js';
+import { COMMON_PHRASES } from '../constants/commonPhrases.js';
 
 export const explainSentences = {
   // Section headers and static text

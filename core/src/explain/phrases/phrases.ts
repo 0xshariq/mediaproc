@@ -1,5 +1,5 @@
 import { CommonPhrases } from '../../types/explainTypes.js';
-import { COMMON_PHRASES } from './commonPhrases.js';
+import { COMMON_PHRASES } from '../constants/commonPhrases.js';
 
 // Plugin-specific phrase overrides
 const PLUGIN_PHRASES: Record<string, Partial<CommonPhrases>> = {};
