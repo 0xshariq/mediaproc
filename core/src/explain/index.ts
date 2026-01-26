@@ -7,3 +7,4 @@ export * from './constants/commonPhrases.js';
 export * from './phrases/explainSentences.js';
 export * from './phrases/phrases.js';
 export * from './constants/effectNamespaces.js';
+export * from './formatter/explainFormatter.js';

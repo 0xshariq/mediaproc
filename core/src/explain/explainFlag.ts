@@ -1,6 +1,6 @@
 
 import chalk from 'chalk';
-import { explainFormatter } from '../formatters/explainFormatter.js';
+import { explainFormatter } from './formatter/explainFormatter.js';
 import { ExplainContext, ExplainMode } from '../types/explainTypes.js';
 import { detectInputFiles, detectOutputFiles } from '../utils/file/fileDetection.js';
 
@@ -233,7 +233,7 @@ export function explainFlag({
       warnings: [],
       confidence: 'high',
       confidenceScore: 0.95,
-      whatWillNotHappen: [getPhrase('noNetwork', plugin)()],
+      whatWillNotHappen: [getPhrase('noNetwork', plugin)(), getPhrase('noOriginalModification', plugin)(), getPhrase('dataLocalOnly', plugin)(), getPhrase('noBackgroundTasks', plugin)()],
     },
     explainFlow,
     environment,

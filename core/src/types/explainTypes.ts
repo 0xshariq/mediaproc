@@ -54,6 +54,9 @@ export interface CommonPhrases {
   inputRead: (args: { context: ExplainContext }) => string;
   outputWrite: (args: { context: ExplainContext }) => string;
   noNetwork: () => string;
+  noOriginalModification: () => string;
+  dataLocalOnly: () => string;
+  noBackgroundTasks: () => string;
   externalTool: (args: { context: ExplainContext }) => string;
   dimensionsChange: (args: { context: ExplainContext }) => string;
   formatConversion: (args: { context: ExplainContext }) => string;
