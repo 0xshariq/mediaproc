@@ -8,7 +8,7 @@ import { createSharpInstance } from '../utils/sharp.js';
 import path from 'node:path';
 
 export function grayscaleCommand(imageCmd: Command): void {
- imageCmd
+  imageCmd
     .command('grayscale <input>')
     .alias('greyscale')
     .description('Convert image to grayscale (black and white)')
@@ -68,7 +68,7 @@ export function grayscaleCommand(imageCmd: Command): void {
 
         if (options.verbose) {
           console.log(chalk.blue('\nConfiguration:'));
-          console.log(chalk.dim(`  Quality: ${options.quality }`));
+          console.log(chalk.dim(`  Quality: ${options.quality}`));
         }
 
         if (options.dryRun) {

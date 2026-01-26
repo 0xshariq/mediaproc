@@ -170,7 +170,7 @@ export function paletteCommand(imageCmd: Command): void {
               try {
                 const stat = fsSync.existsSync(exportPath) && fsSync.statSync(exportPath);
                 isDir = stat && stat.isDirectory();
-              } catch {}
+              } catch { }
               if (!exportPath) {
                 // If no path provided, use current dir and input file name
                 const base = path.basename(inputFile, path.extname(inputFile));

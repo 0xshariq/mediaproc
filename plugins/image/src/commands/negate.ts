@@ -92,7 +92,7 @@ export function negateCommand(imageCmd: Command): void {
         if (options.verbose) {
           console.log(chalk.blue('\nConfiguration:'));
           console.log(chalk.dim(`  Negate alpha: ${options.alpha ? 'yes' : 'no'}`));
-          console.log(chalk.dim(`  Quality: ${options.quality }`));
+          console.log(chalk.dim(`  Quality: ${options.quality}`));
         }
 
         if (options.dryRun) {
@@ -120,11 +120,11 @@ export function negateCommand(imageCmd: Command): void {
 
             const outputExt = path.extname(outputPath).toLowerCase();
             if (outputExt === '.jpg' || outputExt === '.jpeg') {
-              pipeline.jpeg({ quality: options.quality  });
+              pipeline.jpeg({ quality: options.quality });
             } else if (outputExt === '.png') {
-              pipeline.png({ quality: options.quality  });
+              pipeline.png({ quality: options.quality });
             } else if (outputExt === '.webp') {
-              pipeline.webp({ quality: options.quality  });
+              pipeline.webp({ quality: options.quality });
             }
 
             await pipeline.toFile(outputPath);

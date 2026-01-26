@@ -100,7 +100,7 @@ export function sharpenCommand(imageCmd: Command): void {
           console.log(chalk.dim(`  Sigma: ${options.sigma || 1}`));
           console.log(chalk.dim(`  Flat: ${options.flat || 1}`));
           console.log(chalk.dim(`  Jagged: ${options.jagged || 2}`));
-          console.log(chalk.dim(`  Quality: ${options.quality }`));
+          console.log(chalk.dim(`  Quality: ${options.quality}`));
         }
 
         if (options.dryRun) {

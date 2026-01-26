@@ -81,7 +81,7 @@ export function rotateCommand(imageCmd: Command): void {
           console.log(chalk.blue('\nConfiguration:'));
           console.log(chalk.dim(`  Angle: ${options.angle || 90}°`));
           console.log(chalk.dim(`  Background: ${options.background || 'transparent'}`));
-          console.log(chalk.dim(`  Quality: ${options.quality }`));
+          console.log(chalk.dim(`  Quality: ${options.quality}`));
         }
 
         if (options.dryRun) {

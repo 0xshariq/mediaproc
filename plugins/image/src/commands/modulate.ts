@@ -124,7 +124,7 @@ export function modulateCommand(imageCmd: Command): void {
           console.log(chalk.dim(`  Brightness: ${options.brightness || 1}`));
           console.log(chalk.dim(`  Saturation: ${options.saturation || 1}`));
           console.log(chalk.dim(`  Hue: ${options.hue || 0}°`));
-          console.log(chalk.dim(`  Quality: ${options.quality }`));
+          console.log(chalk.dim(`  Quality: ${options.quality}`));
         }
 
         if (options.dryRun) {

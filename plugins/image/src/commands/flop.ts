@@ -27,7 +27,7 @@ export function flopCommand(imageCmd: Command): void {
       usage: ['flop <input>', 'flop <input> -o output.jpg'],
       options: [
         { flag: '-o, --output <path>', description: 'Output file path (default: <input>-flopped.<ext>)' },
-            { flag: '-q, --quality <quality>', description: 'Output quality (1-100). Optional. Applies to JPEG/WEBP/AVIF. For PNG, maps to compression level (higher quality = lower compression). Ignored for other formats.' },
+        { flag: '-q, --quality <quality>', description: 'Output quality (1-100). Optional. Applies to JPEG/WEBP/AVIF. For PNG, maps to compression level (higher quality = lower compression). Ignored for other formats.' },
         { flag: '--dry-run', description: 'Preview changes without executing' },
         { flag: '--explain [mode]', description: 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.' },
         { flag: '-v, --verbose', description: 'Show detailed output' }

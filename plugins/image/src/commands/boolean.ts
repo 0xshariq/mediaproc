@@ -17,7 +17,7 @@ export function booleanCommand(imageCmd: Command): void {
   const cmd = imageCmd
     .command('boolean <input>')
     .description('Perform boolean operations between images')
-    .requiredOption('--operation <op>', 'Boolean operation: and, or, eor (XOR)','and')
+    .requiredOption('--operation <op>', 'Boolean operation: and, or, eor (XOR)', 'and')
     .requiredOption('--operand <path>', 'Second image for operation')
     .option('-o, --output <path>', 'Output file path')
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
@@ -149,8 +149,8 @@ export function booleanCommand(imageCmd: Command): void {
       if (options.dryRun) {
         spinner.info(chalk.yellow('Dry run mode - no changes will be made'));
         console.log(chalk.green(`✓ Would perform ${operation.toUpperCase()} operation on ${inputFiles.length} file(s):`));
-          inputFiles.forEach(f => console.log(chalk.dim(`  - ${f}`)));
-          console.log(chalk.dim(`  Operand: ${options.operand}`));
+        inputFiles.forEach(f => console.log(chalk.dim(`  - ${f}`)));
+        console.log(chalk.dim(`  Operand: ${options.operand}`));
         return;
       }
 
