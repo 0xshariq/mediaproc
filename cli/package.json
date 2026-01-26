@@ -1,6 +1,6 @@
 {
   "name": "@mediaproc/cli",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Universal media processing CLI with plugin architecture",
   "type": "module",
   "main": "./dist/index.js",
@@ -15,14 +15,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "build:all": "pnpm build && pnpm --filter '@mediaproc/*' build",
     "clean": "rm -rf dist",
-    "clean:all": "pnpm clean && pnpm --filter '@mediaproc/*' clean",
-    "dev": "tsc --watch",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:all": "pnpm test && pnpm --filter '@mediaproc/*' test"
+    "dev": "tsc --watch"
   },
   "keywords": [
     "media",
@@ -51,5 +45,30 @@
   "homepage": "https://github.com/0xshariq/mediaproc#readme",
   "engines": {
     "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@gltf-transform/cli": "^4.3.0",
+    "@gltf-transform/core": "^4.3.0",
+    "@lottiefiles/dotlottie-web": "^0.61.0",
+    "@mediaproc/core": "^1.7.0",
+    "boxen": "^8.0.1",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2",
+    "execa": "^9.6.1",
+    "ghostscript4js": "^3.2.3",
+    "node-cron": "^4.2.1",
+    "node-poppler": "^9.1.0",
+    "ora": "^9.1.0",
+    "shaka-player": "^4.16.14",
+    "sharp": "^0.34.5",
+    "tesseract.js": "^7.0.0",
+    "yaml": "^2.8.2",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }
