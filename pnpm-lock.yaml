@@ -18,8 +18,8 @@ importers:
         specifier: ^0.61.0
         version: 0.61.0
       '@mediaproc/core':
-        specifier: ^1.7.0
-        version: 1.7.0
+        specifier: ^1.8.0
+        version: 1.8.0
       boxen:
         specifier: ^8.0.1
         version: 8.0.1
@@ -607,8 +607,8 @@ packages:
   '@mediaproc/core@1.6.1':
     resolution: {integrity: sha512-hEplpfUC2LwNcxy+FJht8qh0C2aEThu5jfUnIkfSPACFIzs+e+aiTOZT1xXx9hMtP0NFBGOvgkh0xMQL0KLt8A==}
 
-  '@mediaproc/core@1.7.0':
-    resolution: {integrity: sha512-TmaLxdR4uF9FhmeeX1ss5GeZJ6eKKubaPIV9Trmjk5AN9KIa24nuBIftTd0hWVdCxP5eLoRfSs0MeIH3CYl9KA==}
+  '@mediaproc/core@1.8.0':
+    resolution: {integrity: sha512-cE009V+lGFHhuhQuP471aq1Catm92H8Kj2uBCwKzzSTiLFumQn4gGVcjRWT2CV6R5+Q3m7eWY2hNECH2oPmCtA==}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -2153,7 +2153,7 @@ snapshots:
     dependencies:
       chalk: 5.6.2
 
-  '@mediaproc/core@1.7.0': {}
+  '@mediaproc/core@1.8.0': {}
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
