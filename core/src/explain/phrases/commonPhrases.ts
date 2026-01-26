@@ -1,4 +1,4 @@
-import { CommonPhrases, ExplainContext } from "../types/explainTypes.js";
+import { CommonPhrases, ExplainContext } from "../../types/explainTypes.js";
 
 // Centralized reusable phrases for explain engine
 export const COMMON_PHRASES: CommonPhrases = {
@@ -50,6 +50,7 @@ export const COMMON_PHRASES: CommonPhrases = {
     inputRead: ({ context }: { context: ExplainContext }) => `The input file "${context?.inputs?.inputPath ?? context?.inputs?.input ?? 'unknown'}" will be read from disk, ensuring the correct format and accessibility.`,
     outputWrite: ({ context }: { context: ExplainContext }) => `A new file will be written to the output path "${context?.outputs?.outputPath ?? context?.outputs?.output ?? 'unknown'}", with all changes applied.`,
     noNetwork: () => 'No network requests will be made, guaranteeing local-only processing.',
+    
     externalTool: ({ context }: { context: ExplainContext }) => `Processing will be performed using the external tool: ${context?.technical?.tool ?? 'unknown'}.`,
     dimensionsChange: ({ context }: { context: ExplainContext }) => `The dimensions will be changed to width=${context?.usedFlags?.width?.value ?? '?'} and height=${context?.usedFlags?.height?.value ?? '?'}.`,
     formatConversion: ({ context }: { context: ExplainContext }) => `Format will be converted to ${context?.usedFlags?.format?.value ?? 'unknown'}, ensuring compatibility and optimal quality.`,

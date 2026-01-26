@@ -2,13 +2,13 @@
 import chalk from 'chalk';
 import { explainFormatter } from '../formatters/explainFormatter.js';
 import { ExplainContext, ExplainMode } from '../types/explainTypes.js';
-import { detectInputFiles, detectOutputFiles } from '../utils/fileDetection.js';
+import { detectInputFiles, detectOutputFiles } from '../utils/file/fileDetection.js';
 
 import os from 'os';
 import fs from 'fs';
 import path from 'path';
-import { getPhrase } from '../utils/phrases.js';
-import { getEffectId } from '../constants/effectNamespaces.js';
+import { getPhrase } from './phrases/phrases.js';
+import { getEffectId } from './naming/effectNamespaces.js';
 
 
 /**

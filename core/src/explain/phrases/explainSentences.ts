@@ -1,4 +1,4 @@
-import { COMMON_PHRASES } from '../constants/commonPhrases.js';
+import { COMMON_PHRASES } from './commonPhrases.js';
 
 export const explainSentences = {
   // Section headers and static text
@@ -80,28 +80,28 @@ export const explainSentences = {
     `${COMMON_PHRASES.commandInputs} ${fileCount} ${fileType}${fileCount === 1 ? '' : 's'} from ${inputPath} will be processed.`,
   actions: (actions: string[]) =>
     actions.length > 0
-      ? `${COMMON_PHRASES.whatWillHappenHeader}\n${actions.map(a => `• ${a}`).join("\n")}`
+      ? actions.map(a => `• ${a}`).join("\n")
       : COMMON_PHRASES.commandPurpose,
   technicalDetails: (details: string[]) =>
-    details.length > 0 ? `${COMMON_PHRASES.technicalDetailsHeader} ${details.join(", ")}.` : '',
+    details.length > 0 ? details.join(", ") + '.' : '',
   executionWorkflow: (steps: string[]) =>
     steps.length > 0
-      ? `${COMMON_PHRASES.technicalWorkflowHeader}\n${steps.map((s, i) => `  ${i + 1}. ${s}`).join("\n")}`
+      ? steps.map((s, i) => `  ${i + 1}. ${s}`).join("\n")
       : COMMON_PHRASES.commandPurpose,
   flagsResolved: (flags: { name: string, value: string, source: string }[]) =>
     flags.length > 0
-      ? `${COMMON_PHRASES.flagsUsedHeader}\n${flags.map(f => `• ${f.name}: ${f.value} (from ${f.source})`).join("\n")}`
-      : COMMON_PHRASES.commandFlags,
+      ? flags.map(f => `• ${f.name}: ${f.value} (from ${f.source})`).join("\n")
+      : '',
   technicalContext: (engine: string, mode: string, count: number, fileType: string) =>
-    `${COMMON_PHRASES.commandPerformance} Engine: ${engine}, Mode: ${mode}, Inputs: ${count} ${fileType}${count === 1 ? '' : 's'}.`,
+    `Engine: ${engine}, Mode: ${mode}, Inputs: ${count} ${fileType}${count === 1 ? '' : 's'}.`,
   batchProcessing: (isBatch: boolean) =>
     isBatch
-      ? `${COMMON_PHRASES.commandOptions} Batch mode: Each input will be processed independently. Errors in one will not stop others.`
+      ? `Batch mode: Each input will be processed independently. Errors in one will not stop others.`
       : '',
   safeguards: (safeguards: string[]) =>
     safeguards.length > 0
-      ? `${COMMON_PHRASES.commandSecurity}\n${safeguards.map(s => `• ${s}`).join("\n")}`
+      ? safeguards.map(s => `• ${s}`).join("\n")
       : '',
   summary: (count: number, fileType: string, operation: string, outputPath: string) =>
-    `${COMMON_PHRASES.summaryHeader} ${count} ${fileType}${count === 1 ? '' : 's'} will be ${operation} and saved to ${outputPath}.`
+    `${count} ${fileType}${count === 1 ? '' : 's'} will be ${operation} and saved to ${outputPath}.`
 };

@@ -7,7 +7,7 @@ import {
   DOCUMENT_EXTENSIONS,
   ANIMATION_EXTENSIONS,
   THREED_EXTENSIONS
-} from '../constants/supportedExtensions.js';
+} from '../../constants/supportedExtensions.js';
 
 export type FileType = 'image' | 'video' | 'audio' | 'document' | 'animation' | '3d' | 'unknown';
 

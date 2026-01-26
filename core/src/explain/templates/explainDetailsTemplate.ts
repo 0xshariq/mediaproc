@@ -2,7 +2,7 @@
 import { ExplainContext } from '../../types/explainTypes.js';
 import chalk from 'chalk';
 import boxen from 'boxen';
-import { explainSentences } from '../explainSentences.js';
+import { explainSentences } from '../phrases/explainSentences.js';
 
 export function explainDetailsTemplate(context: ExplainContext): string {
 
