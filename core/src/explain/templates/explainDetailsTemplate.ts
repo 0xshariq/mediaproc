@@ -49,14 +49,14 @@ export function explainDetailsTemplate(context: ExplainContext): string {
     }
 
     // === INPUTS ===
-    if (context.inputs && (context.inputs.inputPath || context.inputs.filesDetected)) {
+    if (context.inputs && (context.inputs.inputPath || (context.inputs.files && context.inputs.files.length > 0))) {
         lines.push('');
         lines.push(chalk.bold.bgBlue.black(' INPUTS '));
         if (context.inputs.inputPath) {
             lines.push(chalk.cyan('• Input path: ') + chalk.white(displayValue(context.inputs.inputPath, 'None')));
         }
-        if (context.inputs.filesDetected) {
-            lines.push(chalk.cyan('• Files detected: ') + chalk.white(displayValue(context.inputs.filesDetected, 'None')));
+        if (context.inputs.files && context.inputs.files.length > 0) {
+            lines.push(chalk.cyan('• Files detected: ') + chalk.white(displayValue(context.inputs.files, 'None')));
         }
     }
 
