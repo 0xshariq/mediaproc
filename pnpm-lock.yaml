@@ -18,8 +18,8 @@ importers:
         specifier: ^0.61.0
         version: 0.61.0
       '@mediaproc/core':
-        specifier: ^1.8.0
-        version: 1.8.0
+        specifier: latest
+        version: 1.9.0
       boxen:
         specifier: ^8.0.1
         version: 8.0.1
@@ -73,7 +73,72 @@ importers:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.0.10)(tsx@4.21.0)(yaml@2.8.2)
 
-  cli: {}
+  cli:
+    dependencies:
+      '@gltf-transform/cli':
+        specifier: ^4.3.0
+        version: 4.3.0
+      '@gltf-transform/core':
+        specifier: ^4.3.0
+        version: 4.3.0
+      '@lottiefiles/dotlottie-web':
+        specifier: ^0.61.0
+        version: 0.61.0
+      '@mediaproc/core':
+        specifier: latest
+        version: 1.9.0
+      boxen:
+        specifier: ^8.0.1
+        version: 8.0.1
+      chalk:
+        specifier: ^5.6.2
+        version: 5.6.2
+      commander:
+        specifier: ^14.0.2
+        version: 14.0.2
+      execa:
+        specifier: ^9.6.1
+        version: 9.6.1
+      ghostscript4js:
+        specifier: ^3.2.3
+        version: 3.2.3
+      node-cron:
+        specifier: ^4.2.1
+        version: 4.2.1
+      node-poppler:
+        specifier: ^9.1.0
+        version: 9.1.0
+      ora:
+        specifier: ^9.1.0
+        version: 9.1.0
+      shaka-player:
+        specifier: ^4.16.14
+        version: 4.16.14
+      sharp:
+        specifier: ^0.34.5
+        version: 0.34.5
+      tesseract.js:
+        specifier: ^7.0.0
+        version: 7.0.0
+      yaml:
+        specifier: ^2.8.2
+        version: 2.8.2
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
+    devDependencies:
+      '@types/node':
+        specifier: ^25.0.10
+        version: 25.0.10
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@25.0.10)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@types/node@25.0.10)(tsx@4.21.0)(yaml@2.8.2)
 
   core: {}
 
@@ -607,8 +672,8 @@ packages:
   '@mediaproc/core@1.6.1':
     resolution: {integrity: sha512-hEplpfUC2LwNcxy+FJht8qh0C2aEThu5jfUnIkfSPACFIzs+e+aiTOZT1xXx9hMtP0NFBGOvgkh0xMQL0KLt8A==}
 
-  '@mediaproc/core@1.8.0':
-    resolution: {integrity: sha512-cE009V+lGFHhuhQuP471aq1Catm92H8Kj2uBCwKzzSTiLFumQn4gGVcjRWT2CV6R5+Q3m7eWY2hNECH2oPmCtA==}
+  '@mediaproc/core@1.9.0':
+    resolution: {integrity: sha512-1jk4CRwJzA6jcZaM0QBvYeUIqeHgX25Aa5fWrca7DpdZAEkf1FtGSvhsXfpixqXtOmwI8PoohF1OC12uUBDkDA==}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -2153,7 +2218,7 @@ snapshots:
     dependencies:
       chalk: 5.6.2
 
-  '@mediaproc/core@1.8.0': {}
+  '@mediaproc/core@1.9.0': {}
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
