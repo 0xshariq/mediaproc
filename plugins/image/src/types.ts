@@ -4,11 +4,24 @@ export interface ImageOptions {
   width?: number;
   height?: number;
   quality?: number;
-  format?: 'jpg' | 'jpeg' | 'png' | 'webp' | 'avif' | 'tiff' | 'gif';
+  format?: '.jpg' |
+  '.jpeg' |
+  '.png' |
+  '.gif' |
+  '.bmp' |
+  '.webp' |
+  '.tiff' |
+  '.tif' |
+  '.svg' |
+  '.ico' |
+  '.heic' |
+  '.heif' |
+  '.avif';
   fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
   verbose?: boolean;
   dryRun?: boolean;
   explain?: boolean;
+  help?: boolean;
 }
 
 export interface ResizeOptions extends ImageOptions {
@@ -20,7 +33,19 @@ export interface ResizeOptions extends ImageOptions {
 }
 
 export interface ConvertOptions extends ImageOptions {
-  format: 'jpg' | 'jpeg' | 'png' | 'webp' | 'avif' | 'tiff' | 'gif';
+  formats: '.jpg' |
+  '.jpeg' |
+  '.png' |
+  '.gif' |
+  '.bmp' |
+  '.webp' |
+  '.tiff' |
+  '.tif' |
+  '.svg' |
+  '.ico' |
+  '.heic' |
+  '.heif' |
+  '.avif';
   progressive?: boolean;
   compression?: number;
 }

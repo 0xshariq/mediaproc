@@ -6,24 +6,20 @@ import type { ConvertOptions } from '../types.js';
 import { createSharpInstance } from '../utils/sharp.js';
 import { validatePaths, resolveOutputPaths, IMAGE_EXTENSIONS, getFileName, createStandardHelp } from '@mediaproc/core';
 
-
-interface ConvertOptionsExtended extends ConvertOptions {
-  help?: boolean;
-}
-
 export function convertCommand(imageCmd: Command): void {
   imageCmd
     .command('convert <input>')
     .description('Convert image to different format')
     .option('-f, --format <format>', 'Output format: jpg, png, webp, avif, tiff, gif, webp')
     .option('-o, --output <path>', 'Output file path')
-    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)
+    .option('-q, --quality <quality>', 'Quality (1-100)', parseInt, 90)
+    .option('--compression <level>', 'PNG compression level (0-9)', parseInt, 9)
     .option('--progressive', 'Use progressive/interlaced format')
     .option('--dry-run', 'Show what would be done without executing')
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for convert command')
-    .action(async (input: string, options: ConvertOptionsExtended) => {
+    .action(async (input: string, options: ConvertOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'convert',
@@ -33,7 +29,7 @@ export function convertCommand(imageCmd: Command): void {
           options: [
             { flag: '-f, --format <format>', description: 'Output format: jpg, png, webp, avif, tiff, gif (default: webp)' },
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>.<format>)' },
-            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (optional, only applies to JPEG, WEBP, AVIF; for PNG, mapped to compression level)' },
+            { flag: '-q, --quality <quality>', description: 'Output quality 1-100 (default: 90)' },
             { flag: '--compression <level>', description: 'PNG compression level 0-9 (default: 9)' },
             { flag: '--progressive', description: 'Use progressive/interlaced format' },
             { flag: '--dry-run', description: 'Preview changes without executing' },
@@ -73,8 +69,22 @@ export function convertCommand(imageCmd: Command): void {
       const spinner = ora('Validating inputs...').start();
 
       try {
-        const validFormats = ['jpg', 'jpeg', 'png', 'webp', 'avif', 'tiff', 'gif'];
-        if (!validFormats.includes(options.format)) {
+        const validFormats = ['jpg',
+          'jpeg',
+          'png',
+          'gif',
+          'bmp',
+          'webp',
+          'tiff',
+          'tif',
+          'svg',
+          'ico',
+          'heic',
+          'heif',
+          'avif',];
+        // Remove leading dot if present
+        const normalizedFormat = options.format?.startsWith('.') ? options.format.slice(1) : options.format;
+        if (!normalizedFormat || !validFormats.includes(normalizedFormat)) {
           spinner.fail(chalk.red(`Invalid format. Supported: ${validFormats.join(', ')}`));
           process.exit(1);
         }
@@ -98,17 +108,15 @@ export function convertCommand(imageCmd: Command): void {
 
         // Resolve output paths for all input files
         const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
-          newExtension: `.${options.format}`,
+          newExtension: `.${normalizedFormat}`,
         });
 
         spinner.succeed(chalk.green(`Found ${inputFiles.length} image(s) to process`));
 
         if (options.verbose) {
           console.log(chalk.blue('\nConfiguration:'));
-          console.log(chalk.dim(`  Format: ${options.format.toUpperCase()}`));
-          if (typeof options.quality !== 'undefined') {
-            console.log(chalk.dim(`  Quality: ${options.quality}`));
-          }
+          console.log(chalk.dim(`  Format: ${options.format?.toUpperCase()}`));
+          console.log(chalk.dim(`  Quality: ${options.quality || 90}`));
           if (options.compression) {
             console.log(chalk.dim(`  Compression: ${options.compression}`));
           }
@@ -120,7 +128,7 @@ export function convertCommand(imageCmd: Command): void {
         // Dry run mode
         if (options.dryRun) {
           console.log(chalk.yellow('\nDry run mode - no changes will be made\n'));
-          console.log(chalk.green(`Would convert ${inputFiles.length} image(s) to ${options.format.toUpperCase()}:`));
+          console.log(chalk.green(`Would convert ${inputFiles.length} image(s) to ${options.format?.toUpperCase()}:`));
           inputFiles.forEach((inputFile, index) => {
             const outputPath = outputPaths.get(inputFile);
             console.log(chalk.dim(`  ${index + 1}. ${getFileName(inputFile)} → ${getFileName(outputPath!)}`));
@@ -143,44 +151,23 @@ export function convertCommand(imageCmd: Command): void {
             let pipeline = createSharpInstance(inputFile);
 
             // Apply format-specific options
-            if (options.format === 'jpg' || options.format === 'jpeg') {
-              if (typeof options.quality === 'number') {
-                pipeline.jpeg({ quality: options.quality, progressive: options.progressive || false });
-              } else {
-                pipeline.jpeg({ progressive: options.progressive || false });
-              }
-            } else if (options.format === 'webp') {
-              if (typeof options.quality === 'number') {
-                pipeline.webp({ quality: options.quality });
-              } else {
-                pipeline.webp();
-              }
-            } else if (options.format === 'avif') {
-              if (typeof options.quality === 'number') {
-                pipeline.avif({ quality: options.quality });
-              } else {
-                pipeline.avif();
-              }
-            } else if (options.format === 'png') {
-              let compressionLevel = 9;
-              if (typeof options.quality === 'number') {
-                compressionLevel = Math.round((100 - Math.max(1, Math.min(100, options.quality))) * 9 / 99);
-              }
-              pipeline.png({ compressionLevel, progressive: options.progressive || false });
-            } else if (options.format === 'tiff') {
-              if (typeof options.quality === 'number') {
-                pipeline.tiff({ quality: options.quality });
-              } else {
-                pipeline.tiff();
-              }
-            } else if (options.format === 'gif') {
+            if (normalizedFormat === 'jpg' || normalizedFormat === 'jpeg') {
+              pipeline.jpeg({ quality: options.quality || 90, progressive: options.progressive || false });
+            } else if (normalizedFormat === 'png') {
+              pipeline.png({ quality: options.quality || 90, compressionLevel: options.compression || 9, progressive: options.progressive || false });
+            } else if (normalizedFormat === 'webp') {
+              pipeline.webp({ quality: options.quality || 90 });
+            } else if (normalizedFormat === 'avif') {
+              pipeline.avif({ quality: options.quality || 90 });
+            } else if (normalizedFormat === 'tiff') {
+              pipeline.tiff({ quality: options.quality || 90 });
+            } else if (normalizedFormat === 'gif') {
               pipeline.gif();
             }
-            // For other formats, do not set quality
 
             await pipeline.toFile(outputPath);
 
-            spinner.succeed(chalk.green(`✓ ${fileName} converted to ${options.format.toUpperCase()}`));
+            spinner.succeed(chalk.green(`✓ ${fileName} converted to ${options.format?.toUpperCase()}`));
 
             if (options.verbose) {
               console.log(chalk.dim(`    Original format: ${metadata.format?.toUpperCase()}`));
@@ -204,7 +191,7 @@ export function convertCommand(imageCmd: Command): void {
         if (failCount > 0) {
           console.log(chalk.red(`  ✗ Failed: ${failCount}`));
         }
-        console.log(chalk.dim(`  Target format: ${options.format.toUpperCase()}`));
+        console.log(chalk.dim(`  Target format: ${normalizedFormat.toUpperCase()}`));
 
       } catch (error) {
         spinner.fail(chalk.red('Failed to convert images'));

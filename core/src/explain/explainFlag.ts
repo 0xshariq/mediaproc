@@ -251,7 +251,7 @@ export function explainFlag({
       warnings: [],
       confidence: 'high',
       confidenceScore: 0.95,
-      whatWillNotHappen: [explainSentences.noNetwork(), '\n', explainSentences.noOriginalModification(), '\n', explainSentences.dataLocalOnly(), '\n', explainSentences.noBackgroundTasks()],
+      whatWillNotHappen: [explainSentences.noNetwork(), explainSentences.noOriginalModification(), explainSentences.dataLocalOnly(), explainSentences.noBackgroundTasks()],
     },
     explainFlow,
     environment,

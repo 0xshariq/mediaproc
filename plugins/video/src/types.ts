@@ -1,3 +1,7 @@
+import { VIDEO_EXTENSIONS } from "@mediaproc/core";
+
+export type VideoFormats = keyof typeof VIDEO_EXTENSIONS;
+
 export interface VideoOptions {
   input: string;
   output?: string;
@@ -8,6 +12,7 @@ export interface VideoOptions {
   fps?: number;
   verbose?: boolean;
   dryRun?: boolean;
+  formats?: VideoFormats[];
   // Resize-specific options
   scale?: '480p' | '720p' | '1080p' | '1440p' | '4k';
   width?: number;
@@ -26,7 +31,6 @@ export interface CompressOptions extends VideoOptions {
 }
 
 export interface TranscodeOptions extends VideoOptions {
-  format?: 'mp4' | 'webm' | 'mkv' | 'avi';
   audioCodec?: string;
   audioBitrate?: string;
   help?: boolean;
@@ -37,7 +41,7 @@ export interface ExtractOptions extends VideoOptions {
   output?: string;
   start?: string;
   end?: string;
-  format?: 'jpg' | 'png';
+  format?: 'jpg' | 'png' | 'avif';
   fps?: number;
   quality?: number;
   verbose?: boolean;
