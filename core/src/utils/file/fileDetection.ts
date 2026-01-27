@@ -20,6 +20,7 @@ const EXTENSION_MAP: Record<FileType, string[]> = {
   '3d': THREED_EXTENSIONS,
   unknown: []
 };
+console.log(EXTENSION_MAP)
 
 export function detectFileType(filePath: string): FileType {
   const ext = path.extname(filePath).toLowerCase();
@@ -47,16 +48,16 @@ export function detectInputFiles(inputPath: string): { type: FileType; count: nu
   return { type: detectedType, count: files.length, files };
 }
 
-export function detectOutputFiles(outputPath: string): { exists: boolean; isDir: boolean; files: string[] } {
-  if (!fs.existsSync(outputPath)) return { exists: false, isDir: false, files: [] };
-  const stat = fs.statSync(outputPath);
+export function detectOutputFiles(outputPath: string | undefined): { exists: boolean; isDir: boolean; files: string[] } {
+  if (!fs.existsSync(outputPath ? outputPath : '')) return { exists: false, isDir: false, files: [] };
+  const stat = fs.statSync(outputPath ? outputPath : '');
   if (stat.isDirectory()) {
-    const files = fs.readdirSync(outputPath)
-      .map(f => path.join(outputPath, f))
+    const files = fs.readdirSync(outputPath ? outputPath : '')
+      .map(f => path.join(outputPath ? outputPath : '', f))
       .filter(f => fs.statSync(f).isFile());
     return { exists: true, isDir: true, files };
   } else if (stat.isFile()) {
-    return { exists: true, isDir: false, files: [outputPath] };
+    return { exists: true, isDir: false, files: [outputPath ? outputPath : ''] };
   }
   return { exists: false, isDir: false, files: [] };
 }

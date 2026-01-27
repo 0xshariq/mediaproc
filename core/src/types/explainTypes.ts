@@ -1,3 +1,5 @@
+import { FileType } from "../utils";
+
 export interface ExplainEffectContext {
   effect: string;
   context: ExplainContext;
@@ -27,7 +29,6 @@ export interface CommonPhrases {
   commandVersion: string;
   commandLastModified: string;
   commandRelated: string;
-  explainOnly: string;
   contextEnrichmentPrefix: string;
   user: string;
   platform: string;
@@ -51,6 +52,27 @@ export interface CommonPhrases {
   environmentHeader: string;
 
   // Dynamic effect phrases (functions)
+  // --- Enhanced dynamic and user-centric phrases ---
+  detectedInputFiles?: (args: { context: ExplainContext }) => string;
+  detectedOutputFiles?: (args: { context: ExplainContext }) => string;
+  inputTypeDetected?: (args: { context: ExplainContext }) => string;
+  outputTypeDetected?: (args: { context: ExplainContext }) => string;
+  batchModeActive?: (args: { context: ExplainContext }) => string;
+  dryRunMode?: (args: { context: ExplainContext }) => string;
+  pluginList?: (args: { context: ExplainContext }) => string;
+  estimatedTime?: (args: { context: ExplainContext }) => string;
+  userConfirmation?: () => string;
+  undoAvailable?: () => string;
+  previewAvailable?: () => string;
+  resourceUsage?: (args: { context: ExplainContext }) => string;
+  advancedOptions?: (args: { context: ExplainContext }) => string;
+  safetyChecks?: (args: { context: ExplainContext }) => string;
+  fallbackStrategy?: (args: { context: ExplainContext }) => string;
+  interactiveMode?: (args: { context: ExplainContext }) => string;
+  autoRetry?: (args: { context: ExplainContext }) => string;
+  outputSummary?: (args: { context: ExplainContext }) => string;
+  environmentInfo?: (args: { context: ExplainContext }) => string;
+  userTip?: (args: { context: ExplainContext }) => string;
   inputRead: (args: { context: ExplainContext }) => string;
   outputWrite: (args: { context: ExplainContext }) => string;
   noNetwork: () => string;
@@ -81,10 +103,15 @@ export interface CommonPhrases {
   warningDeprecated: (flag: string) => string;
   warningIgnored: (flag: string) => string;
 
+  // Explain-only summaries and warnings
+  explainOnlySummary: string;
+  explainOnlySummaryWithWarnings: string;
+  explainOnlySummaryWithErrors: string;
   // Tips
   tipDetails: string;
   tipJson: string;
   tipHuman?: string;
+  tipOnly?: string;
 }
 // Shared types for the explain engine
 
@@ -95,6 +122,9 @@ export enum ExplainMode {
   Human = 'human',
   Details = 'details',
   Json = 'json',
+  Audit = 'audit', // coming soon
+  Debug = 'debug', // coming soon
+  Only = 'only'
 }
 export interface ExplainDecision {
   key: string;
@@ -119,8 +149,6 @@ export interface ExplainContext {
   schemaVersion?: string; // Tier 3 placeholder
   summary?: string; // Tier 2: summary line
   exitCode?: number; // Tier 3 placeholder
-  // If true, this is an explain-only run (no command execution)
-  explainOnly?: boolean;
   // Command and plugin info
   command: string;
   plugin?: string;
@@ -136,11 +164,31 @@ export interface ExplainContext {
 
   // Inputs/outputs
   inputs: {
-    [key: string]: any;
+    type: FileType;
+    inputPath: string;
+    input?: string;
+    count: number;
+    files: string[] | Buffer[] | never[]
   };
   outputs?: {
-    [key: string]: any;
+    type?: string;
+    outputPath: string;
+    output?: string;
+    exists?: boolean; 
+    isDir?: boolean;
+    count?: number;
+    summary?: string;
+    files?: string[] | Buffer[] | never[]
   };
+  plugins?: string[];
+  estimate?: string;
+  resources?: string;
+  advancedOptions?: string[];
+  safetyChecks?: string;
+  fallback?: string;
+  interactive?: boolean;
+  autoRetry?: boolean;
+  tip?: string;
 
   // Flags and provenance
   usedFlags: {

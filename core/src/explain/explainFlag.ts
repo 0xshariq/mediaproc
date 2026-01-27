@@ -1,14 +1,13 @@
 
 import chalk from 'chalk';
-import { explainFormatter } from './formatter/explainFormatter.js';
+import { explainFormatter } from './formatters/explainFormatter.js';
 import { ExplainContext, ExplainMode } from '../types/explainTypes.js';
-import { detectInputFiles, detectOutputFiles } from '../utils/file/fileDetection.js';
+import { detectInputFiles, detectOutputFiles, FileType } from '../utils/file/fileDetection.js';
 
 import os from 'os';
 import fs from 'fs';
 import path from 'path';
-import { getPhrase } from './phrases/phrases.js';
-import { getEffectId } from './constants/effectNamespaces.js';
+import { explainSentences } from './phrases/explainSentences.js';
 
 
 /**
@@ -44,9 +43,7 @@ export function explainFlag({
   let outputPath = '';
   let allInputs: Record<string, any> = {};
   let allOutputs: Record<string, any> = {};
-  let filesDetected = '';
-  let filesDetectedCount = 0;
-  let filesDetectedType = '';
+  // Gather input/output paths from args/options
   for (const k of inputKeys) {
     if (args[k]) { inputPath = args[k]; allInputs[k] = args[k]; }
     if (options[k]) { inputPath = options[k]; allInputs[k] = options[k]; }
@@ -55,34 +52,21 @@ export function explainFlag({
     if (args[k]) { outputPath = args[k]; allOutputs[k] = args[k]; }
     if (options[k]) { outputPath = options[k]; allOutputs[k] = options[k]; }
   }
-  // Use robust file detection for output
-  let outputFilesDetected = '';
-  if (outputPath) {
-    const detectedOut = detectOutputFiles(outputPath);
-    if (detectedOut.exists) {
-      outputFilesDetected = `${detectedOut.files.length} file${detectedOut.files.length === 1 ? '' : 's'}`;
-    }
-  }
-  // Use robust file detection for input
-  if (inputPath) {
-    const detected = detectInputFiles(inputPath);
-    filesDetectedCount = detected.count;
-    filesDetectedType = detected.type !== 'unknown' ? detected.type : 'file';
-    filesDetected = `${filesDetectedCount} ${filesDetectedType}${filesDetectedCount === 1 ? '' : 's'}`;
-  }
+  // Use fileDetection utilities for input/output
+  let inputDetection = inputPath ? detectInputFiles(inputPath) : { type: 'unknown', count: 0, files: [] };
+  let outputDetection = outputPath ? detectOutputFiles(outputPath) : { exists: false, isDir: false, files: [] };
 
   // Gather used flags
   let explainValue: string | undefined = undefined;
-  let explainOnly = false;
   if (typeof options.explain === 'string') {
     explainValue = options.explain;
-    if (explainValue === 'only') explainOnly = true;
+    if (explainValue === 'only') mode = ExplainMode.Only;
   } else if (Array.isArray(args._) && args._.length > 0) {
     // Check for --explain details as positional
     const idx = args._.findIndex((v: any) => v === 'explain');
     if (idx !== -1 && args._[idx + 1]) {
       explainValue = args._[idx + 1];
-      if (explainValue === 'only') explainOnly = true;
+      if (explainValue === 'only') mode = ExplainMode.Only;
     }
   }
   if (explainValue === 'details') {
@@ -91,7 +75,14 @@ export function explainFlag({
     mode = ExplainMode.Json;
   } else if (explainValue === 'human') {
     mode = ExplainMode.Human;
-  } else if (explainValue) {
+  } else if (explainValue === 'audit') {
+    mode = ExplainMode.Audit;
+  } else if (explainValue === 'debug') {
+    mode = ExplainMode.Debug;
+  } else if (explainValue === 'only') {
+    mode = ExplainMode.Only;
+  }
+  else {
     // fallback for unknown explain values
     console.warn(chalk.yellow(`warn: unknown explain mode "${explainValue}", falling back to "human"`));
     mode = ExplainMode.Human;
@@ -151,40 +142,54 @@ export function explainFlag({
 
   // Step 1: Add effects/primitives to context (plugin-aware, generic fallback)
   const effects: string[] = [];
-  // Always use detected plugin name for effect ID, fallback to generic
-  if (inputPath) effects.push(getEffectId(plugin, 'inputRead'));
-  if (outputPath) effects.push(getEffectId(plugin, 'outputWrite'));
-  if (usedFlags['width'] || usedFlags['height']) effects.push(getEffectId(plugin, 'dimensionsChange'));
-  if (usedFlags['quality']) effects.push(getEffectId(plugin, 'qualityChange'));
-  if (usedFlags['format']) effects.push(getEffectId(plugin, 'formatConversion'));
-  if (usedFlags['metadata']) effects.push(getEffectId(plugin, 'metadataPreserved'));
-  if (usedFlags['tool'] || command?.parent?.name?.()) effects.push(getEffectId(plugin, 'externalTool'));
-  if (usedFlags['noNetwork']) effects.push(getEffectId(plugin, 'noNetwork'));
+  if (inputPath) {
+    effects.push(explainSentences.inputRead({ context: { inputPath, plugin } }));
+    effects.push(explainSentences.detectedInputFiles({
+      context: {
+        inputs: {
+          inputPath
+        },
+        plugin
+      }
+    }));
+  }
+  if (outputPath) {
+    effects.push(explainSentences.outputWrite({ context: { outputPath, plugin } }));
+    effects.push(explainSentences.detectedOutputFiles({
+      context: {
+        outputs: {
+          outputPath
+        },
+        plugin
+      }
+    }));
+  }
+  if (usedFlags['width'] || usedFlags['height']) effects.push(explainSentences.dimensionsChange({ context: { usedFlags, plugin } }));
+  if (usedFlags['quality']) effects.push(explainSentences.qualityChange({ context: { usedFlags, plugin } }));
+  if (usedFlags['format']) effects.push(explainSentences.formatConversion({ context: { usedFlags, plugin } }));
+  if (usedFlags['metadata']) effects.push(explainSentences.metadataPreserved());
+  if (usedFlags['tool'] || command?.parent?.name?.()) effects.push(explainSentences.externalTool({ context: { usedFlags, plugin } }));
+  if (usedFlags['noNetwork']) effects.push(explainSentences.noNetwork());
   // Add more effects for other plugin types as needed
 
-  // Dynamic summary using enhanced phrases
-  // Build ExplainContext with plugin/command info and version
-  // (moved summary logic after context is built)
-
-  // Dynamic outcome and flow using enhanced phrases
+  // Dynamic outcome and flow using enhanced sentences
   const sideEffects: string[] = [];
-  if (usedFlags['noNetwork']) sideEffects.push(getPhrase('noNetwork', plugin)());
-  if (usedFlags['metadata']) sideEffects.push(getPhrase('metadataPreserved', plugin)());
-  if (usedFlags['validation']) sideEffects.push(getPhrase('validation', plugin)());
-  if (usedFlags['logging']) sideEffects.push(getPhrase('logging', plugin)());
-  if (usedFlags['cleanup']) sideEffects.push(getPhrase('cleanup', plugin)());
-  // Add more side effects as needed
+  if (usedFlags['noNetwork']) sideEffects.push(explainSentences.noNetwork());
+  if (usedFlags['metadata']) sideEffects.push(explainSentences.metadataPreserved());
+  if (usedFlags['validation']) sideEffects.push(explainSentences.validation());
+  if (usedFlags['logging']) sideEffects.push(explainSentences.logging());
+  if (usedFlags['cleanup']) sideEffects.push(explainSentences.cleanup());
 
   // Tag explainFlow steps as static or conditional for DETAILS mode
   type ExplainFlowStep = { step: string; type: 'static' | 'conditional' };
   const explainFlow: ExplainFlowStep[] = [
-    { step: getPhrase('validation', plugin)(), type: 'static' },
-    { step: 'Check input and output paths for validity and existence.', type: 'static' },
-    { step: 'Prepare configuration for processing (flags/options).', type: 'static' },
-    { step: 'Execute main processing logic for each input.', type: 'conditional' },
-    { step: getPhrase('logging', plugin)(), type: 'static' },
-    { step: getPhrase('cleanup', plugin)(), type: 'static' },
-    { step: 'Show summary and any errors encountered.', type: 'static' }
+    { step: explainSentences.validation(), type: 'static' },
+    { step: explainSentences.commandInputs(), type: 'static' },
+    { step: explainSentences.commandOptions(), type: 'static' },
+    { step: explainSentences.commandPurpose(), type: 'conditional' },
+    { step: explainSentences.logging(), type: 'static' },
+    { step: explainSentences.cleanup(), type: 'static' },
+    { step: explainSentences.summarySuccess(), type: 'static' }
   ];
 
   // Technical details (plugin-agnostic)
@@ -215,8 +220,21 @@ export function explainFlag({
     platform: `${os.platform()} ${os.arch()}`,
     mode,
     summary: '', // will set below
-    inputs: { inputPath, outputPath, filesDetected, ...allInputs },
-    outputs: Object.keys(allOutputs).length > 0 ? { ...allOutputs, outputFilesDetected } : undefined,
+    inputs: {
+      inputPath,
+      type: inputDetection.type as FileType,
+      count: inputDetection.count,
+      files: inputDetection.files,
+      ...allInputs,
+    },
+    outputs: {
+      outputPath,
+      exists: outputDetection.exists,
+      isDir: outputDetection.isDir,
+      count: outputDetection.files.length,
+      files: outputDetection.files,
+      ...allOutputs
+    },
     usedFlags,
     omittedFlags: Object.keys(omittedFlags).length > 0 ? omittedFlags : undefined,
     decisions: Object.entries(usedFlags).map(([key, v]) => ({
@@ -233,26 +251,31 @@ export function explainFlag({
       warnings: [],
       confidence: 'high',
       confidenceScore: 0.95,
-      whatWillNotHappen: [getPhrase('noNetwork', plugin)(), getPhrase('noOriginalModification', plugin)(), getPhrase('dataLocalOnly', plugin)(), getPhrase('noBackgroundTasks', plugin)()],
+      whatWillNotHappen: [explainSentences.noNetwork(), '\n', explainSentences.noOriginalModification(), '\n', explainSentences.dataLocalOnly(), '\n', explainSentences.noBackgroundTasks()],
     },
     explainFlow,
     environment,
-    explainOnly,
     technical,
     exitCode: 0,
   };
 
   // Now set summary and result using the full context
-  if (inputPath && outputPath) {
-    context.summary = `${getPhrase('inputRead', plugin)({ context })} ${getPhrase('outputWrite', plugin)({ context })}`;
+  if (mode === ExplainMode.Only) {
+    context.summary = explainSentences.explainOnlySummary();
+    context.outcome.result = explainSentences.explainOnlySummary();
+  } else if (inputPath && outputPath) {
+    context.summary = `${explainSentences.inputRead({ context })} ${explainSentences.outputWrite({ context })}`;
+    context.outcome.result = explainSentences.outputWrite({ context });
   } else if (inputPath) {
-    context.summary = getPhrase('inputRead', plugin)({ context });
+    context.summary = explainSentences.inputRead({ context });
+    context.outcome.result = explainSentences.inputRead({ context });
   } else if (outputPath) {
-    context.summary = getPhrase('outputWrite', plugin)({ context });
+    context.summary = explainSentences.outputWrite({ context });
+    context.outcome.result = explainSentences.outputWrite({ context });
   } else {
-    context.summary = getPhrase('summarySuccess', plugin);
+    context.summary = explainSentences.summarySuccess();
+    context.outcome.result = explainSentences.summarySuccess();
   }
-  context.outcome.result = outputPath ? getPhrase('outputWrite', plugin)({ context }) : 'Operation will complete';
 
   // Print explanation only
   const explanation = explainFormatter(context, mode);
