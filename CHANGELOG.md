@@ -26,6 +26,27 @@ MediaProc is organized as a monorepo with the following packages:
 
 ---
 
+## [@mediaproc/core@1.9.0] - 2026-01-27
+
+### Added
+
+- New audit and debug explain templates (placeholders, "coming soon").
+- Support for new explain modes in CLI output.
+- Improved, DRY, and type-safe human and details explain templates.
+
+### Changed
+
+- Refactored explain output system for maintainability and clarity.
+- Centralized file detection logic and removed duplicate code in phrases and templates.
+- Modernized CLI output styling and improved phrasing for user-friendliness.
+
+### Fixed
+
+- Removed all references to non-existent properties in explain templates.
+- Ensured all explain output is robust, actionable, and error-free.
+
+---
+
 ## [@mediaproc/core@1.7.0] - 2026-01-25
 
 ### Added
