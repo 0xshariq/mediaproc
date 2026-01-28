@@ -21,25 +21,30 @@ export function explainHumanTemplate(context: ExplainContext): string {
   // Use explainSentences to get all needed sentences for this mode
   const sentences: string[] = [];
 
-  // Example: Add summary, what will happen, outputs, flags, safety, etc. as needed for human mode
+  // Human mode: overview only, plugin-agnostic, no details
   if (explainSentences.summaryHeader) sentences.push(explainSentences.summaryHeader());
   if (explainSentences.inputRead) sentences.push(explainSentences.inputRead(context));
   if (explainSentences.whatWillHappenHeader) sentences.push(explainSentences.whatWillHappenHeader());
   if (explainSentences.outputWrite) sentences.push(explainSentences.outputWrite(context));
-  if (explainSentences.detectedInputFiles) sentences.push(explainSentences.detectedInputFiles(context));
-  if (explainSentences.detectedOutputFiles) sentences.push(explainSentences.detectedOutputFiles(context));
-  if (explainSentences.flagsUsedHeader) sentences.push(explainSentences.flagsUsedHeader());
-  if (explainSentences.whatWillNotHappenHeader()) sentences.push(explainSentences.noNetwork(), explainSentences.noBackgroundTasks(), explainSentences.noOriginalModification(), explainSentences.dataLocalOnly());
+  if (explainSentences.whatWillNotHappenHeader) sentences.push(explainSentences.whatWillNotHappenHeader());
+  // Group the original plugin-agnostic phrases for this section
+  const notHappen = [
+    explainSentences.noNetwork(),
+    explainSentences.noBackgroundTasks(),
+    explainSentences.noOriginalModification(),
+    explainSentences.dataLocalOnly()
+  ].join(' ');
+  sentences.push(notHappen);
   if (explainSentences.summarySuccess) sentences.push(explainSentences.summarySuccess());
 
   // Render with section styling
   for (const sentence of sentences) {
     if (typeof sentence === 'string') {
-      // Detect section headers (e.g., 'SUMMARY:', 'WHAT WILL HAPPEN:')
-      const match = sentence.match(/^(SUMMARY|WHAT WILL HAPPEN|OUTPUTS|FLAGS|SAFETY|PROCESSING FLOW|OUTCOME|TECHNICAL DETAILS):\s*(.*)$/);
+      // Detect section headers (e.g., 'SUMMARY:', 'WHAT WILL HAPPEN:', 'WHAT WILL NOT HAPPEN:')
+      const match = sentence.match(/^(SUMMARY|WHAT WILL HAPPEN|WHAT WILL NOT HAPPEN|OUTPUTS|FLAGS|SAFETY|PROCESSING FLOW|OUTCOME|TECHNICAL DETAILS):\s*(.*)$/);
       if (match) {
         const [, section, rest] = match;
-        lines.push(SECTION_STYLES[section](section));
+        lines.push(SECTION_STYLES[section] ? SECTION_STYLES[section](section) : section);
         if (rest && rest.trim()) lines.push(rest.trim());
       } else {
         lines.push(sentence);

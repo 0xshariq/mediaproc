@@ -1,171 +1,59 @@
-
 import { ExplainContext } from '../../types/explainTypes.js';
 import chalk from 'chalk';
 import boxen from 'boxen';
-// Removed unused import
+import { explainSentences } from '../phrases/explainSentences.js';
+
+const SECTION_STYLES: Record<string, (txt: string) => string> = {
+  'SUMMARY': txt => chalk.bold.bgCyan.black(` ${txt} `),
+  'WHAT WILL HAPPEN': txt => chalk.bold.bgGreen.black(` ${txt} `),
+  'OUTPUTS': txt => chalk.bold.bgMagenta.black(` ${txt} `),
+  'FLAGS': txt => chalk.bold.bgYellow.black(` ${txt} `),
+  'WHAT WILL NOT HAPPEN': txt => chalk.bold.bgRed.white(` ${txt} `),
+  'PROCESSING FLOW': txt => chalk.bold.bgWhite.black(` ${txt} `),
+  'OUTCOME': txt => chalk.bold.bgRedBright.white(` ${txt} `),
+  'TECHNICAL DETAILS': txt => chalk.bold.bgGray.white(` ${txt} `),
+};
 
 export function explainDetailsTemplate(context: ExplainContext): string {
-    // Helper to sanitize values for user-facing output
-    function displayValue(val: any, fallback: string = 'default'): string {
-        if (val === undefined || val === null) return fallback;
-        if (val === true) return 'enabled';
-        if (val === false) return 'disabled';
-        if (Array.isArray(val) && val.length === 0) return 'None';
-        if (typeof val === 'object' && val !== null && Object.keys(val).length === 0) return 'None';
-        return String(val);
+  const lines: string[] = [];
+  const sentences: string[] = [];
+
+  // Details mode: plugin-agnostic, detailed, relevant sentences only
+  if (explainSentences.summaryHeader) sentences.push(explainSentences.summaryHeader());
+  if (explainSentences.inputRead) sentences.push(explainSentences.inputRead(context));
+  if (explainSentences.whatWillHappenHeader) sentences.push(explainSentences.whatWillHappenHeader());
+  if (explainSentences.outputWrite) sentences.push(explainSentences.outputWrite(context));
+  if (explainSentences.flagsUsedHeader) sentences.push(explainSentences.flagsUsedHeader());
+  if (explainSentences.whatWillNotHappenHeader) sentences.push(explainSentences.whatWillNotHappenHeader());
+  // Group the original plugin-agnostic phrases for this section
+  const notHappen = [
+    explainSentences.noNetwork(),
+    explainSentences.noBackgroundTasks(),
+    explainSentences.noOriginalModification(),
+    explainSentences.dataLocalOnly()
+  ].join(' ');
+  sentences.push(notHappen);
+  if (explainSentences.technicalDetailsHeader) sentences.push(explainSentences.technicalDetailsHeader());
+  if (explainSentences.summarySuccess) sentences.push(explainSentences.summarySuccess());
+
+  for (const sentence of sentences) {
+    if (typeof sentence === 'string') {
+      // Detect section headers (e.g., 'SUMMARY:', 'WHAT WILL HAPPEN:', 'WHAT WILL NOT HAPPEN:')
+      const match = sentence.match(/^(SUMMARY|WHAT WILL HAPPEN|WHAT WILL NOT HAPPEN|OUTPUTS|FLAGS|SAFETY|PROCESSING FLOW|OUTCOME|TECHNICAL DETAILS):\s*(.*)$/);
+      if (match) {
+        const [, section, rest] = match;
+        lines.push(SECTION_STYLES[section] ? SECTION_STYLES[section](section) : section);
+        if (rest && rest.trim()) lines.push(rest.trim());
+      } else {
+        lines.push(sentence);
+      }
     }
-    let lines: string[] = []; // Declare lines before use
+  }
 
-    // === SUMMARY ===
-    lines.push('');
-    lines.push(chalk.bold.bgCyan.black(' SUMMARY '));
-    if (context.summary && context.inputs && context.outputs) {
-        const inputCount = context.inputs ? Object.keys(context.inputs).length : 0;
-        const fileType = context.inputs && inputCount > 0 ? Object.keys(context.inputs)[0] : 'file';
-        const outputCount = context.outputs ? Object.keys(context.outputs).length : 0;
-        const outputType = context.outputs && outputCount > 0 ? Object.keys(context.outputs)[0] : 'output';
-        const operation = context.command || 'processed';
-        lines.push(chalk.bold.cyan(`This command will process ${inputCount} ${fileType}${inputCount === 1 ? '' : 's'} and produce ${outputCount} ${outputType}${outputCount === 1 ? '' : 's'} using the '${operation}' operation.`));
-    } else if (context.summary) {
-        lines.push(chalk.bold.cyan(context.summary));
-    }
-
-    // === WHAT WILL HAPPEN ===
-    if (context.effects && Array.isArray(context.effects) && context.effects.length > 0) {
-        lines.push('');
-        lines.push(chalk.bold.bgGreen.black(' WHAT WILL HAPPEN '));
-        lines.push(
-            context.effects
-                .map(eff => typeof eff === 'string' && eff.match(/effectNamespace|schemaVersion|processingScope/) ? '' : chalk.greenBright('• ' + displayValue(eff)))
-                .filter(Boolean)
-                .join('\n')
-        );
-        const techEffects = context.effects
-            .filter(eff => typeof eff === 'string' && !eff.match(/effectNamespace|schemaVersion|processingScope/))
-            .map(val => displayValue(val));
-        if (techEffects.length > 0) {
-            lines.push(chalk.gray('Technical Effects: ' + techEffects.join(', ')));
-        }
-    }
-
-    // === INPUTS ===
-    if (context.inputs && (context.inputs.inputPath || (context.inputs.files && context.inputs.files.length > 0))) {
-        lines.push('');
-        lines.push(chalk.bold.bgBlue.black(' INPUTS '));
-        if (context.inputs.inputPath) {
-            lines.push(chalk.cyan('• Input path: ') + chalk.white(displayValue(context.inputs.inputPath, 'None')));
-        }
-        if (context.inputs.files && context.inputs.files.length > 0) {
-            lines.push(chalk.cyan('• Files detected: ') + chalk.white(displayValue(context.inputs.files, 'None')));
-        }
-    }
-
-    // === OUTPUTS ===
-    if (context.outputs && context.outputs.outputPath) {
-        lines.push('');
-        lines.push(chalk.bold.bgMagenta.black(' OUTPUTS '));
-        lines.push(chalk.magenta('• Output path: ') + chalk.white(displayValue(context.outputs.outputPath, 'None')));
-    }
-
-    // === FLAGS ===
-    if (context.usedFlags && Object.keys(context.usedFlags).length > 0) {
-        lines.push('');
-        lines.push(chalk.bold.bgYellow.black(' FLAGS '));
-        const userFlags = Object.entries(context.usedFlags)
-            .filter(([_, v]) => v.source === 'user')
-            .map(([name, v]) => chalk.yellow('• ' + name + ': ') + chalk.white(displayValue(v.value)));
-        const defaultFlags = Object.entries(context.usedFlags)
-            .filter(([_, v]) => v.source !== 'user')
-            .map(([name, v]) => chalk.gray('• ' + name + ': ') + chalk.white(displayValue(v.value)));
-        if (userFlags.length > 0) {
-            lines.push(chalk.yellow('User Flags:'));
-            lines.push(userFlags.join('\n'));
-        }
-        if (defaultFlags.length > 0) {
-            lines.push(chalk.gray('Default Flags:'));
-            lines.push(defaultFlags.join('\n'));
-        }
-    }
-
-    // === WHAT WILL NOT HAPPEN ===
-    lines.push('');
-    lines.push(chalk.bold.bgRed.white(' WHAT WILL NOT HAPPEN '));
-    lines.push(chalk.green('No network access. All processing is local. No telemetry is collected.'));
-
-    // === PROCESSING FLOW ===
-    if (context.executionSteps && context.executionSteps.length > 0) {
-        lines.push('');
-        lines.push(chalk.bold.bgWhite.black(' PROCESSING FLOW '));
-        for (const step of context.executionSteps) {
-            const s = typeof step === 'string' ? step.trim() : '';
-            const actionStep = /^[A-Z]/.test(s) ? s : s.charAt(0).toUpperCase() + s.slice(1);
-            lines.push(chalk.white('→ ') + chalk.cyan(actionStep));
-        }
-    }
-
-    // === OUTCOME ===
-    if (
-        context.outcome &&
-        ((Array.isArray(context.outcome.errors) && context.outcome.errors.length > 0) ||
-            (Array.isArray(context.outcome.warnings) && context.outcome.warnings.length > 0))
-    ) {
-        lines.push('');
-        lines.push(chalk.bold.bgRedBright.white(' OUTCOME '));
-        if (Array.isArray(context.outcome.errors) && context.outcome.errors.length > 0) {
-            lines.push(chalk.red('Errors:'));
-            for (const err of context.outcome.errors) {
-                lines.push(chalk.red('• ' + displayValue(err, 'None')));
-            }
-        }
-        if (Array.isArray(context.outcome.warnings) && context.outcome.warnings.length > 0) {
-            lines.push(chalk.yellow('Warnings:'));
-            for (const warn of context.outcome.warnings) {
-                lines.push(chalk.yellow('• ' + displayValue(warn, 'None')));
-            }
-        }
-        lines.push(chalk.gray('Result: See above for details.'));
-    }
-
-    // === TECHNICAL DETAILS ===
-    if (context.technical && typeof context.technical === 'object' && Object.keys(context.technical).length > 0) {
-        lines.push('');
-        lines.push(chalk.bold.bgGray.white(' TECHNICAL DETAILS '));
-        const detailsArr = Object.entries(context.technical)
-            .filter(([, v]) => v !== undefined && v !== null && v !== '' && v !== 'unknown')
-            .map(([k, v]) => chalk.gray('• ' + k + ': ') + chalk.white(displayValue(v)));
-        if (detailsArr.length > 0) {
-            lines.push(detailsArr.join('\n'));
-        }
-    }
-
-    // Custom plugin sections
-    if (context.customSections && Array.isArray(context.customSections)) {
-        for (const section of context.customSections) {
-            if (section.items && section.items.length > 0) {
-                lines.push('');
-                lines.push(chalk.bold.bgMagenta.white(` ${section.title.toUpperCase()} `));
-                for (const item of section.items) {
-                    let safeItem = (typeof item === 'function') ? '[function]' : displayValue(item);
-                    lines.push(chalk.magentaBright('• ' + safeItem));
-                }
-            }
-        }
-    }
-
-    // Tips
-    lines.push('');
-    lines.push(chalk.bgWhiteBright.black('Tip: ') + chalk.gray('Use --json for machine-readable output.'));
-    lines.push(chalk.bgWhiteBright.black('Tip: ') + chalk.gray('See the documentation for more details.'));
-
-    // Always print the summary/result phrase at the end
-    lines.push('');
-    lines.push(chalk.bold.bgGreen.black('✔ Operation explained successfully.'));
-
-    // Wrap all in a single box with a subtle border and modern look
-    return boxen(lines.join('\n'), {
-        padding: 1,
-        borderColor: 'gray',
-        borderStyle: 'round',
-        backgroundColor: 'black',
-    });
+  return boxen(lines.join('\n'), {
+    padding: 1,
+    borderColor: 'gray',
+    borderStyle: 'round',
+    backgroundColor: 'black',
+  });
 }
