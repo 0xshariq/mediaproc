@@ -20,7 +20,6 @@ const EXTENSION_MAP: Record<FileType, string[]> = {
   '3d': THREED_EXTENSIONS,
   unknown: []
 };
-console.log(EXTENSION_MAP)
 
 export function detectFileType(filePath: string): FileType {
   const ext = path.extname(filePath).toLowerCase();

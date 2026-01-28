@@ -61,12 +61,10 @@ export function explainDetailsTemplate(context: ExplainContext): string {
     }
 
     // === OUTPUTS ===
-    if (context.outputs && Object.keys(context.outputs).length > 0) {
+    if (context.outputs && context.outputs.outputPath) {
         lines.push('');
         lines.push(chalk.bold.bgMagenta.black(' OUTPUTS '));
-        for (const [k, v] of Object.entries(context.outputs)) {
-            lines.push(chalk.magenta('• ' + k + ': ') + chalk.white(displayValue(v, 'None')));
-        }
+        lines.push(chalk.magenta('• Output path: ') + chalk.white(displayValue(context.outputs.outputPath, 'None')));
     }
 
     // === FLAGS ===
@@ -89,9 +87,9 @@ export function explainDetailsTemplate(context: ExplainContext): string {
         }
     }
 
-    // === SAFETY ===
+    // === WHAT WILL NOT HAPPEN ===
     lines.push('');
-    lines.push(chalk.bold.bgRed.white(' SAFETY '));
+    lines.push(chalk.bold.bgRed.white(' WHAT WILL NOT HAPPEN '));
     lines.push(chalk.green('No network access. All processing is local. No telemetry is collected.'));
 
     // === PROCESSING FLOW ===

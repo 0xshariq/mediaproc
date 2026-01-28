@@ -4,32 +4,57 @@ export interface ExplainEffectContext {
   effect: string;
   context: ExplainContext;
 }
+export interface CommandRelatedOptions {
+  type?: string;
+  category?: string;
+  purpose: string;
+  inputs: string;
+  outputs: string;
+  flags?: string;
+  options: string;
+  performance?: string;
+  security?: string;
+  dependencies?: string;
+  sideEffects?: string;
+  warnings?: string;
+  limitations?: string;
+  examples?: string;
+  docs?: string;
+  author?: string;
+  version?: string;
+  lastModified?: string;
+  relatedCommands?: string;
+}
+export type ExplainFlagSource = 'user' | 'system' | 'default' | 'deprecated' | 'ignored';
+
+// Enum for explain output format
+export enum ExplainMode {
+  Human = 'human',
+  Details = 'details',
+  Json = 'json',
+  Audit = 'audit', // coming soon
+  Debug = 'debug', // coming soon
+  Only = 'only'
+}
+export interface ExplainDecision {
+  key: string;
+  value: any;
+  reason: string;
+  provenance?: ExplainFlagSource;
+  omitted?: boolean;
+}
+
+
+export type ExplainFlowStep = { step: string; type: 'static' | 'conditional' };
+
 
 export interface CommonPhrases {
   // Section headers and static text
   header: string;
   detailsHeader: string;
   summaryHeader: string;
-  commandType: string;
-  commandCategory: string;
-  commandPurpose: string;
-  commandInputs: string;
-  commandOutputs: string;
-  commandFlags: string;
-  commandOptions: string;
-  commandPerformance: string;
-  commandSecurity: string;
-  commandDependencies: string;
-  commandSideEffects: string;
-  commandWarnings: string;
-  commandLimitations: string;
-  commandExamples: string;
-  commandDocs: string;
-  commandAuthor: string;
-  commandVersion: string;
-  commandLastModified: string;
-  commandRelated: string;
   contextEnrichmentPrefix: string;
+  commandRelatedOptions: CommandRelatedOptions;
   user: string;
   platform: string;
   mode: string;
@@ -113,29 +138,6 @@ export interface CommonPhrases {
   tipHuman?: string;
   tipOnly?: string;
 }
-// Shared types for the explain engine
-
-export type ExplainFlagSource = 'user' | 'system' | 'default' | 'deprecated' | 'ignored';
-
-// Enum for explain output format
-export enum ExplainMode {
-  Human = 'human',
-  Details = 'details',
-  Json = 'json',
-  Audit = 'audit', // coming soon
-  Debug = 'debug', // coming soon
-  Only = 'only'
-}
-export interface ExplainDecision {
-  key: string;
-  value: any;
-  reason: string;
-  provenance?: ExplainFlagSource;
-  omitted?: boolean;
-}
-
-
-export type ExplainFlowStep = { step: string; type: 'static' | 'conditional' };
 
 export interface ExplainContext {
   // Batch processing context (optional)
@@ -174,7 +176,7 @@ export interface ExplainContext {
     type?: string;
     outputPath: string;
     output?: string;
-    exists?: boolean; 
+    exists?: boolean;
     isDir?: boolean;
     count?: number;
     summary?: string;
@@ -239,25 +241,5 @@ export interface ExplainContext {
   // Extensibility for plugin authors
   customSections?: Array<{ title: string; items: string[] }>;
 
-  // Optional diagram (ASCII or plugin-provided)
-  diagram?: string;
-  commandType?: string;
-  commandCategory?: string;
-  commandPurpose?: string;
-  commandInputs?: string;
-  commandOutputs?: string;
-  commandFlags?: string;
-  commandOptions?: string;
-  commandPerformance?: string;
-  commandSecurity?: string;
-  commandDependencies?: string;
-  commandSideEffects?: string;
-  commandWarnings?: string;
-  commandLimitations?: string;
-  commandExamples?: string;
-  commandDocs?: string;
-  commandAuthor?: string;
-  commandVersion?: string;
-  commandLastModified?: string;
-  commandRelated?: string;
+  commandRelatedOptions?: CommandRelatedOptions;
 }

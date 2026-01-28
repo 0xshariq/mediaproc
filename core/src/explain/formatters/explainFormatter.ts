@@ -3,6 +3,8 @@
 import { ExplainContext, ExplainMode } from '../../types/explainTypes.js';
 import { explainHumanTemplate } from '../templates/explainHumanTemplate.js';
 import { explainDetailsTemplate } from '../templates/explainDetailsTemplate.js';
+import { explainAuditTemplate } from '../templates/explainAuditTemplate.js';
+import { explainDebugTemplate } from '../templates/explainDebugTemplate.js';
 
 
 
@@ -19,11 +21,17 @@ export function explainFormatter(
     // Return raw context for machine use, including all enhanced fields
     return context;
   }
-  if (mode === ExplainMode.Human) {
+  else if (mode === ExplainMode.Human) {
     return explainHumanTemplate(context);
   }
-  if (mode === ExplainMode.Details) {
+  else if (mode === ExplainMode.Details) {
     return explainDetailsTemplate(context);
+  }
+  else if (mode === ExplainMode.Audit) {
+    return explainAuditTemplate(/* context */)
+  }
+  else if (mode === ExplainMode.Debug) {
+    return explainDebugTemplate(/* context */)
   }
   return '';
 }
