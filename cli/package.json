@@ -1,6 +1,6 @@
 {
   "name": "@mediaproc/cli",
-  "version": "0.8.3",
+  "version": "0.8.5",
   "description": "Universal media processing CLI with plugin architecture",
   "type": "module",
   "main": "./dist/index.js",

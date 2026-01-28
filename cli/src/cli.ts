@@ -2,7 +2,7 @@
 
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { getVersion, showBranding } from '@mediaproc/core';
+import { showBranding } from '@mediaproc/core';
 import { PluginManager } from './plugin-manager.js';
 import { addCommand } from './commands/add.js';
 import { removeCommand } from './commands/remove.js';
@@ -26,7 +26,7 @@ const pluginManager = new PluginManager();
 
 
 // Get version from core branding utility
-const version = getVersion(require.resolve('../package.json'));
+const version = '0.8.5';
 
 /**
  * Auto-load installed plugins
@@ -82,7 +82,7 @@ export async function cli(): Promise<void> {
   program.hook('preAction', explainPreActionHook);
   // Show CLI branding after all commands
   program.hook('postAction', () => {
-    showBranding(require.resolve('../package.json'));
+    showBranding();
   });
 }
 
