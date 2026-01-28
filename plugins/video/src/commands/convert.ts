@@ -11,6 +11,7 @@ import {
 import { parseInputPaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import ora from 'ora';
+import { ConvertOptions } from '../types.js';
 
 // Format configurations
 const formatConfig: Record<string, { codec: string; audioCodec: string; ext: string }> = {
@@ -44,7 +45,7 @@ export function convertCommand(videoCmd: Command): void {
         .option('-v, --verbose', 'Show detailed FFmpeg output')
         .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
         .option('-h, --help', 'Display help for convert command')
-        .action(async (input: string | undefined, options: any) => {
+        .action(async (input: string | undefined, options: ConvertOptions) => {
             // Show help if requested
             if (options.help || !input) {
                 createStandardHelp({
@@ -104,7 +105,7 @@ export function convertCommand(videoCmd: Command): void {
                 }
 
                 // Validate format
-                const format = options.format.toLowerCase();
+                const format = options.formats?.toLowerCase();
                 if (!formatConfig[format]) {
                     console.log(chalk.red(`❌ Unsupported format: ${format}`));
                     console.log(chalk.yellow('Supported formats: mp4, mkv, webm, avi, mov, flv, 3gp, m4v'));
@@ -112,7 +113,7 @@ export function convertCommand(videoCmd: Command): void {
                 }
 
                 // Parse input paths
-                const inputPaths = await parseInputPaths(input, VIDEO_EXTENSIONS);
+                const inputPaths = parseInputPaths(input, VIDEO_EXTENSIONS);
 
                 if (inputPaths.length === 0) {
                     console.log(chalk.red('❌ No valid video files found'));

@@ -1,7 +1,13 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { register } from './register.js';
 import { explainPreActionHook, showPluginBranding } from '@mediaproc/core';
+import { compressCommand } from './commands/compress.js';
+import { convertCommand } from './commands/convert.js';
+import { extractCommand } from './commands/extract.js';
+import { mergeCommand } from './commands/merge.js';
+import { resizeCommand } from './commands/resize.js';
+import { transcodeCommand } from './commands/transcode.js';
+import { trimCommand } from './commands/trim.js';
 
 const program = new Command();
 program
@@ -37,12 +43,21 @@ Professional video processing powered by FFmpeg. Compress, transcode, edit, and 
 
 📚 Use 'mediaproc-video <command> --help' for detailed command documentation.
   `)
-  .version('1.4.0');
+  .version('1.5.0');
+
+// Register all commands directly (no "video" prefix in standalone mode)
+compressCommand(program);
+convertCommand(program);
+extractCommand(program);
+mergeCommand(program);
+resizeCommand(program);
+transcodeCommand(program);
+trimCommand(program);
+
 program.hook('preAction', explainPreActionHook);
 program.hook('postAction', () => {
   showPluginBranding('Video');
 });
-register(program);
 
 program.parse(process.argv);
 

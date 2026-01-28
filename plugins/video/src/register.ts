@@ -9,7 +9,8 @@ import { mergeCommand } from './commands/merge.js';
 
 
 export const name = '@mediaproc/video';
-export const version = '1.4.0';
+export const version = '1.5.0';
+export const isBuiltIn  = true;
 
 export function register(program: Command): void {
   const videoCmd = program

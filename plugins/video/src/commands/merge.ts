@@ -13,6 +13,7 @@ import {
 } from '../utils/ffmpeg.js';
 import { fileExists, validatePaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
+import { MergeOptions } from '../types.js';
 
 export function mergeCommand(videoCmd: Command): void {
   videoCmd
@@ -33,7 +34,7 @@ export function mergeCommand(videoCmd: Command): void {
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('-h, --help', 'Display help for merge command')
-    .action(async (inputs: string[], options: any) => {
+    .action(async (inputs: string[], options: MergeOptions) => {
       if (options.help || !inputs) {
         createStandardHelp({
           commandName: 'merge',

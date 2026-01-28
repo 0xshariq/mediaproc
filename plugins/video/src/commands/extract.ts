@@ -53,7 +53,7 @@ export function extractCommand(videoCmd: Command): void {
         return;
       }
       const inputPaths = parseInputPaths(input, VIDEO_EXTENSIONS);
-      const outputPathsMap = resolveOutputPaths(inputPaths, options.output, { suffix: '-audio', newExtension: options.format });
+      const outputPathsMap = resolveOutputPaths(inputPaths, options.output, { suffix: '-audio', newExtension: options.formats });
       const outputPaths = Array.from(outputPathsMap.values());
       for (let i = 0; i < inputPaths.length; i++) {
         const inputFile = inputPaths[i];
@@ -67,7 +67,7 @@ export function extractCommand(videoCmd: Command): void {
           if (options.stream) args.push('-map', `0:a:${options.stream}`);
           if (options.start) args.push('-ss', options.start);
           if (options.duration) args.push('-t', options.duration);
-          args.push('-acodec', options.format);
+          args.push('-acodec', options.formats);
           args.push('-b:a', options.bitrate);
           // Audio filters
           const filters: string[] = [];
@@ -128,7 +128,7 @@ export function extractCommand(videoCmd: Command): void {
         return;
       }
       const inputPaths = parseInputPaths(input, VIDEO_EXTENSIONS);
-      const outputPathsMap = resolveOutputPaths(inputPaths, options.output, { suffix: '-frame', newExtension: options.format });
+      const outputPathsMap = resolveOutputPaths(inputPaths, options.output, { suffix: '-frame', newExtension: options.formats });
       const outputPaths = Array.from(outputPathsMap.values());
       for (let i = 0; i < inputPaths.length; i++) {
         const inputFile = inputPaths[i];
@@ -202,7 +202,7 @@ export function extractCommand(videoCmd: Command): void {
         return;
       }
       const inputPaths = parseInputPaths(input, VIDEO_EXTENSIONS);
-      const outputPathsMap = resolveOutputPaths(inputPaths, options.output, { suffix: '-thumbnail', newExtension: options.format });
+      const outputPathsMap = resolveOutputPaths(inputPaths, options.output, { suffix: '-thumbnail', newExtension: options.formats });
       const outputPaths = Array.from(outputPathsMap.values());
       for (let i = 0; i < inputPaths.length; i++) {
         const inputFile = inputPaths[i];

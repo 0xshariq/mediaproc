@@ -10,6 +10,7 @@ import {
 import { parseInputPaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import ora from 'ora';
+import { ResizeOptions } from '../types.js';
 
 export function resizeCommand(videoCmd: Command): void {
   videoCmd
@@ -37,7 +38,7 @@ export function resizeCommand(videoCmd: Command): void {
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('-h, --help', 'Display help for resize command')
-    .action(async (input: string | undefined, options: any) => {
+    .action(async (input: string | undefined, options: ResizeOptions) => {
       // Show help if requested (before input validation)
       if (options.help || !input) {
         createStandardHelp({
@@ -199,7 +200,7 @@ export function resizeCommand(videoCmd: Command): void {
         // Resolve output paths
         const outputPaths = resolveOutputPaths(inputFiles, options.output, {
           suffix: `-${targetWidth}x${targetHeight}`,
-          newExtension: options.format ? `.${options.format}` : undefined
+          newExtension: options.formats ? `.${options.formats}` : undefined
         });
 
         console.log(chalk.cyan.bold(`\n🎬 Resizing ${inputFiles.length} video(s) to ${options.scale}\n`));

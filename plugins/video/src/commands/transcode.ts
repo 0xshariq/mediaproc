@@ -83,7 +83,7 @@ export function transcodeCommand(videoCmd: Command): void {
         console.log();
 
         // Generate output path
-        const format = options.format || 'mp4';
+        const format = options.formats || 'mp4';
         const output = options.output || generateOutputPath(inputPath, 'transcoded', format);
 
         // Map codec to proper ffmpeg names
@@ -116,9 +116,9 @@ export function transcodeCommand(videoCmd: Command): void {
         args.push('-preset', 'medium');
 
         // Output format specific options
-        if (format === 'webm') {
+        if (format.includes('webm')) {
           args.push('-f', 'webm');
-        } else if (format === 'mkv') {
+        } else if (format.includes('mkv')) {
           args.push('-f', 'matroska');
         }
 

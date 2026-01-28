@@ -10,6 +10,7 @@ import {
 } from '../utils/ffmpeg.js';
 import { parseInputPaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
+import { CompressOptions } from '../types.js';
 
 export function compressCommand(videoCmd: Command): void {
   videoCmd
@@ -36,7 +37,7 @@ export function compressCommand(videoCmd: Command): void {
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-h, --help', 'Display help for compress command')
-    .action(async (input: string | undefined, options: any) => {
+    .action(async (input: string | undefined, options: CompressOptions) => {
       // Show help if requested (before input validation)
       if (options.help || !input) {
         createStandardHelp({
@@ -131,7 +132,7 @@ export function compressCommand(videoCmd: Command): void {
         // Resolve output paths
         const outputPaths = resolveOutputPaths(inputFiles, options.output, {
           suffix: '-compressed',
-          newExtension: `.${options.format || 'mp4'}`
+          newExtension: `.${options.formats || 'mp4'}`
         });
 
         // Determine CRF based on quality preset

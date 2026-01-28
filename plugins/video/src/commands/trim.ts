@@ -10,6 +10,7 @@ import {
 } from '../utils/ffmpeg.js';
 import { parseInputPaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
+import { TrimOptions } from '../types.js';
 
 export function trimCommand(videoCmd: Command): void {
   videoCmd
@@ -33,7 +34,7 @@ export function trimCommand(videoCmd: Command): void {
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('-h, --help', 'Display help for trim command')
-    .action(async function (input: string | undefined, options: any) {
+    .action(async function (input: string | undefined, options: TrimOptions) {
       // Show help if requested
       if (options.help || !input) {
         createStandardHelp({
@@ -132,7 +133,7 @@ export function trimCommand(videoCmd: Command): void {
         // Resolve output paths
         const outputPaths = resolveOutputPaths(inputFiles, options.output, {
           suffix: '-trimmed',
-          newExtension: options.format ? `.${options.format}` : undefined
+          newExtension: options.formats ? `.${options.formats}` : undefined
         });
 
         // Process each file
