@@ -11,6 +11,7 @@ import {
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
 import { AUDIO_EXTENSIONS, parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp } from '@mediaproc/core';
 import ora from 'ora';
+import { ExtractOptions } from '../types.js';
 
 export function extractCommand(audioCmd: Command): void {
   audioCmd
@@ -33,7 +34,7 @@ export function extractCommand(audioCmd: Command): void {
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-h, --help', 'Display help for extract command')
-    .action(async (input: string | undefined, options: any) => {
+    .action(async (input: string | undefined, options: ExtractOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'extract',

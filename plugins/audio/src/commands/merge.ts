@@ -6,6 +6,7 @@ import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuratio
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
 import { AUDIO_EXTENSIONS, parseInputPaths, createStandardHelp } from '@mediaproc/core';
 import ora from 'ora';
+import { MergeOptions } from '../types.js';
 
 export function mergeCommand(audioCmd: Command): void {
   audioCmd
@@ -20,7 +21,7 @@ export function mergeCommand(audioCmd: Command): void {
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-h, --help', 'Display help for merge command')
-    .action(async (inputs: string[], options: any) => {
+    .action(async (inputs: string[] | undefined, options: MergeOptions) => {
       if (options.help || !inputs || inputs.length === 0) {
         createStandardHelp({
           commandName: 'merge',

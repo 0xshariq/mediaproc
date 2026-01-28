@@ -5,6 +5,7 @@ import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuratio
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
 import { parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, AUDIO_EXTENSIONS } from '@mediaproc/core';
 import ora from 'ora';
+import { ConvertOptions } from '../types.js';
 
 export function convertCommand(audioCmd: Command): void {
   audioCmd
@@ -28,7 +29,7 @@ export function convertCommand(audioCmd: Command): void {
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('-h, --help', 'Display help for convert command')
-    .action(async (input: string | undefined, options: any) => {
+    .action(async (input: string | undefined, options: ConvertOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'convert',
@@ -83,7 +84,7 @@ export function convertCommand(audioCmd: Command): void {
         const { outputPath } = validatePaths(input, options.output, { allowedExtensions: AUDIO_EXTENSIONS });
         const outputPathsMap = resolveOutputPaths(inputPaths, outputPath, {
           suffix: '-converted',
-          newExtension: `.${options.format}`
+          newExtension: `.${options.formats}`
         });
         const outputPaths = Array.from(outputPathsMap.values());
 

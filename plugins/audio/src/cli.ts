@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { register } from './register.js';
 import { explainPreActionHook, showPluginBranding } from '@mediaproc/core';
+import { trimCommand } from './commands/trim.js';
+import { convertCommand } from './commands/convert.js';
+import { mergeCommand } from './commands/merge.js';
+import { normalizeCommand } from './commands/normalize.js';
+import { extractCommand } from './commands/extract.js';
 
 const program = new Command();
 program
@@ -95,12 +99,19 @@ Professional audio processing powered by FFmpeg/FFprobe. Convert, normalize, tri
 📚 Detailed Help:
   Use 'mediaproc-audio <command> --help' for comprehensive documentation on each command.
   `)
-  .version('1.2.0');
+  .version('1.3.0');
+
+// Register trim command directly (no "audio" prefix in standalone mode)
+convertCommand(program);
+extractCommand(program);
+mergeCommand(program);
+normalizeCommand(program);
+trimCommand(program);
+
 program.hook('preAction', explainPreActionHook);
 program.hook('postAction', () => {
   showPluginBranding('Audio');
 });
-register(program);
 program.parse(process.argv);
 
 if (!process.argv.slice(2).length) {
