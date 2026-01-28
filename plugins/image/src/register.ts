@@ -46,16 +46,13 @@ import { recombCommand } from './commands/recomb.js';
 import { compressCommand } from './commands/compress.js';
 import { infoCommand } from './commands/info.js';
 
-
 export const name = '@mediaproc/image';
-
-export const version = '1.4.0';
+export const version = '1.0.0';
 
 export function register(program: Command): void {
   const imageCmd = program
     .command('image')
-    .description('Image processing commands (powered by Sharp)')
-    .version(version);
+    .description('Image processing commands (powered by Sharp)');
 
   // Transform operations
   resizeCommand(imageCmd);
@@ -67,12 +64,12 @@ export function register(program: Command): void {
   trimCommand(imageCmd);
   extendCommand(imageCmd);
   thumbnailCommand(imageCmd);
-
+  
   // Format operations
   convertCommand(imageCmd);
   optimizeCommand(imageCmd);
   compressCommand(imageCmd);
-
+  
   // Color adjustments
   modulateCommand(imageCmd);
   gammaCommand(imageCmd);
@@ -84,7 +81,7 @@ export function register(program: Command): void {
   recombCommand(imageCmd);
   flattenCommand(imageCmd);
   unflattenCommand(imageCmd);
-
+  
   // Effects and filters
   blurCommand(imageCmd);
   sharpenCommand(imageCmd);
@@ -94,7 +91,7 @@ export function register(program: Command): void {
   thresholdCommand(imageCmd);
   dilateCommand(imageCmd);
   erodeCommand(imageCmd);
-
+  
   // Advanced operations
   compositeCommand(imageCmd);
   extractCommand(imageCmd);
@@ -103,20 +100,20 @@ export function register(program: Command): void {
   claheCommand(imageCmd);
   convolveCommand(imageCmd);
   booleanCommand(imageCmd);
-
+  
   // Smart/AI operations
   pixelateCommand(imageCmd);
   paletteCommand(imageCmd);
   dominantColorCommand(imageCmd);
-
+  
   // Batch operations
   batchCommand(imageCmd);
-
+  
   // Utility operations
   splitCommand(imageCmd);
   mirrorCommand(imageCmd);
   metadataCommand(imageCmd);
-
+  
   // Information
   statsCommand(imageCmd);
   infoCommand(imageCmd);
