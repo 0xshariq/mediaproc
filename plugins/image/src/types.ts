@@ -1,22 +1,22 @@
+export type ImageFormats = 'jpg' |
+  'jpeg' |
+  'png' |
+  'bmp' |
+  'webp' |
+  'tiff' |
+  'tif' |
+  'svg' |
+  'ico' |
+  'heic' |
+  'heif' |
+  'avif'
 export interface ImageOptions {
   input: string;
   output?: string;
   width?: number;
   height?: number;
   quality?: number;
-  format?: '.jpg' |
-  '.jpeg' |
-  '.png' |
-  '.gif' |
-  '.bmp' |
-  '.webp' |
-  '.tiff' |
-  '.tif' |
-  '.svg' |
-  '.ico' |
-  '.heic' |
-  '.heif' |
-  '.avif';
+  format?: ImageFormats;
   fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
   verbose?: boolean;
   dryRun?: boolean;
@@ -33,19 +33,6 @@ export interface ResizeOptions extends ImageOptions {
 }
 
 export interface ConvertOptions extends ImageOptions {
-  formats: '.jpg' |
-  '.jpeg' |
-  '.png' |
-  '.gif' |
-  '.bmp' |
-  '.webp' |
-  '.tiff' |
-  '.tif' |
-  '.svg' |
-  '.ico' |
-  '.heic' |
-  '.heif' |
-  '.avif';
   progressive?: boolean;
   compression?: number;
 }
