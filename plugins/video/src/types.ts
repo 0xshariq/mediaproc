@@ -1,19 +1,19 @@
 
-export type VideoFormats = '.mp4' |
-  '.avi' |
-  '.mkv' |
-  '.mov' |
-  '.webm' |
-  '.flv' |
-  '.wmv' |
-  '.mpg' |
-  '.mpeg' |
-  '.m4v' |
-  '.3gp' |
-  '.f4v' |
-  '.ts' |
-  '.mts' |
-  '.m2ts'
+export type VideoFormats = 'mp4' |
+  'avi' |
+  'mkv' |
+  'mov' |
+  'webm' |
+  'flv' |
+  'wmv' |
+  'mpg' |
+  'mpeg' |
+  'm4v' |
+  '3gp' |
+  'f4v' |
+  'ts' |
+  'mts' |
+  'm2ts'
 
 export interface VideoOptions {
   input: string;
@@ -71,7 +71,6 @@ export interface ResizeOptions extends VideoOptions {
   width: number;
   height: number;
   maintainAspectRatio?: boolean;
-  scale: string;
 }
 
 export interface MergeOptions extends VideoOptions {
