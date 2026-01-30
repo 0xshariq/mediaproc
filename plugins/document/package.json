@@ -5,16 +5,13 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": {
-    "mediaproc-document": "./bin/cli.js"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist", "bin"],
+  "files": ["dist"],
   "keywords": ["mediaproc", "pdf", "document", "ocr", "ghostscript"],
   "author": "Sharique Chaudhary",
   "license": "ISC",

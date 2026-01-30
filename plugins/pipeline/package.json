@@ -5,7 +5,6 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": { "mediaproc-pipeline": "./bin/cli.js" },
   "keywords": ["pipeline", "workflow", "automation"],
   "scripts": { "build": "tsc", "dev": "tsx src/cli.ts" },
   "dependencies": {
