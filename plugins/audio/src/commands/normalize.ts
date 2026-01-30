@@ -80,19 +80,40 @@ export function normalizeCommand(audioCmd: Command): void {
 
           const args = ['-i', inputFile, '-y'];
 
+          let filterApplied = false;
           if (options.method === 'loudnorm') {
-            // EBU R128 loudness normalization
             args.push(
               '-af',
               `loudnorm=I=${options.target}:TP=${options.maxLevel}:LRA=11:print_format=summary`
             );
+            filterApplied = true;
           } else if (options.method === 'peak') {
-            // Simple peak normalization
             args.push('-af', 'volume=0dB');
+            filterApplied = true;
           }
 
-          // Preserve original codec if no format specified
-          if (!options.format) {
+          // Determine output format and codec
+          let outFormat = options.format;
+          if (!outFormat) {
+            const extMatch = outputFile.match(/\.([a-zA-Z0-9]+)$/);
+            outFormat = extMatch ? extMatch[1].toLowerCase() : '';
+          }
+
+          // If filter is applied, do NOT use streamcopy, set codec
+          if (filterApplied) {
+            if (outFormat === 'mp3') {
+              args.push('-c:a', 'libmp3lame');
+            } else if (outFormat === 'aac' || outFormat === 'm4a') {
+              args.push('-c:a', 'aac');
+            } else if (outFormat === 'flac') {
+              args.push('-c:a', 'flac');
+            } else if (outFormat === 'wav') {
+              args.push('-c:a', 'pcm_s16le');
+            } else {
+              args.push('-c:a', 'libmp3lame'); // Default to mp3 codec for safety
+            }
+          } else {
+            // No filter: safe to streamcopy
             args.push('-c:a', 'copy');
           }
 
