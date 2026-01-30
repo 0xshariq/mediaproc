@@ -12,11 +12,16 @@ export function mergeCommand(audioCmd: Command): void {
   audioCmd
     .command('merge [inputs...]')
     .description('Merge multiple audio files into one')
-    .option('-o, --output <path>', 'Output file path', 'merged.mp3')
+    .option('-o, --output <path>', 'Output file path (must include extension)', 'merged.mp3')
     .option('--format <format>', 'Output format: mp3, aac, wav, flac, ogg', 'mp3')
+    .option('--codec <codec>', 'Specify output audio codec (overrides default for format)')
     .option('--bitrate <bitrate>', 'Output bitrate (e.g., 192k, 320k)', '192k')
     .option('--crossfade <seconds>', 'Crossfade duration between files (seconds)', parseFloat)
     .option('--normalize', 'Normalize audio levels before merging')
+    .option('--fade-in <seconds>', 'Add fade-in effect (seconds)', parseFloat)
+    .option('--fade-out <seconds>', 'Add fade-out effect (seconds)', parseFloat)
+    .option('--remove-silence', 'Remove silence between tracks')
+    .option('--metadata <key=value>', 'Set custom metadata (repeatable)', (val, acc = []) => { acc.push(val); return acc; }, [])
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
@@ -64,6 +69,11 @@ export function mergeCommand(audioCmd: Command): void {
           console.error(chalk.red('\n✗ Error: At least 2 audio files required for merging'));
           process.exit(1);
         }
+        // Require output file with extension
+        if (!options.output || !/\.[a-zA-Z0-9]+$/.test(options.output)) {
+          console.error(chalk.red('\n✗ Error: Output file must include a valid extension (e.g., .mp3, .wav, .flac)'));
+          process.exit(1);
+        }
 
         console.log(chalk.blue(`\n🔗 Merging ${inputs.length} audio files...`));
 
@@ -100,9 +110,23 @@ export function mergeCommand(audioCmd: Command): void {
 
         const args = ['-f', 'concat', '-safe', '0', '-i', concatFile, '-y'];
 
-        // Add crossfade if specified
+        // Output format/codec selection
+        const format = options.format || (options.output.match(/\.([a-zA-Z0-9]+)$/)?.[1].toLowerCase()) || 'mp3';
+        const codecMap = {
+          mp3: 'libmp3lame',
+          aac: 'aac',
+          flac: 'flac',
+          wav: 'pcm_s16le',
+          ogg: 'libvorbis',
+        };
+        let codec = options.codec || codecMap[format] || 'libmp3lame';
+        if (codec) args.push('-c:a', codec);
+        if (options.bitrate) args.push('-b:a', options.bitrate);
+
+        // Audio filter chain
+        let filterChain = '';
+        // Crossfade
         if (options.crossfade) {
-          // Build complex filter for crossfade
           const filterParts: string[] = [];
           for (let i = 0; i < validatedInputs.length - 1; i++) {
             if (i === 0) {
@@ -114,17 +138,36 @@ export function mergeCommand(audioCmd: Command): void {
           args.push('-filter_complex', filterParts.join(';'));
           args.push('-map', `[a0${validatedInputs.length - 1}]`);
         }
-
-        // Normalization
+        // Normalization (if not crossfade)
         if (options.normalize && !options.crossfade) {
-          args.push('-af', 'loudnorm=I=-16:TP=-1.5:LRA=11');
+          filterChain += (filterChain ? ',' : '') + 'loudnorm=I=-16:TP=-1.5:LRA=11';
         }
-
-        // Output bitrate
-          if (options.bitrate) args.push('-b:a', options.bitrate);
-          if (options.output) {
-            args.push(options.output);
+        // Fade in/out
+        if (options.fadeIn) {
+          filterChain += (filterChain ? ',' : '') + `afade=t=in:st=0:d=${options.fadeIn}`;
+        }
+        if (options.fadeOut && totalDuration) {
+          const fadeStart = totalDuration - options.fadeOut;
+          filterChain += (filterChain ? ',' : '') + `afade=t=out:st=${fadeStart}:d=${options.fadeOut}`;
+        }
+        // Silence removal
+        if (options.removeSilence) {
+          filterChain += (filterChain ? ',' : '') + 'silenceremove=start_periods=1:start_silence=0.1:start_threshold=-50dB';
+        }
+        if (filterChain && !options.crossfade) {
+          args.push('-af', filterChain);
+        }
+        // Metadata
+        if (options.metadata && Array.isArray(options.metadata)) {
+          for (const entry of options.metadata) {
+            const [key, value] = entry.split('=');
+            if (key && value) args.push('-metadata', `${key}=${value}`);
           }
+        }
+        // Output file
+        if (options.output) {
+          args.push(options.output);
+        }
 
         if (options.dryRun) {
           console.log(chalk.yellow('\n[DRY RUN] Would execute:'));
