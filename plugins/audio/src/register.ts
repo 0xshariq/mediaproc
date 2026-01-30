@@ -16,7 +16,7 @@ const pkgUrl = path.join(__dirname, '../package.json');
 let currentVersion = 'unknown';
 try {
   const pkg = await import(pkgUrl, { assert: { type: 'json' } });
-  currentVersion = pkg.default.version;
+  currentVersion = pkg.default.version as string;
 } catch (e) {
   // fallback or log error if needed
 }
