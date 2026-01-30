@@ -45,9 +45,23 @@ import { linearCommand } from './commands/linear.js';
 import { recombCommand } from './commands/recomb.js';
 import { compressCommand } from './commands/compress.js';
 import { infoCommand } from './commands/info.js';
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const pkgUrl = path.join(__dirname, '../package.json');
+let currentVersion = 'unknown';
+try {
+  const pkg = await import(pkgUrl, { assert: { type: 'json' } });
+  currentVersion = pkg.default.version as string;
+} catch (e) {
+  // fallback or log error if needed
+}
+
 
 export const name = '@mediaproc/image';
-export const version = '1.0.0';
+export const version = currentVersion;
 
 export function register(program: Command): void {
   const imageCmd = program
@@ -64,12 +78,12 @@ export function register(program: Command): void {
   trimCommand(imageCmd);
   extendCommand(imageCmd);
   thumbnailCommand(imageCmd);
-  
+
   // Format operations
   convertCommand(imageCmd);
   optimizeCommand(imageCmd);
   compressCommand(imageCmd);
-  
+
   // Color adjustments
   modulateCommand(imageCmd);
   gammaCommand(imageCmd);
@@ -81,7 +95,7 @@ export function register(program: Command): void {
   recombCommand(imageCmd);
   flattenCommand(imageCmd);
   unflattenCommand(imageCmd);
-  
+
   // Effects and filters
   blurCommand(imageCmd);
   sharpenCommand(imageCmd);
@@ -91,7 +105,7 @@ export function register(program: Command): void {
   thresholdCommand(imageCmd);
   dilateCommand(imageCmd);
   erodeCommand(imageCmd);
-  
+
   // Advanced operations
   compositeCommand(imageCmd);
   extractCommand(imageCmd);
@@ -100,20 +114,20 @@ export function register(program: Command): void {
   claheCommand(imageCmd);
   convolveCommand(imageCmd);
   booleanCommand(imageCmd);
-  
+
   // Smart/AI operations
   pixelateCommand(imageCmd);
   paletteCommand(imageCmd);
   dominantColorCommand(imageCmd);
-  
+
   // Batch operations
   batchCommand(imageCmd);
-  
+
   // Utility operations
   splitCommand(imageCmd);
   mirrorCommand(imageCmd);
   metadataCommand(imageCmd);
-  
+
   // Information
   statsCommand(imageCmd);
   infoCommand(imageCmd);

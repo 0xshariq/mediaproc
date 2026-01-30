@@ -47,6 +47,7 @@ import { recombCommand } from './commands/recomb.js';
 import { compressCommand } from './commands/compress.js';
 import { infoCommand } from './commands/info.js';
 import { explainPreActionHook, showPluginBranding } from '@mediaproc/core';
+import { version } from './register.js';
 
 
 const program = new Command();
@@ -79,7 +80,7 @@ Professional image processing powered by Sharp. Transform, optimize, and enhance
 
 📚 Use 'mediaproc-image <command> --help' for detailed command documentation.
   `)
-  .version('1.4.0');
+  .version(version);
 
 // Register all commands directly (no "image" prefix in standalone mode)
 resizeCommand(program);
