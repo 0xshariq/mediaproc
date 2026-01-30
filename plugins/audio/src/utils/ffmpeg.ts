@@ -1,4 +1,6 @@
+
 import { spawn } from 'child_process';
+import { logFFmpegOutput } from './ffmpeg-output.js';
 
 export interface AudioMetadata {
   duration: number;
@@ -21,19 +23,20 @@ export async function runFFmpeg(
   return new Promise((resolve, reject) => {
     const ffmpeg = spawn('ffmpeg', args);
     let stderr = '';
+    let allOutput = '';
 
     ffmpeg.stderr.on('data', (data) => {
       const output = data.toString();
       stderr += output;
-      
+      allOutput += output;
       if (onOutput) {
         output.split('\n').forEach((line: string) => {
           if (line.trim()) {
             onOutput(line);
           }
         });
-      } else if (verbose) {
-        process.stderr.write(data);
+      } else {
+        logFFmpegOutput(output, verbose);
       }
     });
 
@@ -41,6 +44,8 @@ export async function runFFmpeg(
       if (code === 0) {
         resolve();
       } else {
+        // Print the last error line for user clarity
+        logFFmpegOutput(stderr, true);
         reject(new Error(`FFmpeg failed with code ${code}\n${stderr}`));
       }
     });

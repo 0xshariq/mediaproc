@@ -82,9 +82,10 @@ export function convertCommand(audioCmd: Command): void {
         // Parse and validate input/output paths
         const inputPaths = parseInputPaths(input, AUDIO_EXTENSIONS);
         const { outputPath } = validatePaths(input, options.output, { allowedExtensions: AUDIO_EXTENSIONS });
+        const outputFormat = options.format || 'mp3';
         const outputPathsMap = resolveOutputPaths(inputPaths, outputPath, {
           suffix: '-converted',
-          newExtension: `.${options.formats}`
+          newExtension: `.${outputFormat}`
         });
         const outputPaths = Array.from(outputPathsMap.values());
 
@@ -96,7 +97,7 @@ export function convertCommand(audioCmd: Command): void {
           lossless: 'lossless'
         };
 
-        const targetBitrate = qualityMap[options.quality] || options.bitrate;
+        const targetBitrate = (options.quality && qualityMap[options.quality]) || options.bitrate || '192k';
 
         // Process each file
         for (let i = 0; i < inputPaths.length; i++) {
@@ -134,7 +135,7 @@ export function convertCommand(audioCmd: Command): void {
             ogg: 'libvorbis',
             opus: 'libopus',
           };
-          const codec = options.codec || codecMap[options.format];
+          const codec = options.codec || (options.format && codecMap[options.format]);
           if (codec) args.push('-c:a', codec);
           if (targetBitrate !== 'lossless') args.push('-b:a', targetBitrate);
           if (options.sampleRate) args.push('-ar', options.sampleRate.toString());
@@ -175,9 +176,9 @@ export function convertCommand(audioCmd: Command): void {
           try {
             await runFFmpeg(
               args,
-              options.verbose,
+              options.verbose ?? false,
               (line: string) => {
-                if (shouldDisplayLine(line, options.verbose)) {
+                if (shouldDisplayLine(line, options.verbose ?? false)) {
                   console.log(styleFFmpegOutput(line));
                 }
               }

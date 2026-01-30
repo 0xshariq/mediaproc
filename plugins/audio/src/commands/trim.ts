@@ -82,6 +82,7 @@ export function trimCommand(audioCmd: Command): void {
         const outputPaths = Array.from(outputPathsMap.values());
 
         for (let i = 0; i < inputPaths.length; i++) {
+
           const inputFile = inputPaths[i];
           const outputFile = outputPaths[i];
 
@@ -90,9 +91,17 @@ export function trimCommand(audioCmd: Command): void {
           const metadata = await getAudioMetadata(inputFile);
           const inputStat = await stat(inputFile);
 
+          if (!options.start) throw new Error('Start time is required for trim');
           const startTime = parseTime(options.start);
-          const endTime = options.end ? parseTime(options.end) : startTime + parseTime(options.duration);
-          const duration = endTime - startTime;
+          let duration = 0;
+          let endTime = startTime;
+          if (options.end) {
+            endTime = parseTime(options.end);
+            duration = endTime - startTime;
+          } else if (options.duration) {
+            duration = parseTime(options.duration);
+            endTime = startTime + duration;
+          }
 
           console.log(chalk.dim(`Duration: ${formatDuration(metadata.duration)} • ` +
             `Sample Rate: ${metadata.sampleRate} Hz`));
@@ -155,9 +164,9 @@ export function trimCommand(audioCmd: Command): void {
           try {
             await runFFmpeg(
               args,
-              options.verbose,
+              options.verbose ?? false,
               (line: string) => {
-                if (shouldDisplayLine(line, options.verbose)) {
+                if (shouldDisplayLine(line, options.verbose ?? false)) {
                   console.log(styleFFmpegOutput(line));
                 }
               }
@@ -172,10 +181,7 @@ export function trimCommand(audioCmd: Command): void {
             throw error;
           }
         }
-
-        if (inputPaths.length > 1) {
-          console.log(chalk.green(`\n✓ Trimmed ${inputPaths.length} files successfully`));
-        }
+        console.log(chalk.green(`\n✓ Trimmed ${inputPaths.length} files successfully`));
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
         process.exit(1);

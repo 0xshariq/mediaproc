@@ -86,7 +86,7 @@ export function extractCommand(audioCmd: Command): void {
         const { outputPath } = validatePaths(input, options.output, { allowedExtensions: AUDIO_EXTENSIONS });
         const outputPathsMap = resolveOutputPaths(inputPaths, outputPath, {
           suffix: '-audio',
-          newExtension: `.${options.format}`
+          newExtension: `.${options.format || 'mp3'}`
         });
         const outputPaths = Array.from(outputPathsMap.values());
 
@@ -98,7 +98,7 @@ export function extractCommand(audioCmd: Command): void {
           lossless: 'lossless'
         };
 
-        const targetBitrate = qualityMap[options.quality] || options.bitrate;
+        const targetBitrate = (options.quality && qualityMap[options.quality]) || options.bitrate || '192k';
 
         for (let i = 0; i < inputPaths.length; i++) {
           const inputFile = inputPaths[i];
@@ -136,7 +136,7 @@ export function extractCommand(audioCmd: Command): void {
             ogg: 'libvorbis',
             opus: 'libopus',
           };
-          const codec = codecMap[options.format];
+          const codec = options.format && codecMap[options.format];
           if (codec) args.push('-c:a', codec);
           if (targetBitrate !== 'lossless') args.push('-b:a', targetBitrate);
           if (options.sampleRate) args.push('-ar', options.sampleRate.toString());
@@ -174,9 +174,9 @@ export function extractCommand(audioCmd: Command): void {
           try {
             await runFFmpeg(
               args,
-              options.verbose,
+              options.verbose ?? false,
               (line: string) => {
-                if (shouldDisplayLine(line, options.verbose)) {
+                if (shouldDisplayLine(line, options.verbose ?? false)) {
                   console.log(styleFFmpegOutput(line));
                 }
               }
@@ -185,7 +185,8 @@ export function extractCommand(audioCmd: Command): void {
 
             spinner.succeed(chalk.green('Extraction complete'));
             console.log(chalk.green(`✓ Output: ${outputFile}`));
-            console.log(chalk.dim(`Format: ${options.format.toUpperCase()} • ` +
+            const fmt = options.format ? options.format.toUpperCase() : 'MP3';
+            console.log(chalk.dim(`Format: ${fmt} • ` +
               `Bitrate: ${targetBitrate} • ` +
               `Size: ${formatFileSize(outputStat.size)}`));
           } catch (error) {

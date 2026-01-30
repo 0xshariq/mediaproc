@@ -121,9 +121,10 @@ export function mergeCommand(audioCmd: Command): void {
         }
 
         // Output bitrate
-        args.push('-b:a', options.bitrate);
-
-        args.push(options.output);
+          if (options.bitrate) args.push('-b:a', options.bitrate);
+          if (options.output) {
+            args.push(options.output);
+          }
 
         if (options.dryRun) {
           console.log(chalk.yellow('\n[DRY RUN] Would execute:'));
@@ -139,19 +140,26 @@ export function mergeCommand(audioCmd: Command): void {
             args,
             options.verbose,
             (line: string) => {
-              if (shouldDisplayLine(line, options.verbose)) {
-                console.log(styleFFmpegOutput(line));
-              }
+                if (shouldDisplayLine(line, options.verbose ?? false)) {
+                  console.log(styleFFmpegOutput(line));
+                }
             }
           );
-          const outputStat = await stat(options.output);
+          let outputStat;
+          if (options.output) {
+            outputStat = await stat(options.output);
+          }
 
           // Clean up concat file
           await unlink(concatFile);
 
           spinner.succeed(chalk.green('Merge complete'));
-          console.log(chalk.green(`✓ Output: ${options.output}`));
-          console.log(chalk.dim(`Duration: ${formatDuration(totalDuration)} • Size: ${formatFileSize(outputStat.size)}`));
+          if (options.output) {
+            console.log(chalk.green(`✓ Output: ${options.output}`));
+            if (outputStat) {
+              console.log(chalk.dim(`Duration: ${formatDuration(totalDuration)} • Size: ${formatFileSize(outputStat.size)}`));
+            }
+          }
         } catch (error) {
           await unlink(concatFile).catch(() => { });
           spinner.fail(chalk.red('Merge failed'));

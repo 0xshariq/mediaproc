@@ -109,9 +109,9 @@ export function normalizeCommand(audioCmd: Command): void {
           try {
             await runFFmpeg(
               args,
-              options.verbose,
+              options.verbose ?? false,
               (line: string) => {
-                if (shouldDisplayLine(line, options.verbose)) {
+                if (shouldDisplayLine(line, options.verbose ?? false)) {
                   console.log(styleFFmpegOutput(line));
                 }
               }

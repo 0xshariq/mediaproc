@@ -6,6 +6,7 @@ import { convertCommand } from './commands/convert.js';
 import { mergeCommand } from './commands/merge.js';
 import { normalizeCommand } from './commands/normalize.js';
 import { extractCommand } from './commands/extract.js';
+import { version } from './register.js';
 
 const program = new Command();
 program
@@ -99,7 +100,7 @@ Professional audio processing powered by FFmpeg/FFprobe. Convert, normalize, tri
 📚 Detailed Help:
   Use 'mediaproc-audio <command> --help' for comprehensive documentation on each command.
   `)
-  .version('1.3.0');
+  .version(version);
 
 // Register trim command directly (no "audio" prefix in standalone mode)
 convertCommand(program);
