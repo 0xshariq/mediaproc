@@ -9,7 +9,7 @@ import {
   formatDuration,
 } from '../utils/ffmpeg.js';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
-import { AUDIO_EXTENSIONS, parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp } from '@mediaproc/core';
+import { AUDIO_EXTENSIONS, validatePaths, resolveOutputPaths, createStandardHelp } from '@mediaproc/core';
 import ora from 'ora';
 import { ExtractOptions } from '../types.js';
 
@@ -81,10 +81,13 @@ export function extractCommand(audioCmd: Command): void {
           process.exit(1);
         }
 
-        // Accept video formats
-        const inputPaths = parseInputPaths(input, AUDIO_EXTENSIONS);
-        const { outputPath } = validatePaths(input, options.output, { allowedExtensions: AUDIO_EXTENSIONS });
-        const outputPathsMap = resolveOutputPaths(inputPaths, outputPath, {
+        // Use pathValidator for all input/output logic
+        const { inputFiles, outputPath, errors } = validatePaths(input, options.output, { allowedExtensions: AUDIO_EXTENSIONS });
+        if (errors.length > 0) {
+          errors.forEach(e => console.error(chalk.red(e)));
+          process.exit(1);
+        }
+        const outputPathsMap = resolveOutputPaths(inputFiles, outputPath, {
           suffix: '-audio',
           newExtension: `.${options.format || 'mp3'}`
         });
@@ -100,8 +103,8 @@ export function extractCommand(audioCmd: Command): void {
 
         const targetBitrate = (options.quality && qualityMap[options.quality]) || options.bitrate || '192k';
 
-        for (let i = 0; i < inputPaths.length; i++) {
-          const inputFile = inputPaths[i];
+        for (let i = 0; i < inputFiles.length; i++) {
+          const inputFile = inputFiles[i];
           const outputFile = outputPaths[i];
 
           console.log(chalk.blue(`\n🎵 Extracting audio from: ${inputFile}`));
@@ -213,8 +216,8 @@ export function extractCommand(audioCmd: Command): void {
           }
         }
 
-        if (inputPaths.length > 1) {
-          console.log(chalk.green(`\n✓ Extracted audio from ${inputPaths.length} videos successfully`));
+        if (inputFiles.length > 1) {
+          console.log(chalk.green(`\n✓ Extracted audio from ${inputFiles.length} videos successfully`));
         }
       } catch (error) {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
