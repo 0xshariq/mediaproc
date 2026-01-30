@@ -130,13 +130,16 @@ export function convertCommand(audioCmd: Command): void {
 
           // Codec selection
           const codecMap: Record<string, string> = {
-            mp3: 'libmp3lame',
-            aac: 'aac',
-            m4a: 'aac',
-            flac: 'flac',
-            wav: 'pcm_s16le',
-            ogg: 'libvorbis',
-            opus: 'libopus',
+            mp3: 'libmp3lame',   // MP3 encoder
+            aac: 'aac',          // Native AAC encoder
+            m4a: 'aac',          // M4A is a container, usually AAC inside
+            flac: 'flac',         // FLAC lossless codec
+            wav: 'pcm_s16le',    // Standard uncompressed WAV PCM
+            ogg: 'libvorbis',    // OGG is a container, Vorbis is most common
+            opus: 'libopus',      // Opus codec (often in .opus or .ogg)
+            wma: 'wmav2',        // Windows Media Audio v2
+            ape: 'ape',          // Monkey’s Audio (lossless)
+            alac: 'alac'
           };
           const codec = options.codec || (options.format && codecMap[options.format]);
           if (codec) args.push('-c:a', codec);
