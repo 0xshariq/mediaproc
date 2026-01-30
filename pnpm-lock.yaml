@@ -18,8 +18,8 @@ importers:
         specifier: ^0.61.0
         version: 0.61.0
       '@mediaproc/core':
-        specifier: 1.10.0
-        version: 1.10.0
+        specifier: 1.10.1
+        version: 1.10.1
       boxen:
         specifier: ^8.0.1
         version: 8.0.1
@@ -86,7 +86,7 @@ importers:
         version: 0.61.0
       '@mediaproc/core':
         specifier: latest
-        version: 1.10.0
+        version: 1.10.1
       boxen:
         specifier: ^8.0.1
         version: 8.0.1
@@ -669,8 +669,8 @@ packages:
   '@lottiefiles/dotlottie-web@0.61.0':
     resolution: {integrity: sha512-1QwcDchh/TXTvP9zXUHA5oJOdhEdUrn6U7gAiQ1AXEUrcK6PTU6v5D3byP76BK56fQjoY2WQ2A4pYDCCvoVRqw==}
 
-  '@mediaproc/core@1.10.0':
-    resolution: {integrity: sha512-YMBIGJXnW+SU/bZ9FK5uQ+GZG5QZIuR8wW7/UGf+FnhhtLFpuS1NCaXhOWd8i7RcKkOatkphbJm4WMaf95V5+w==}
+  '@mediaproc/core@1.10.1':
+    resolution: {integrity: sha512-CCsljdAteJtPMMu60y1Mpn2ruR+HGlbWPV+e5MfC2m9m4nD/TflLbqxZSLpkwbEsXIgKk5mLkFJLB6Zldu3+fA==}
 
   '@mediaproc/core@1.6.1':
     resolution: {integrity: sha512-hEplpfUC2LwNcxy+FJht8qh0C2aEThu5jfUnIkfSPACFIzs+e+aiTOZT1xXx9hMtP0NFBGOvgkh0xMQL0KLt8A==}
@@ -2214,7 +2214,7 @@ snapshots:
 
   '@lottiefiles/dotlottie-web@0.61.0': {}
 
-  '@mediaproc/core@1.10.0': {}
+  '@mediaproc/core@1.10.1': {}
 
   '@mediaproc/core@1.6.1':
     dependencies:
