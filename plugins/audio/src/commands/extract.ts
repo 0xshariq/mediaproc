@@ -22,7 +22,7 @@ export function extractCommand(audioCmd: Command): void {
     .option('-b, --bitrate <bitrate>', 'Audio bitrate (e.g., 128k, 192k, 320k)', '192k')
     .option('-q, --quality <quality>', 'Quality preset: low, medium, high, lossless', 'medium')
     .option('--sample-rate <rate>', 'Sample rate in Hz (e.g., 44100, 48000)', parseInt)
-    .option('--channels <channels>', 'Number of channels: 1 (mono), 2 (stereo)', parseInt)
+    .option('--channels <channels>', 'Number of channels in output. Most formats: 1 (mono), 2 (stereo). For WAV/FLAC/AAC/Opus: 1, 2, 4, 6, 8 (if input supports). MP3/OGG: max 2. If unsupported, will downmix to stereo.', parseInt)
     .option('--normalize', 'Normalize audio levels (EBU R128 loudness normalization)')
     .option('--volume <db>', 'Adjust output volume in dB (e.g., -3 for -3dB)')
     .option('--fade-in <seconds>', 'Add fade-in effect (seconds)', parseFloat)
@@ -51,7 +51,7 @@ export function extractCommand(audioCmd: Command): void {
             { flag: '-b, --bitrate <bitrate>', description: 'Audio bitrate: 128k, 192k, 256k, 320k (default: 192k)' },
             { flag: '-q, --quality <quality>', description: 'Quality preset: low (96k), medium (192k), high (320k), lossless' },
             { flag: '--sample-rate <rate>', description: 'Sample rate: 44100 (CD), 48000 (studio), 96000 (Hi-Res)' },
-            { flag: '--channels <channels>', description: 'Audio channels: 1 (mono), 2 (stereo)' },
+            { flag: '--channels <channels>', description: 'Number of channels in output. Most formats: 1 (mono), 2 (stereo). For WAV/FLAC/AAC/Opus: 1, 2, 4, 6, 8 (if input supports). MP3/OGG: max 2. If unsupported, will downmix to stereo.' },
             { flag: '--normalize', description: 'Normalize audio levels (EBU R128 loudness normalization)' },
             { flag: '--volume <db>', description: 'Adjust output volume in dB (e.g., -3 for -3dB)' },
             { flag: '--fade-in <seconds>', description: 'Add fade-in effect (seconds)' },
@@ -135,12 +135,16 @@ export function extractCommand(audioCmd: Command): void {
 
           // Codec selection and channel handling
           const codecMap: Record<string, string> = {
-            mp3: 'libmp3lame',
-            aac: 'aac',
-            flac: 'flac',
-            wav: 'pcm_s16le',
-            ogg: 'libvorbis',
-            opus: 'libopus',
+            mp3: 'libmp3lame',   // MP3 encoder
+            aac: 'aac',          // Native AAC encoder
+            m4a: 'aac',          // M4A is a container, usually AAC inside
+            flac: 'flac',         // FLAC lossless codec
+            wav: 'pcm_s16le',    // Standard uncompressed WAV PCM
+            ogg: 'libvorbis',    // OGG is a container, Vorbis is most common
+            opus: 'libopus',      // Opus codec (often in .opus or .ogg)
+            wma: 'wmav2',        // Windows Media Audio v2
+            ape: 'ape',          // Monkey’s Audio (lossless)
+            alac: 'alac'
           };
           const codec = options.format && codecMap[options.format];
           if (codec) args.push('-c:a', codec);

@@ -4,7 +4,7 @@ import { stat, writeFile, unlink } from 'fs/promises';
 import { join, dirname } from 'path';
 import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuration } from '../utils/ffmpeg.js';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
-import { AUDIO_EXTENSIONS, validatePaths, createStandardHelp } from '@mediaproc/core';
+import { AUDIO_EXTENSIONS, validatePaths, createStandardHelp, resolveOutputPaths } from '@mediaproc/core';
 import ora from 'ora';
 import { MergeOptions } from '../types.js';
 
@@ -12,7 +12,7 @@ export function mergeCommand(audioCmd: Command): void {
   audioCmd
     .command('merge [inputs...]')
     .description('Merge multiple audio files into one')
-    .option('-o, --output <path>', 'Output file path (must include extension)', 'merged.mp3')
+    .option('-o, --output <path>', 'Output file path (must include extension)')
     .option('--format <format>', 'Output format: mp3, aac, wav, flac, ogg', 'mp3')
     .option('--codec <codec>', 'Specify output audio codec (overrides default for format)')
     .option('--bitrate <bitrate>', 'Output bitrate (e.g., 192k, 320k)', '192k')
@@ -69,27 +69,15 @@ export function mergeCommand(audioCmd: Command): void {
           console.error(chalk.red('\n✗ Error: At least 2 audio files required for merging'));
           process.exit(1);
         }
-        // Require output file with extension and not a directory
-        if (!options.output || !/\.[a-zA-Z0-9]+$/.test(options.output)) {
-          console.error(chalk.red('\n✗ Error: Output file must include a valid extension (e.g., .mp3, .wav, .flac) and not be a directory.'));
-          process.exit(1);
-        }
-        // Defensive: check if outputPath is a directory (should not be, but extra guard)
-        try {
-          const outStat = await stat(options.output);
-          if (outStat.isDirectory()) {
-            console.error(chalk.red('\n✗ Error: Output path must be a file, not a directory.'));
-            process.exit(1);
-          }
-        } catch (e) {
-          // If stat fails, assume it's a new file (ok)
+
+        // Provide default output file name if not provided
+        let outputPathArg = options.output;
+        if (!outputPathArg) {
+          outputPathArg = 'merged.mp3';
         }
 
-        console.log(chalk.blue(`\n🔗 Merging ${inputs.length} audio files...`));
-
-        // Validate all input files
-        // Use pathValidator for all input/output logic
-        const { inputFiles, outputPath, errors } = validatePaths(inputs.join(','), options.output, { allowedExtensions: AUDIO_EXTENSIONS });
+        // Use pathValidator for all input/output validation
+        const { inputFiles, outputPath, errors } = validatePaths(inputs.join(','), outputPathArg, { allowedExtensions: AUDIO_EXTENSIONS });
         if (errors.length > 0) {
           errors.forEach(e => console.error(chalk.red(e)));
           process.exit(1);
@@ -98,7 +86,18 @@ export function mergeCommand(audioCmd: Command): void {
           console.error(chalk.red('\n✗ Error: Not enough valid audio files found'));
           process.exit(1);
         }
-        // Show input files
+
+        // Always use resolveOutputPaths to generate output file(s)
+        const outputFormat = options.format || 'mp3';
+        const outputPathsMap = resolveOutputPaths(inputFiles, outputPath, {
+          suffix: '-merged',
+          newExtension: `.${outputFormat}`
+        });
+        const outputFiles = Array.from(outputPathsMap.values());
+
+        console.log(chalk.blue(`\n🔗 Merging ${inputFiles.length} audio files...`));
+
+        // Show input files and collect extensions
         let totalDuration = 0;
         for (const inputFile of inputFiles) {
           const metadata = await getAudioMetadata(inputFile);
@@ -106,6 +105,7 @@ export function mergeCommand(audioCmd: Command): void {
           totalDuration += metadata.duration;
         }
         console.log(chalk.dim(`\nTotal duration: ${formatDuration(totalDuration)}`));
+
         // Create concat file list
         const concatFile = join(dirname(inputFiles[0]), '.concat-list.txt');
         const concatContent = inputFiles.map(f => `file '${f}'`).join('\n');
@@ -113,8 +113,7 @@ export function mergeCommand(audioCmd: Command): void {
 
         const args = ['-f', 'concat', '-safe', '0', '-i', concatFile, '-y'];
 
-        // Output format/codec selection
-        const format = options.format || (outputPath && outputPath.match(/\.([a-zA-Z0-9]+)$/)?.[1].toLowerCase()) || 'mp3';
+        // Output codec selection
         const codecMap: Record<string, string> = {
           mp3: 'libmp3lame',
           aac: 'aac',
@@ -122,7 +121,7 @@ export function mergeCommand(audioCmd: Command): void {
           wav: 'pcm_s16le',
           ogg: 'libvorbis',
         };
-        let codec = options.codec || codecMap[format as keyof typeof codecMap] || 'libmp3lame';
+        let codec = options.codec || codecMap[outputFormat as keyof typeof codecMap] || 'libmp3lame';
         if (codec) args.push('-c:a', codec);
         if (options.bitrate) args.push('-b:a', options.bitrate);
 
@@ -167,10 +166,12 @@ export function mergeCommand(audioCmd: Command): void {
             if (key && value) args.push('-metadata', `${key}=${value}`);
           }
         }
-        // Output file
-        if (outputPath) {
-          args.push(outputPath);
+        // Output file (merge always produces a single output file)
+        if (!outputFiles[0]) {
+          console.error(chalk.red('\n✗ Error: Could not determine output file path.'));
+          process.exit(1);
         }
+        args.push(outputFiles[0]);
 
         if (options.dryRun) {
           console.log(chalk.yellow('\n[DRY RUN] Would execute:'));
@@ -192,16 +193,16 @@ export function mergeCommand(audioCmd: Command): void {
             }
           );
           let outputStat;
-          if (outputPath) {
-            outputStat = await stat(outputPath);
+          if (outputFiles[0]) {
+            outputStat = await stat(outputFiles[0]);
           }
 
           // Clean up concat file
           await unlink(concatFile);
 
           spinner.succeed(chalk.green('Merge complete'));
-          if (outputPath) {
-            console.log(chalk.green(`✓ Output: ${outputPath}`));
+          if (outputFiles[0]) {
+            console.log(chalk.green(`✓ Output: ${outputFiles[0]}`));
             if (outputStat) {
               console.log(chalk.dim(`Duration: ${formatDuration(totalDuration)} • Size: ${formatFileSize(outputStat.size)}`));
             }

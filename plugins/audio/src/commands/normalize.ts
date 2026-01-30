@@ -5,7 +5,7 @@ import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuratio
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
 import { AUDIO_EXTENSIONS, validatePaths, resolveOutputPaths, createStandardHelp } from '@mediaproc/core';
 import ora from 'ora';
-import { NormalizeOptions } from '../types.js';
+import { AudioFormats, NormalizeOptions } from '../types.js';
 
 export function normalizeCommand(audioCmd: Command): void {
   audioCmd
@@ -72,6 +72,21 @@ export function normalizeCommand(audioCmd: Command): void {
           const inputFile = inputFiles[i];
           const outputFile = outputPaths[i];
 
+          // Warn if normalization is requested for a format known to be problematic
+          const unsupportedNormFormats = ['ogg'];
+          let outFormat = options.format;
+          if (!outFormat) {
+            const extMatch = outputFile.match(/\.([a-zA-Z0-9]+)$/);
+            outFormat = extMatch && [
+              'mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma', 'opus', 'ape', 'alac', 'mov', 'mkv'
+            ].includes(extMatch[1].toLowerCase())
+              ? extMatch[1].toLowerCase() as AudioFormats
+              : undefined;
+          }
+          if (outFormat && unsupportedNormFormats.includes(outFormat) && (options.method === 'loudnorm' || options.method === 'peak')) {
+            console.warn(chalk.yellow(`⚠️  Warning: Normalization for format '${outFormat}' may not be supported or may fail. If you encounter errors, try using a different output format (e.g., wav, flac, mp3, aac).`));
+          }
+
           console.log(chalk.blue(`\n📊 Normalizing: ${inputFile}`));
 
           const metadata = await getAudioMetadata(inputFile);
@@ -96,11 +111,10 @@ export function normalizeCommand(audioCmd: Command): void {
           }
 
           // Determine output format and codec
-          let outFormat: import('../types.js').AudioFormats | undefined = options.format;
           if (!outFormat) {
             const extMatch = outputFile.match(/\.([a-zA-Z0-9]+)$/);
             outFormat = extMatch && [
-              'mp3','wav','flac','aac','ogg','m4a','wma','opus','ape','alac','mov','mkv'
+              'mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a', 'wma', 'opus', 'ape', 'alac', 'mov', 'mkv'
             ].includes(extMatch[1].toLowerCase())
               ? extMatch[1].toLowerCase() as import('../types.js').AudioFormats
               : undefined;
@@ -140,26 +154,36 @@ export function normalizeCommand(audioCmd: Command): void {
 
           const spinner = ora('Normalizing...').start();
 
-          try {
-            await runFFmpeg(
-              args,
-              options.verbose ?? false,
-              (line: string) => {
-                if (shouldDisplayLine(line, options.verbose ?? false)) {
-                  console.log(styleFFmpegOutput(line));
-                }
+          // Capture FFmpeg output to parse measured LUFS
+          let measuredLufs: string | undefined = undefined;
+          await runFFmpeg(
+            args,
+            options.verbose ?? false,
+            (line: string) => {
+              if (shouldDisplayLine(line, options.verbose ?? false)) {
+                console.log(styleFFmpegOutput(line));
               }
-            );
-            const outputStat = await stat(outputFile);
+              // Parse measured_I from loudnorm summary
+              if (options.method === 'loudnorm') {
+                const match = line.match(/Measured_I:\s*(-?\d+\.?\d*)/);
+                if (match) measuredLufs = match[1];
+              }
+            }
+          );
+          const outputStat = await stat(outputFile);
 
-            spinner.succeed(chalk.green('Normalization complete'));
-            console.log(chalk.green(`✓ Output: ${outputFile}`));
-            console.log(chalk.dim(`Target: ${options.target} LUFS • Peak limit: ${options.maxLevel} dB`));
-            console.log(chalk.dim(`Size: ${formatFileSize(inputStat.size)} → ${formatFileSize(outputStat.size)}`));
-          } catch (error) {
-            spinner.fail(chalk.red('Normalization failed'));
-            throw error;
+          spinner.succeed(chalk.green('Normalization complete'));
+          console.log(chalk.green(`✓ Output: ${outputFile}`));
+          if (options.method === 'loudnorm') {
+            if (measuredLufs !== undefined) {
+              console.log(chalk.dim(`Measured: ${measuredLufs} LUFS • Target: ${options.target} LUFS • Peak limit: ${options.maxLevel} dB`));
+            } else {
+              console.log(chalk.dim(`Target: ${options.target} LUFS • Peak limit: ${options.maxLevel} dB (LUFS not available)`));
+            }
+          } else {
+            console.log(chalk.dim(`Peak limit: ${options.maxLevel} dB`));
           }
+          console.log(chalk.dim(`Size: ${formatFileSize(inputStat.size)} → ${formatFileSize(outputStat.size)}`));
         }
 
         if (inputFiles.length > 1) {
