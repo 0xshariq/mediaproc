@@ -33,7 +33,9 @@ export interface ExtractOptions extends AudioOptions {
 }
 
 export interface MergeOptions extends AudioOptions {
+  inputs?: string[];
   crossfade?: number;
+  removeSilence?: boolean;
 }
 
 export interface NormalizeOptions extends AudioOptions {
