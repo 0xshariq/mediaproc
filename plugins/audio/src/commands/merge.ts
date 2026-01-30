@@ -4,7 +4,7 @@ import { stat, writeFile, unlink } from 'fs/promises';
 import { join, dirname } from 'path';
 import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuration } from '../utils/ffmpeg.js';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
-import { AUDIO_EXTENSIONS, parseInputPaths, createStandardHelp } from '@mediaproc/core';
+import { AUDIO_EXTENSIONS, validatePaths, createStandardHelp } from '@mediaproc/core';
 import ora from 'ora';
 import { MergeOptions } from '../types.js';
 
@@ -21,7 +21,7 @@ export function mergeCommand(audioCmd: Command): void {
     .option('--fade-in <seconds>', 'Add fade-in effect (seconds)', parseFloat)
     .option('--fade-out <seconds>', 'Add fade-out effect (seconds)', parseFloat)
     .option('--remove-silence', 'Remove silence between tracks')
-    .option('--metadata <key=value>', 'Set custom metadata (repeatable)', (val, acc = []) => { acc.push(val); return acc; }, [])
+    .option('--metadata <key=value>', 'Set custom metadata (repeatable)', (val: string, acc: string[] = []) => { acc.push(val); return acc; }, [] as string[])
     .option('--dry-run', 'Preview command without executing')
     .option('-v, --verbose', 'Show detailed FFmpeg output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
@@ -78,48 +78,41 @@ export function mergeCommand(audioCmd: Command): void {
         console.log(chalk.blue(`\n🔗 Merging ${inputs.length} audio files...`));
 
         // Validate all input files
-        const validatedInputs: string[] = [];
-        for (const input of inputs) {
-          try {
-            const paths = parseInputPaths(input, AUDIO_EXTENSIONS);
-            validatedInputs.push(...paths);
-          } catch (err) {
-            console.warn(chalk.yellow(`⚠ Skipping invalid input: ${input}`));
-          }
+        // Use pathValidator for all input/output logic
+        const { inputFiles, outputPath, errors } = validatePaths(inputs.join(','), options.output, { allowedExtensions: AUDIO_EXTENSIONS });
+        if (errors.length > 0) {
+          errors.forEach(e => console.error(chalk.red(e)));
+          process.exit(1);
         }
-
-        if (validatedInputs.length < 2) {
+        if (inputFiles.length < 2) {
           console.error(chalk.red('\n✗ Error: Not enough valid audio files found'));
           process.exit(1);
         }
-
         // Show input files
         let totalDuration = 0;
-        for (const inputFile of validatedInputs) {
+        for (const inputFile of inputFiles) {
           const metadata = await getAudioMetadata(inputFile);
           console.log(chalk.dim(`  ${inputFile} (${formatDuration(metadata.duration)})`));
           totalDuration += metadata.duration;
         }
-
         console.log(chalk.dim(`\nTotal duration: ${formatDuration(totalDuration)}`));
-
         // Create concat file list
-        const concatFile = join(dirname(validatedInputs[0]), '.concat-list.txt');
-        const concatContent = validatedInputs.map(f => `file '${f}'`).join('\n');
+        const concatFile = join(dirname(inputFiles[0]), '.concat-list.txt');
+        const concatContent = inputFiles.map(f => `file '${f}'`).join('\n');
         await writeFile(concatFile, concatContent);
 
         const args = ['-f', 'concat', '-safe', '0', '-i', concatFile, '-y'];
 
         // Output format/codec selection
-        const format = options.format || (options.output.match(/\.([a-zA-Z0-9]+)$/)?.[1].toLowerCase()) || 'mp3';
-        const codecMap = {
+        const format = options.format || (outputPath && outputPath.match(/\.([a-zA-Z0-9]+)$/)?.[1].toLowerCase()) || 'mp3';
+        const codecMap: Record<string, string> = {
           mp3: 'libmp3lame',
           aac: 'aac',
           flac: 'flac',
           wav: 'pcm_s16le',
           ogg: 'libvorbis',
         };
-        let codec = options.codec || codecMap[format] || 'libmp3lame';
+        let codec = options.codec || codecMap[format as keyof typeof codecMap] || 'libmp3lame';
         if (codec) args.push('-c:a', codec);
         if (options.bitrate) args.push('-b:a', options.bitrate);
 
@@ -128,7 +121,7 @@ export function mergeCommand(audioCmd: Command): void {
         // Crossfade
         if (options.crossfade) {
           const filterParts: string[] = [];
-          for (let i = 0; i < validatedInputs.length - 1; i++) {
+          for (let i = 0; i < inputFiles.length - 1; i++) {
             if (i === 0) {
               filterParts.push(`[0:a][1:a]acrossfade=d=${options.crossfade}[a01]`);
             } else {
@@ -136,7 +129,7 @@ export function mergeCommand(audioCmd: Command): void {
             }
           }
           args.push('-filter_complex', filterParts.join(';'));
-          args.push('-map', `[a0${validatedInputs.length - 1}]`);
+          args.push('-map', `[a0${inputFiles.length - 1}]`);
         }
         // Normalization (if not crossfade)
         if (options.normalize && !options.crossfade) {
@@ -165,8 +158,8 @@ export function mergeCommand(audioCmd: Command): void {
           }
         }
         // Output file
-        if (options.output) {
-          args.push(options.output);
+        if (outputPath) {
+          args.push(outputPath);
         }
 
         if (options.dryRun) {
@@ -183,22 +176,22 @@ export function mergeCommand(audioCmd: Command): void {
             args,
             options.verbose,
             (line: string) => {
-                if (shouldDisplayLine(line, options.verbose ?? false)) {
-                  console.log(styleFFmpegOutput(line));
-                }
+              if (shouldDisplayLine(line, options.verbose ?? false)) {
+                console.log(styleFFmpegOutput(line));
+              }
             }
           );
           let outputStat;
-          if (options.output) {
-            outputStat = await stat(options.output);
+          if (outputPath) {
+            outputStat = await stat(outputPath);
           }
 
           // Clean up concat file
           await unlink(concatFile);
 
           spinner.succeed(chalk.green('Merge complete'));
-          if (options.output) {
-            console.log(chalk.green(`✓ Output: ${options.output}`));
+          if (outputPath) {
+            console.log(chalk.green(`✓ Output: ${outputPath}`));
             if (outputStat) {
               console.log(chalk.dim(`Duration: ${formatDuration(totalDuration)} • Size: ${formatFileSize(outputStat.size)}`));
             }
