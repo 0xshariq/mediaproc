@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { stat } from 'fs/promises';
 import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuration } from '../utils/ffmpeg.js';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
-import { parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp, AUDIO_EXTENSIONS } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, createStandardHelp, AUDIO_EXTENSIONS } from '@mediaproc/core';
 import ora from 'ora';
 import { ConvertOptions } from '../types.js';
 
@@ -79,11 +79,14 @@ export function convertCommand(audioCmd: Command): void {
           process.exit(1);
         }
 
-        // Parse and validate input/output paths
-        const inputPaths = parseInputPaths(input, AUDIO_EXTENSIONS);
-        const { outputPath } = validatePaths(input, options.output, { allowedExtensions: AUDIO_EXTENSIONS });
+        // Use pathValidator for all input/output logic
+        const { inputFiles, outputPath, errors } = validatePaths(input, options.output, { allowedExtensions: AUDIO_EXTENSIONS });
+        if (errors.length > 0) {
+          errors.forEach(e => console.error(chalk.red(e)));
+          process.exit(1);
+        }
         const outputFormat = options.format || 'mp3';
-        const outputPathsMap = resolveOutputPaths(inputPaths, outputPath, {
+        const outputPathsMap = resolveOutputPaths(inputFiles, outputPath, {
           suffix: '-converted',
           newExtension: `.${outputFormat}`
         });
@@ -100,8 +103,8 @@ export function convertCommand(audioCmd: Command): void {
         const targetBitrate = (options.quality && qualityMap[options.quality]) || options.bitrate || '192k';
 
         // Process each file
-        for (let i = 0; i < inputPaths.length; i++) {
-          const inputFile = inputPaths[i];
+        for (let i = 0; i < inputFiles.length; i++) {
+          const inputFile = inputFiles[i];
           const outputFile = outputPaths[i];
 
           console.log(chalk.blue(`\n🔄 Converting: ${inputFile}`));
@@ -194,8 +197,8 @@ export function convertCommand(audioCmd: Command): void {
           }
         }
 
-        if (inputPaths.length > 1) {
-          console.log(chalk.green(`\n✓ Converted ${inputPaths.length} files successfully`));
+        if (inputFiles.length > 1) {
+          console.log(chalk.green(`\n✓ Converted ${inputFiles.length} files successfully`));
         }
 
       } catch (error) {
