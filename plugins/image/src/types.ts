@@ -22,6 +22,8 @@ export interface ImageOptions {
   dryRun?: boolean;
   explain?: boolean;
   help?: boolean;
+  left?: number;
+  top?: number;
 }
 
 export interface ResizeOptions extends ImageOptions {
@@ -29,7 +31,6 @@ export interface ResizeOptions extends ImageOptions {
   position?: string;
   background?: string;
   kernel?: string;
-  help?: boolean;
 }
 
 export interface ConvertOptions extends ImageOptions {
@@ -43,22 +44,14 @@ export interface CompositeOptions extends ImageOptions {
   blend?: 'over' | 'in' | 'out' | 'atop' | 'dest' | 'dest-over' | 'dest-in' | 'dest-out' | 'dest-atop' | 'xor' | 'add' | 'saturate' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten';
   tile?: boolean;
   premultiplied?: boolean;
-  left?: number;
-  top?: number;
   opacity?: number;
 }
 
 export interface ExtractOptions extends ImageOptions {
   channel?: 'red' | 'green' | 'blue' | 'alpha';
-  left?: number;
-  top?: number;
-  width?: number;
-  height?: number;
 }
 
 export interface BorderOptions extends ImageOptions {
-  width?: number;
-  height?: number;
   color?: string;
 }
 
@@ -68,20 +61,14 @@ export interface TextOptions extends ImageOptions {
   size?: number;
   color?: string;
   gravity?: 'center' | 'north' | 'south' | 'east' | 'west' | 'northeast' | 'northwest' | 'southeast' | 'southwest';
-  top?: number;
-  left?: number;
 }
 
 export interface StatsOptions extends ImageOptions {
-  input: string;
   detailed?: boolean;
   histogram?: boolean;
-  verbose?: boolean;
 }
 
 export interface ClaheOptions extends ImageOptions {
-  width?: number;
-  height?: number;
   maxSlope?: number;
 }
 
@@ -98,7 +85,6 @@ export interface FilterOptions extends ImageOptions {
   sharpen?: boolean;
   normalize?: boolean;
   negate?: boolean;
-  help?: boolean;
 }
 
 export interface AdjustOptions extends ImageOptions {
