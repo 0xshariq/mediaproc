@@ -106,7 +106,7 @@ export function normalizeCommand(audioCmd: Command): void {
               : undefined;
           }
 
-          // If filter is applied, do NOT use streamcopy, set codec
+          // Prevent filter+streamcopy: show error if user tries to use filters with stream copy
           if (filterApplied) {
             if (outFormat === 'mp3') {
               args.push('-c:a', 'libmp3lame');
@@ -121,6 +121,12 @@ export function normalizeCommand(audioCmd: Command): void {
             }
           } else {
             // No filter: safe to streamcopy
+            // But if user tries to add a filter (e.g. via method=peak) and also requests stream copy, show error
+            if (options.method === 'peak' || options.method === 'loudnorm') {
+              // Defensive: should not happen, but catch any logic error
+              console.error(chalk.red('\n✗ Error: Cannot use normalization filters with stream copy. Please remove normalization options or use a supported codec.'));
+              process.exit(1);
+            }
             args.push('-c:a', 'copy');
           }
 

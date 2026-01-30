@@ -69,10 +69,20 @@ export function mergeCommand(audioCmd: Command): void {
           console.error(chalk.red('\n✗ Error: At least 2 audio files required for merging'));
           process.exit(1);
         }
-        // Require output file with extension
+        // Require output file with extension and not a directory
         if (!options.output || !/\.[a-zA-Z0-9]+$/.test(options.output)) {
-          console.error(chalk.red('\n✗ Error: Output file must include a valid extension (e.g., .mp3, .wav, .flac)'));
+          console.error(chalk.red('\n✗ Error: Output file must include a valid extension (e.g., .mp3, .wav, .flac) and not be a directory.'));
           process.exit(1);
+        }
+        // Defensive: check if outputPath is a directory (should not be, but extra guard)
+        try {
+          const outStat = await stat(options.output);
+          if (outStat.isDirectory()) {
+            console.error(chalk.red('\n✗ Error: Output path must be a file, not a directory.'));
+            process.exit(1);
+          }
+        } catch (e) {
+          // If stat fails, assume it's a new file (ok)
         }
 
         console.log(chalk.blue(`\n🔗 Merging ${inputs.length} audio files...`));
@@ -199,6 +209,15 @@ export function mergeCommand(audioCmd: Command): void {
         } catch (error) {
           await unlink(concatFile).catch(() => { });
           spinner.fail(chalk.red('Merge failed'));
+          // Enhanced error reporting for common ffmpeg concat/decoder issues
+          const errObj = error as any;
+          const errMsg = (errObj && errObj.message) ? errObj.message : String(error);
+          if (/Invalid data found when processing input|Error submitting packet to decoder/i.test(errMsg)) {
+            console.error(chalk.yellow('\n⚠️  One or more input files may be corrupted, incompatible, or not suitable for merging.'));
+            console.error(chalk.yellow('Please ensure all input files are valid, have the same codec/sample rate/channels, and are not damaged.'));
+          } else if (/Unable to choose an output format|Invalid argument|Error opening output file/i.test(errMsg)) {
+            console.error(chalk.yellow('\n⚠️  Output path or format may be invalid. Make sure the output file has a valid extension and is not a directory.'));
+          }
           throw error;
         }
       } catch (error) {

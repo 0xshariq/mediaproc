@@ -115,6 +115,9 @@ export function extractCommand(audioCmd: Command): void {
             console.log(chalk.dim(`Duration: ${formatDuration(metadata.duration)} • ` +
               `Codec: ${metadata.codec} • ` +
               `Sample Rate: ${metadata.sampleRate} Hz`));
+            if (metadata.channels && metadata.channels > 2) {
+              console.warn(chalk.yellow(`⚠️  Warning: Extracting audio with ${metadata.channels} channels may be slow. Consider downmixing to stereo for faster processing.`));
+            }
           } catch (err) {
             console.log(chalk.dim('Analyzing video file...'));
           }
