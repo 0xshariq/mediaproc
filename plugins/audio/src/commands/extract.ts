@@ -127,7 +127,7 @@ export function extractCommand(audioCmd: Command): void {
             if (duration) args.push('-t', duration);
           }
 
-          // Codec selection
+          // Codec selection and channel handling
           const codecMap: Record<string, string> = {
             mp3: 'libmp3lame',
             aac: 'aac',
@@ -140,7 +140,25 @@ export function extractCommand(audioCmd: Command): void {
           if (codec) args.push('-c:a', codec);
           if (targetBitrate !== 'lossless') args.push('-b:a', targetBitrate);
           if (options.sampleRate) args.push('-ar', options.sampleRate.toString());
-          if (options.channels) args.push('-ac', options.channels.toString());
+
+          // Efficient handling for >2 channels
+          let requestedChannels = options.channels;
+          if (!requestedChannels && metadata && metadata.channels) {
+            requestedChannels = metadata.channels;
+          }
+          if (requestedChannels && requestedChannels > 2) {
+            // Only allow >2 channels for codecs that support it well
+            const multichannelCodecs = ['flac', 'wav', 'aac', 'opus'];
+            if (!options.format || !multichannelCodecs.includes(options.format)) {
+              // Warn and downmix to stereo for mp3/ogg
+              console.warn(chalk.yellow(`⚠️  Format ${options.format || 'mp3'} does not efficiently support >2 channels. Downmixing to stereo.`));
+              args.push('-ac', '2');
+            } else {
+              args.push('-ac', requestedChannels.toString());
+            }
+          } else if (requestedChannels) {
+            args.push('-ac', requestedChannels.toString());
+          }
 
           // Audio filters
           const filters: string[] = [];
