@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { stat } from 'fs/promises';
 import { runFFmpeg, getAudioMetadata, checkFFmpeg, formatFileSize, formatDuration } from '../utils/ffmpeg.js';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
-import { AUDIO_EXTENSIONS, parseInputPaths, resolveOutputPaths, validatePaths, createStandardHelp } from '@mediaproc/core';
+import { AUDIO_EXTENSIONS, validatePaths, resolveOutputPaths, createStandardHelp } from '@mediaproc/core';
 import ora from 'ora';
 import { NormalizeOptions } from '../types.js';
 
@@ -59,14 +59,17 @@ export function normalizeCommand(audioCmd: Command): void {
           process.exit(1);
         }
 
-        const inputPaths = parseInputPaths(input, AUDIO_EXTENSIONS);
+        const { inputFiles, outputPath, errors } = validatePaths(input, options.output, { allowedExtensions: AUDIO_EXTENSIONS });
+        if (errors.length > 0) {
+          errors.forEach(e => console.error(chalk.red(e)));
+          process.exit(1);
+        }
         const suffix = options.format ? `-normalized.${options.format}` : '-normalized';
-        const { outputPath } = validatePaths(input, options.output, { allowedExtensions: AUDIO_EXTENSIONS });
-        const outputPathsMap = resolveOutputPaths(inputPaths, outputPath, { suffix });
+        const outputPathsMap = resolveOutputPaths(inputFiles, outputPath, { suffix });
         const outputPaths = Array.from(outputPathsMap.values());
 
-        for (let i = 0; i < inputPaths.length; i++) {
-          const inputFile = inputPaths[i];
+        for (let i = 0; i < inputFiles.length; i++) {
+          const inputFile = inputFiles[i];
           const outputFile = outputPaths[i];
 
           console.log(chalk.blue(`\n📊 Normalizing: ${inputFile}`));
@@ -93,10 +96,14 @@ export function normalizeCommand(audioCmd: Command): void {
           }
 
           // Determine output format and codec
-          let outFormat = options.format;
+          let outFormat: import('../types.js').AudioFormats | undefined = options.format;
           if (!outFormat) {
             const extMatch = outputFile.match(/\.([a-zA-Z0-9]+)$/);
-            outFormat = extMatch ? extMatch[1].toLowerCase() : '';
+            outFormat = extMatch && [
+              'mp3','wav','flac','aac','ogg','m4a','wma','opus','ape','alac','mov','mkv'
+            ].includes(extMatch[1].toLowerCase())
+              ? extMatch[1].toLowerCase() as import('../types.js').AudioFormats
+              : undefined;
           }
 
           // If filter is applied, do NOT use streamcopy, set codec
@@ -149,8 +156,8 @@ export function normalizeCommand(audioCmd: Command): void {
           }
         }
 
-        if (inputPaths.length > 1) {
-          console.log(chalk.green(`\n✓ Normalized ${inputPaths.length} files successfully`));
+        if (inputFiles.length > 1) {
+          console.log(chalk.green(`\n✓ Normalized ${inputFiles.length} files successfully`));
         }
 
       } catch (error) {
