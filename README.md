@@ -242,7 +242,7 @@ mediaproc audio extract video.mp4 --format flac
 
 ## Requirements
 
-- **Node.js** >= 18.0.0
+- **Node.js** >= 22.0.0
 - **FFmpeg** (for video/audio plugins)
 
   ```bash
@@ -325,11 +325,11 @@ See [Plugin Integration Guide](docs/plugin-integration-guide.md) for complete do
 
 ## Roadmap
 
-**Current (v0.7.0):**
+**Current (v0.8.5):**
 
 - ✅ Core CLI with plugin system
-- ✅ Image Plugin (51 commands)
-- ✅ Video Plugin (6 commands)
+- ✅ Image Plugin (46 commands)
+- ✅ Video Plugin (7 commands)
 - ✅ Audio Plugin (5 commands)
 
 **Q1 2026:**
