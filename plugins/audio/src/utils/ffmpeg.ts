@@ -3,6 +3,23 @@ import { spawn } from 'child_process';
 import { shouldDisplayLine, logFFmpegOutput } from './ffmpegLogger.js';
 import { styleFFmpegOutput } from './ffmpeg-output.js';
 
+// FFmpeg install guidance links (all platforms)
+const FFMPEG_GUIDES = [
+  { label: 'Official guide', url: 'https://ffmpeg.org/download.html' },
+  { label: 'Community guide', url: 'https://github.com/adaptlearning/adapt_authoring/wiki/Installing-FFmpeg' },
+  { label: 'Multi-platform guide', url: 'https://github.com/ffmpegwasm/ffmpeg.wasm/blob/main/docs/install.md' },
+];
+
+function printFFmpegInstallGuidance() {
+  const lines = [
+    '✗ FFmpeg or ffprobe not found on your system.',
+    'Please install FFmpeg and ffprobe to use audio features.',
+    ...FFMPEG_GUIDES.map(g => `${g.label}: ${g.url}`),
+    'After installation, ensure ffmpeg and ffprobe are available in your PATH.'
+  ];
+  lines.forEach(line => console.error(styleFFmpegOutput(line)));
+}
+
 export interface AudioMetadata {
   duration: number;
   codec: string;
@@ -21,11 +38,11 @@ export async function runFFmpeg(
   verbose = false,
   onOutput?: (line: string, styledLine?: string) => void
 ): Promise<void> {
+  if (!(await ensureFFmpegAvailable())) return;
   return new Promise((resolve, reject) => {
     const ffmpeg = spawn('ffmpeg', args);
     let stderr = '';
     let allOutput = '';
-
     ffmpeg.stderr.on('data', (data) => {
       const output = data.toString();
       stderr += output;
@@ -42,7 +59,6 @@ export async function runFFmpeg(
         }
       });
     });
-
     ffmpeg.on('close', (code) => {
       if (code === 0) {
         console.log(styleFFmpegOutput('FFmpeg finished successfully.'));
@@ -58,7 +74,6 @@ export async function runFFmpeg(
         reject(new Error(`FFmpeg failed with code ${code}\n${stderr}`));
       }
     });
-
     ffmpeg.on('error', (error) => {
       console.error(styleFFmpegOutput(`Failed to start ffmpeg: ${error.message}`));
       reject(new Error(`Failed to start ffmpeg: ${error.message}`));
@@ -70,6 +85,7 @@ export async function runFFmpeg(
  * Get audio metadata using ffprobe with detailed output and error reporting
  */
 export async function getAudioMetadata(input: string): Promise<AudioMetadata> {
+  if (!(await ensureFFmpegAvailable())) return Promise.reject(new Error('FFmpeg/ffprobe not installed'));
   return new Promise((resolve, reject) => {
     const ffprobe = spawn('ffprobe', [
       '-v', 'quiet',
@@ -78,14 +94,11 @@ export async function getAudioMetadata(input: string): Promise<AudioMetadata> {
       '-show_streams',
       input,
     ]);
-
     let stdout = '';
     let stderr = '';
-
     ffprobe.stdout.on('data', (data) => {
       stdout += data.toString();
     });
-
     ffprobe.stderr.on('data', (data) => {
       const output = data.toString();
       stderr += output;
@@ -97,24 +110,20 @@ export async function getAudioMetadata(input: string): Promise<AudioMetadata> {
         }
       });
     });
-
     ffprobe.on('close', (code) => {
       if (code !== 0) {
         console.error(styleFFmpegOutput(`ffprobe failed with code ${code}`));
         reject(new Error(`ffprobe failed: ${stderr}`));
         return;
       }
-
       try {
         const data = JSON.parse(stdout);
         const audioStream = data.streams.find((s: any) => s.codec_type === 'audio');
-
         if (!audioStream) {
           console.error(styleFFmpegOutput('No audio stream found in file.'));
           reject(new Error('No audio stream found'));
           return;
         }
-
         const metadata: AudioMetadata = {
           duration: parseFloat(data.format.duration) || 0,
           codec: audioStream.codec_name || 'unknown',
@@ -124,13 +133,11 @@ export async function getAudioMetadata(input: string): Promise<AudioMetadata> {
           format: data.format.format_name || 'unknown',
           channelLayout: audioStream.channel_layout,
         };
-
         // Detailed output of metadata
         console.log(styleFFmpegOutput('Audio Metadata:'));
         Object.entries(metadata).forEach(([key, value]) => {
           console.log(styleFFmpegOutput(`  ${key}: ${value}`));
         });
-
         resolve(metadata);
       } catch (error) {
         console.error(styleFFmpegOutput(`Failed to parse ffprobe output: ${(error as Error).message}`));
@@ -142,24 +149,43 @@ export async function getAudioMetadata(input: string): Promise<AudioMetadata> {
 
 /**
  * Check if ffmpeg and ffprobe are available, with styled output
+ * If strict=true, both must be present. If strict=false, only ffmpeg is checked.
  */
-export async function checkFFmpeg(): Promise<boolean> {
-  return new Promise((resolve) => {
-    const ffmpeg = spawn('ffmpeg', ['-version']);
-    ffmpeg.on('close', (code) => {
-      if (code === 0) {
-        console.log(styleFFmpegOutput('FFmpeg is available.'));
-        resolve(true);
-      } else {
-        console.error(styleFFmpegOutput('FFmpeg is NOT available.'));
-        resolve(false);
-      }
-    });
-    ffmpeg.on('error', () => {
-      console.error(styleFFmpegOutput('FFmpeg is NOT available.'));
+export async function checkFFmpeg(strict = false): Promise<boolean> {
+  // Check ffmpeg
+  const ffmpegAvailable = await new Promise<boolean>((resolve) => {
+    try {
+      const ffmpeg = spawn('ffmpeg', ['-version']);
+      ffmpeg.on('close', (code) => resolve(code === 0));
+      ffmpeg.on('error', () => resolve(false));
+    } catch {
       resolve(false);
-    });
+    }
   });
+  if (!strict) return ffmpegAvailable;
+  // Check ffprobe
+  const ffprobeAvailable = await new Promise<boolean>((resolve) => {
+    try {
+      const ffprobe = spawn('ffprobe', ['-version']);
+      ffprobe.on('close', (code) => resolve(code === 0));
+      ffprobe.on('error', () => resolve(false));
+    } catch {
+      resolve(false);
+    }
+  });
+  return ffmpegAvailable && ffprobeAvailable;
+}
+
+/**
+ * Centralized check and guidance for ffmpeg/ffprobe availability
+ */
+async function ensureFFmpegAvailable(): Promise<boolean> {
+  const available = await checkFFmpeg(true);
+  if (!available) {
+    printFFmpegInstallGuidance();
+    return false;
+  }
+  return true;
 }
 
 /**
