@@ -1,6 +1,7 @@
 
 import { spawn } from 'child_process';
-import { logFFmpegOutput } from './ffmpeg-output.js';
+import { shouldDisplayLine, logFFmpegOutput } from './ffmpegLogger.js';
+import { styleFFmpegOutput } from './ffmpeg-output.js';
 
 export interface AudioMetadata {
   duration: number;
@@ -13,12 +14,12 @@ export interface AudioMetadata {
 }
 
 /**
- * Execute ffmpeg command
+ * Execute ffmpeg command with detailed output and robust error handling
  */
 export async function runFFmpeg(
-  args: string[], 
-  verbose = false, 
-  onOutput?: (line: string) => void
+  args: string[],
+  verbose = false,
+  onOutput?: (line: string, styledLine?: string) => void
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const ffmpeg = spawn('ffmpeg', args);
@@ -29,43 +30,50 @@ export async function runFFmpeg(
       const output = data.toString();
       stderr += output;
       allOutput += output;
-      if (onOutput) {
-        output.split('\n').forEach((line: string) => {
-          if (line.trim()) {
-            onOutput(line);
+      output.split('\n').forEach((line: string) => {
+        if (shouldDisplayLine(line) || verbose) {
+          const styled = styleFFmpegOutput(line);
+          logFFmpegOutput(line);
+          if (onOutput) {
+            onOutput(line, styled);
+          } else {
+            if (styled) console.log(styled);
           }
-        });
-      } else {
-        logFFmpegOutput(output, verbose);
-      }
+        }
+      });
     });
 
     ffmpeg.on('close', (code) => {
       if (code === 0) {
+        console.log(styleFFmpegOutput('FFmpeg finished successfully.'));
         resolve();
       } else {
-        // Print the last error line for user clarity
-        logFFmpegOutput(stderr, true);
+        stderr.split('\n').forEach((line: string) => {
+          if (shouldDisplayLine(line)) {
+            logFFmpegOutput(line);
+            const styled = styleFFmpegOutput(line);
+            if (styled) console.error(styled);
+          }
+        });
         reject(new Error(`FFmpeg failed with code ${code}\n${stderr}`));
       }
     });
 
     ffmpeg.on('error', (error) => {
+      console.error(styleFFmpegOutput(`Failed to start ffmpeg: ${error.message}`));
       reject(new Error(`Failed to start ffmpeg: ${error.message}`));
     });
   });
 }
 
 /**
- * Get audio metadata using ffprobe
+ * Get audio metadata using ffprobe with detailed output and error reporting
  */
 export async function getAudioMetadata(input: string): Promise<AudioMetadata> {
   return new Promise((resolve, reject) => {
     const ffprobe = spawn('ffprobe', [
-      '-v',
-      'quiet',
-      '-print_format',
-      'json',
+      '-v', 'quiet',
+      '-print_format', 'json',
       '-show_format',
       '-show_streams',
       input,
@@ -79,11 +87,20 @@ export async function getAudioMetadata(input: string): Promise<AudioMetadata> {
     });
 
     ffprobe.stderr.on('data', (data) => {
-      stderr += data.toString();
+      const output = data.toString();
+      stderr += output;
+      output.split('\n').forEach((line: string) => {
+        if (shouldDisplayLine(line)) {
+          logFFmpegOutput(line);
+          const styled = styleFFmpegOutput(line);
+          if (styled) console.error(styled);
+        }
+      });
     });
 
     ffprobe.on('close', (code) => {
       if (code !== 0) {
+        console.error(styleFFmpegOutput(`ffprobe failed with code ${code}`));
         reject(new Error(`ffprobe failed: ${stderr}`));
         return;
       }
@@ -93,6 +110,7 @@ export async function getAudioMetadata(input: string): Promise<AudioMetadata> {
         const audioStream = data.streams.find((s: any) => s.codec_type === 'audio');
 
         if (!audioStream) {
+          console.error(styleFFmpegOutput('No audio stream found in file.'));
           reject(new Error('No audio stream found'));
           return;
         }
@@ -107,8 +125,15 @@ export async function getAudioMetadata(input: string): Promise<AudioMetadata> {
           channelLayout: audioStream.channel_layout,
         };
 
+        // Detailed output of metadata
+        console.log(styleFFmpegOutput('Audio Metadata:'));
+        Object.entries(metadata).forEach(([key, value]) => {
+          console.log(styleFFmpegOutput(`  ${key}: ${value}`));
+        });
+
         resolve(metadata);
       } catch (error) {
+        console.error(styleFFmpegOutput(`Failed to parse ffprobe output: ${(error as Error).message}`));
         reject(new Error(`Failed to parse ffprobe output: ${(error as Error).message}`));
       }
     });
@@ -116,22 +141,29 @@ export async function getAudioMetadata(input: string): Promise<AudioMetadata> {
 }
 
 /**
- * Check if ffmpeg and ffprobe are available
+ * Check if ffmpeg and ffprobe are available, with styled output
  */
 export async function checkFFmpeg(): Promise<boolean> {
   return new Promise((resolve) => {
     const ffmpeg = spawn('ffmpeg', ['-version']);
     ffmpeg.on('close', (code) => {
-      resolve(code === 0);
+      if (code === 0) {
+        console.log(styleFFmpegOutput('FFmpeg is available.'));
+        resolve(true);
+      } else {
+        console.error(styleFFmpegOutput('FFmpeg is NOT available.'));
+        resolve(false);
+      }
     });
     ffmpeg.on('error', () => {
+      console.error(styleFFmpegOutput('FFmpeg is NOT available.'));
       resolve(false);
     });
   });
 }
 
 /**
- * Format file size to human-readable string
+ * Format file size to human-readable string (styled)
  */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 B';
@@ -142,13 +174,12 @@ export function formatFileSize(bytes: number): string {
 }
 
 /**
- * Format duration to HH:MM:SS
+ * Format duration to HH:MM:SS (styled)
  */
 export function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = Math.floor(seconds % 60);
-  
   return [h, m, s].map(v => v.toString().padStart(2, '0')).join(':');
 }
 
@@ -159,19 +190,17 @@ export function parseTime(time: string): number {
   if (/^\d+(\.\d+)?$/.test(time)) {
     return parseFloat(time);
   }
-  
   const parts = time.split(':').map(p => parseInt(p));
   if (parts.length === 3) {
     return parts[0] * 3600 + parts[1] * 60 + parts[2];
   } else if (parts.length === 2) {
     return parts[0] * 60 + parts[1];
   }
-  
   return parseFloat(time);
 }
 
 /**
- * Format bitrate to human-readable string
+ * Format bitrate to human-readable string (styled)
  */
 export function formatBitrate(bitrate: number): string {
   if (bitrate === 0) return 'unknown';
