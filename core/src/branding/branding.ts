@@ -6,7 +6,7 @@
 const SLOGAN = 'Automate, Analyze, Create. All your media, one CLI.';
 const DOCS_URL = 'https://docs-mediaproc.vercel.app/';
 const GITHUB_URL = 'https://github.com/0xshariq/mediaproc';
-const DISCORD_URL = 'https://discord.gg/TxNsD5kM';
+const DISCORD_URL = 'https://discord.gg/Pp7pRs7sJA';
 const ABOUT = 'MediaProc is an open-source, cross-platform CLI toolkit for processing, transforming, and automating media workflows. Built for creators, developers, and teams who want powerful tools with simple commands.';
 
 function printBrandingHeader(title: string) {
