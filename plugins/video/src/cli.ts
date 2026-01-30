@@ -8,6 +8,7 @@ import { mergeCommand } from './commands/merge.js';
 import { resizeCommand } from './commands/resize.js';
 import { transcodeCommand } from './commands/transcode.js';
 import { trimCommand } from './commands/trim.js';
+import { version } from './register.js';
 
 const program = new Command();
 program
@@ -43,7 +44,7 @@ Professional video processing powered by FFmpeg. Compress, transcode, edit, and 
 
 📚 Use 'mediaproc-video <command> --help' for detailed command documentation.
   `)
-  .version('1.5.0');
+  .version(version);
 
 // Register all commands directly (no "video" prefix in standalone mode)
 compressCommand(program);
