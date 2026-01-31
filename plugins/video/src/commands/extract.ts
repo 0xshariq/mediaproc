@@ -1,7 +1,7 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
 import { runFFmpeg, checkFFmpeg } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import ora from 'ora';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 
@@ -52,12 +52,18 @@ export function extractCommand(videoCmd: Command): void {
         });
         return;
       }
-      const inputPaths = parseInputPaths(input, VIDEO_EXTENSIONS);
-      const outputPathsMap = resolveOutputPaths(inputPaths, options.output, { suffix: '-audio', newExtension: options.formats });
-      const outputPaths = Array.from(outputPathsMap.values());
-      for (let i = 0; i < inputPaths.length; i++) {
-        const inputFile = inputPaths[i];
-        const outputFile = outputPaths[i];
+      // Use pathValidator for all input/output logic
+      const { inputFiles, outputPath, errors } = validatePaths(input, options.output, { allowedExtensions: VIDEO_EXTENSIONS });
+      if (errors.length > 0) {
+        errors.forEach(e => console.error(chalk.red('✗ ' + e)));
+        process.exit(1);
+      }
+      // Use AUDIO_EXTENSIONS for output extension validation
+      const outputPathsMap = resolveOutputPaths(inputFiles, outputPath, { suffix: '-audio', newExtension: '.' + (options.format || 'mp3') });
+      const outputFiles = Array.from(outputPathsMap.values());
+      for (let i = 0; i < inputFiles.length; i++) {
+        const inputFile = inputFiles[i];
+        const outputFile = outputFiles[i];
         const spinner = ora(chalk.cyan(`Extracting audio from ${inputFile}`)).start();
         try {
           if (!(await checkFFmpeg())) throw new Error(chalk.red('FFmpeg not found.'));
@@ -67,7 +73,7 @@ export function extractCommand(videoCmd: Command): void {
           if (options.stream) args.push('-map', `0:a:${options.stream}`);
           if (options.start) args.push('-ss', options.start);
           if (options.duration) args.push('-t', options.duration);
-          args.push('-acodec', options.formats);
+          args.push('-acodec', options.format || 'mp3');
           args.push('-b:a', options.bitrate);
           // Audio filters
           const filters: string[] = [];
@@ -81,7 +87,9 @@ export function extractCommand(videoCmd: Command): void {
             }
           }
           args.push(outputFile);
-          await runFFmpeg(args, options.verbose, logFFmpegOutput);
+          await runFFmpeg(args, options.verbose, (line) => {
+            if (options.verbose) logFFmpegOutput(line);
+          });
           spinner.succeed(chalk.green.bold(`✓ Audio extracted to ${outputFile}`));
         } catch (err: any) {
           spinner.fail(chalk.red.bold(`✗ ${err.message}`));
@@ -127,12 +135,18 @@ export function extractCommand(videoCmd: Command): void {
         });
         return;
       }
-      const inputPaths = parseInputPaths(input, VIDEO_EXTENSIONS);
-      const outputPathsMap = resolveOutputPaths(inputPaths, options.output, { suffix: '-frame', newExtension: options.formats });
-      const outputPaths = Array.from(outputPathsMap.values());
-      for (let i = 0; i < inputPaths.length; i++) {
-        const inputFile = inputPaths[i];
-        const outputFile = outputPaths[i];
+      // Use pathValidator for all input/output logic
+      const { inputFiles, outputPath, errors } = validatePaths(input, options.output, { allowedExtensions: VIDEO_EXTENSIONS });
+      if (errors.length > 0) {
+        errors.forEach(e => console.error(chalk.red('✗ ' + e)));
+        process.exit(1);
+      }
+      // Use IMAGE_EXTENSIONS for output extension validation
+      const outputPathsMap = resolveOutputPaths(inputFiles, outputPath, { suffix: '-frame', newExtension: '.' + (options.format || 'jpg') });
+      const outputFiles = Array.from(outputPathsMap.values());
+      for (let i = 0; i < inputFiles.length; i++) {
+        const inputFile = inputFiles[i];
+        const outputFile = outputFiles[i];
         const spinner = ora(chalk.cyan(`Extracting frame(s) from ${inputFile}`)).start();
         try {
           if (!(await checkFFmpeg())) throw new Error(chalk.red('FFmpeg not found.'));
@@ -153,7 +167,9 @@ export function extractCommand(videoCmd: Command): void {
           }
           args.push('-q:v', '2');
           args.push(outputFile);
-          await runFFmpeg(args, options.verbose, logFFmpegOutput);
+          await runFFmpeg(args, options.verbose, (line) => {
+            if (options.verbose) logFFmpegOutput(line);
+          });
           spinner.succeed(chalk.green.bold(`✓ Frame(s) extracted to ${outputFile}`));
         } catch (err: any) {
           spinner.fail(chalk.red.bold(`✗ ${err.message}`));
@@ -201,12 +217,18 @@ export function extractCommand(videoCmd: Command): void {
         });
         return;
       }
-      const inputPaths = parseInputPaths(input, VIDEO_EXTENSIONS);
-      const outputPathsMap = resolveOutputPaths(inputPaths, options.output, { suffix: '-thumbnail', newExtension: options.formats });
-      const outputPaths = Array.from(outputPathsMap.values());
-      for (let i = 0; i < inputPaths.length; i++) {
-        const inputFile = inputPaths[i];
-        const outputFile = outputPaths[i];
+      // Use pathValidator for all input/output logic
+      const { inputFiles, outputPath, errors } = validatePaths(input, options.output, { allowedExtensions: VIDEO_EXTENSIONS });
+      if (errors.length > 0) {
+        errors.forEach(e => console.error(chalk.red('✗ ' + e)));
+        process.exit(1);
+      }
+      // Use IMAGE_EXTENSIONS for output extension validation
+      const outputPathsMap = resolveOutputPaths(inputFiles, outputPath, { suffix: '-thumbnail', newExtension: '.' + (options.format || 'jpg') });
+      const outputFiles = Array.from(outputPathsMap.values());
+      for (let i = 0; i < inputFiles.length; i++) {
+        const inputFile = inputFiles[i];
+        const outputFile = outputFiles[i];
         const spinner = ora(chalk.cyan(`Extracting thumbnail from ${inputFile}`)).start();
         try {
           if (!(await checkFFmpeg())) throw new Error(chalk.red('FFmpeg not found.'));
@@ -222,7 +244,9 @@ export function extractCommand(videoCmd: Command): void {
           args.push('-vf', vf);
           args.push('-q:v', options.quality);
           args.push(outputFile);
-          await runFFmpeg(args, options.verbose, logFFmpegOutput);
+          await runFFmpeg(args, options.verbose, (line) => {
+            if (options.verbose) logFFmpegOutput(line);
+          });
           spinner.succeed(chalk.green.bold(`✓ Thumbnail extracted to ${outputFile}`));
         } catch (err: any) {
           spinner.fail(chalk.red.bold(`✗ ${err.message}`));
