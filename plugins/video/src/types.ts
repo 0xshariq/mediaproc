@@ -1,78 +1,81 @@
 
-export type VideoFormats = 'mp4' |
-  'avi' |
-  'mkv' |
-  'mov' |
-  'webm' |
-  'flv' |
-  'wmv' |
-  'mpg' |
-  'mpeg' |
-  'm4v' |
-  '3gp' |
-  'f4v' |
-  'ts' |
-  'mts' |
-  'm2ts'
+export type VideoFormats =
+  | 'mp4'
+  | 'avi'
+  | 'mkv'
+  | 'mov'
+  | 'webm'
+  | 'flv'
+  | 'wmv'
+  | 'mpg'
+  | 'mpeg'
+  | 'm4v'
+  | '3gp'
+  | 'f4v'
+  | 'ts'
+  | 'mts'
+  | 'm2ts';
 
-export interface VideoOptions {
-  input: string;
+// All common options for video commands
+export interface InVideoOptions {
+  input?: string;
   output?: string;
+  formats?: VideoFormats;
   codec?: 'h264' | 'h265' | 'hevc' | 'vp9' | 'av1';
+  audioCodec?: string;
+  audioBitrate?: string;
   preset?: 'ultrafast' | 'superfast' | 'veryfast' | 'faster' | 'fast' | 'medium' | 'slow' | 'slower' | 'veryslow';
   crf?: number;
   bitrate?: string;
   fps?: number;
   verbose?: boolean;
   dryRun?: boolean;
-  formats?: VideoFormats;
-  // Resize-specific options
-  scale?: '480p' | '720p' | '1080p' | '1440p' | '4k';
+  threads?: number;
+  hwAccel?: boolean;
+  quality?: number | 'low' | 'medium' | 'high';
+  scale?: string; // e.g. '720p', '1920x1080'
   width?: number;
   height?: number;
-  aspect?: boolean;
-  // Trim-specific options
-  start?: string;
-  duration?: string;
-  end?: string;
+  aspect?: string; // e.g. '16:9'
+  twoPass?: boolean;
+  audio?: boolean;
   fast?: boolean;
   explain?: boolean;
   help?: boolean;
-}
-export interface ConvertOptions extends VideoOptions {
-  noAudio?: boolean;
-  audioCodec?: string;
-}
-
-export interface CompressOptions extends VideoOptions {
-  quality?: 'low' | 'medium' | 'high';
-  audioBitrate?: string;
-}
-
-export interface TranscodeOptions extends VideoOptions {
-  audioCodec?: string;
-  audioBitrate?: string;
-}
-
-export interface ExtractOptions extends VideoOptions {
+  // For trim/extract
   start?: string;
   end?: string;
-  format?: 'jpg' | 'png' | 'avif';
-  fps?: number;
-  quality?: number;
+  duration?: string;
+  // For merge
+  reEncode?: boolean;
 }
 
-export interface TrimOptions extends VideoOptions {
+export interface ConvertOptions extends InVideoOptions {
+  noAudio?: boolean;
+}
+
+export interface CompressOptions extends InVideoOptions {
+  // quality can be string or number
+  quality?: 'low' | 'medium' | 'high' | number;
+}
+
+export interface TranscodeOptions extends InVideoOptions {}
+
+export interface ExtractOptions extends InVideoOptions {
+  format?: 'jpg' | 'png' | 'avif';
+}
+
+export interface TrimOptions extends InVideoOptions {
   start: string;
   end: string;
 }
 
-export interface ResizeOptions extends VideoOptions {
-  width: number;
-  height: number;
+export interface ResizeOptions extends InVideoOptions {
+  width?: number;
+  height?: number;
   maintainAspectRatio?: boolean;
 }
 
-export interface MergeOptions extends VideoOptions {
+export interface MergeOptions extends InVideoOptions {
   inputs: string[];
 }
