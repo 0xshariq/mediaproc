@@ -6,11 +6,11 @@ import {
   runFFmpeg,
   getVideoMetadata,
   checkFFmpeg,
-  generateOutputPath,
   formatFileSize,
   formatDuration
 } from '../utils/ffmpeg.js';
-import { createStandardHelp, parseInputPaths, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { validatePaths, resolveOutputPaths } from '@mediaproc/core';
 import { styleFFmpegOutput, shouldDisplayLine } from '../utils/ffmpeg-output.js';
 
 export function transcodeCommand(videoCmd: Command): void {
@@ -63,13 +63,23 @@ export function transcodeCommand(videoCmd: Command): void {
         // Check ffmpeg
         const ffmpegAvailable = await checkFFmpeg();
         if (!ffmpegAvailable) {
-          throw new Error('ffmpeg is not installed or not in PATH');
+          console.error(chalk.red('ffmpeg is not installed or not in PATH'));
+          process.exit(1);
         }
 
-        // Validate input
-        const inputPaths = parseInputPaths(input, VIDEO_EXTENSIONS);
-
-        const inputPath = Array.isArray(inputPaths) ? inputPaths[0] : inputPaths;
+        // Centralized input/output validation
+        const { inputFiles, outputPath, errors } = validatePaths(input, options.output, {
+          allowedExtensions: VIDEO_EXTENSIONS,
+        });
+        if (errors.length > 0) {
+          console.error(chalk.red(errors.join('\n')));
+          process.exit(1);
+        }
+        if (inputFiles.length === 0) {
+          console.error(chalk.red('No valid video files found'));
+          process.exit(1);
+        }
+        const inputPath = inputFiles[0];
 
         // Get input metadata
         console.log(chalk.dim('📊 Analyzing video...'));
@@ -82,9 +92,13 @@ export function transcodeCommand(videoCmd: Command): void {
         console.log(chalk.gray(`   Size: ${formatFileSize(inputStat.size)}`));
         console.log();
 
-        // Generate output path
-        const format = options.formats || 'mp4';
-        const output = options.output || generateOutputPath(inputPath, 'transcoded', format);
+        // Centralized output path resolution
+        const outputExt = options.formats ? `.${options.formats}` : '.mp4';
+        const outputPaths = resolveOutputPaths([inputPath], outputPath, {
+          suffix: '-transcoded',
+          newExtension: outputExt,
+        });
+        const output = outputPaths.get(inputPath)!;
 
         // Map codec to proper ffmpeg names
         const codecMap: Record<string, string> = {
@@ -116,9 +130,9 @@ export function transcodeCommand(videoCmd: Command): void {
         args.push('-preset', 'medium');
 
         // Output format specific options
-        if (format.includes('webm')) {
+        if (outputExt && outputExt.includes('webm')) {
           args.push('-f', 'webm');
-        } else if (format.includes('mkv')) {
+        } else if (outputExt && outputExt.includes('mkv')) {
           args.push('-f', 'matroska');
         }
 
@@ -129,7 +143,7 @@ export function transcodeCommand(videoCmd: Command): void {
           console.log(chalk.dim('Command:'));
           console.log(chalk.gray(`  ffmpeg ${args.join(' ')}\n`));
           console.log(chalk.dim('Output:'));
-          console.log(chalk.gray(`  Format: ${format}`));
+          console.log(chalk.gray(`  Format: ${outputExt || '.mp4'}`));
           console.log(chalk.gray(`  Video codec: ${options.codec || 'h264'}`));
           console.log(chalk.gray(`  Audio codec: ${audioCodec}`));
           console.log(chalk.green('\n✓ Dry run complete'));
@@ -143,7 +157,7 @@ export function transcodeCommand(videoCmd: Command): void {
         }
 
         await runFFmpeg(args, options.verbose, (line) => {
-          if (shouldDisplayLine(line, options.verbose || false)) {
+          if (shouldDisplayLine(line)) {
             console.log(styleFFmpegOutput(line));
           }
         });
@@ -153,7 +167,7 @@ export function transcodeCommand(videoCmd: Command): void {
 
         console.log();
         console.log(chalk.green.bold('✓ Transcoding Complete!\n'));
-        console.log(chalk.gray(`   Format: ${metadata.format} → ${format}`));
+        console.log(chalk.gray(`   Format: ${metadata.format} → ${outputExt || '.mp4'}`));
         console.log(chalk.gray(`   Codec: ${metadata.codec} → ${options.codec || 'h264'}`));
         console.log(chalk.gray(`   Size: ${formatFileSize(inputStat.size)} → ${formatFileSize(outputStat.size)}`));
         console.log(chalk.dim(`\n   ${output}`));
