@@ -7,7 +7,8 @@ import {
   checkFFmpeg,
   formatFileSize,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { validatePaths } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import ora from 'ora';
 import { ResizeOptions } from '../types.js';
@@ -131,13 +132,19 @@ export function resizeCommand(videoCmd: Command): void {
         spinner.text = 'Checking FFmpeg...';
         const ffmpegAvailable = await checkFFmpeg();
         if (!ffmpegAvailable) {
-          throw new Error('ffmpeg is not installed or not in PATH');
+          spinner.fail(chalk.red('ffmpeg is not installed or not in PATH'));
+          process.exit(1);
         }
 
-        // Parse input files
+        // Centralized input/output validation
         spinner.text = 'Finding video files...';
-        const inputFiles = parseInputPaths(input, VIDEO_EXTENSIONS);
-
+        const { inputFiles, outputPath, errors } = validatePaths(input, options.output, {
+          allowedExtensions: VIDEO_EXTENSIONS,
+        });
+        if (errors.length > 0) {
+          spinner.fail(chalk.red(errors.join('\n')));
+          process.exit(1);
+        }
         if (inputFiles.length === 0) {
           spinner.fail(chalk.red('No valid video files found'));
           process.exit(1);
@@ -170,12 +177,12 @@ export function resizeCommand(videoCmd: Command): void {
         let targetWidth: number;
         let targetHeight: number;
 
-        if (options.scale.includes('x')) {
+        if (typeof options.scale === 'string' && options.scale.includes('x')) {
           // Custom dimensions like 1920x1080
           const [w, h] = options.scale.split('x').map(Number);
           targetWidth = w;
           targetHeight = h;
-        } else if (scaleMap[options.scale]) {
+        } else if (options.scale && scaleMap[options.scale]) {
           const preset = scaleMap[options.scale];
           targetWidth = preset.width;
           targetHeight = preset.height;
@@ -195,12 +202,15 @@ export function resizeCommand(videoCmd: Command): void {
           'vp9': 'libvpx-vp9',
           'av1': 'libaom-av1',
         };
-        const videoCodec = codecMap[options.codec] || 'libx264';
+        const videoCodec = options.codec ? codecMap[options.codec] || 'libx264' : 'libx264';
 
-        // Resolve output paths
-        const outputPaths = resolveOutputPaths(inputFiles, options.output, {
+
+        // Determine output extension
+        const outputExt = options.formats ? `.${options.formats}` : undefined;
+        // Centralized output path resolution
+        const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
           suffix: `-${targetWidth}x${targetHeight}`,
-          newExtension: options.formats ? `.${options.formats}` : undefined
+          newExtension: outputExt,
         });
 
         console.log(chalk.cyan.bold(`\n🎬 Resizing ${inputFiles.length} video(s) to ${options.scale}\n`));
@@ -234,10 +244,12 @@ export function resizeCommand(videoCmd: Command): void {
               args.push('-maxrate', options.bitrate, '-bufsize', `${parseInt(options.bitrate) * 2}`);
             }
           } else {
-            args.push('-crf', options.quality.toString());
+            args.push('-crf', String(options.quality ?? 23));
           }
 
-          args.push('-preset', options.preset);
+          if (options.preset) {
+            args.push('-preset', options.preset);
+          }
 
           // FPS
           if (options.fps) {
