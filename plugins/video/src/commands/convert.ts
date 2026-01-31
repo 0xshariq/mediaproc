@@ -8,7 +8,8 @@ import {
     formatFileSize,
     formatDuration,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { validatePaths } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import ora from 'ora';
 import { ConvertOptions } from '../types.js';
@@ -105,38 +106,37 @@ export function convertCommand(videoCmd: Command): void {
                 }
 
                 // Validate format
-                const format = options.formats?.toLowerCase();
+                const format = options.formats?.toLowerCase() || 'mp4';
                 if (!formatConfig[format]) {
                     console.log(chalk.red(`❌ Unsupported format: ${format}`));
                     console.log(chalk.yellow('Supported formats: mp4, mkv, webm, avi, mov, flv, 3gp, m4v'));
                     process.exit(1);
                 }
 
-                // Parse input paths
-                const inputPaths = parseInputPaths(input, VIDEO_EXTENSIONS);
-
-                if (inputPaths.length === 0) {
-                    console.log(chalk.red('❌ No valid video files found'));
+                // Use pathValidator for all input/output logic
+                const { inputFiles, outputPath, errors } = validatePaths(input, options.output, { allowedExtensions: VIDEO_EXTENSIONS });
+                if (errors.length > 0) {
+                    errors.forEach(e => console.error(chalk.red('✗ ' + e)));
                     process.exit(1);
                 }
 
-                // Resolve output paths
+                // Always use resolveOutputPaths for output
                 const outputPathsMap = resolveOutputPaths(
-                    inputPaths,
-                    options.output,
+                    inputFiles,
+                    outputPath,
                     {
                         suffix: '',
-                        newExtension: formatConfig[format].ext
+                        newExtension: '.' + formatConfig[format].ext
                     }
                 );
 
-                const outputPaths = Array.from(outputPathsMap.values());
+                const outputFiles = Array.from(outputPathsMap.values());
                 // Process each file
-                for (let i = 0; i < inputPaths.length; i++) {
-                    const inputFile = inputPaths[i];
-                    const outputFile = outputPaths[i];
+                for (let i = 0; i < inputFiles.length; i++) {
+                    const inputFile = inputFiles[i];
+                    const outputFile = outputFiles[i];
 
-                    console.log(chalk.blue.bold(`\n🔄 Converting Video ${inputPaths.length > 1 ? `(${i + 1}/${inputPaths.length})` : ''}`));
+                    console.log(chalk.blue.bold(`\n🔄 Converting Video ${inputFiles.length > 1 ? `(${i + 1}/${inputFiles.length})` : ''}`));
                     console.log(chalk.dim(`Input:  ${inputFile}`));
                     console.log(chalk.dim(`Output: ${outputFile}`));
 
@@ -200,7 +200,7 @@ export function convertCommand(videoCmd: Command): void {
                         if (options.bitrate) {
                             args.push('-b:v', options.bitrate);
                         } else {
-                            args.push('-crf', String(options.quality));
+                            args.push('-crf', String(options.quality ?? 23));
                         }
 
                         // Preset
@@ -217,9 +217,11 @@ export function convertCommand(videoCmd: Command): void {
                         if (options.noAudio) {
                             args.push('-an');
                         } else {
-                            const audioEncoderName = audioCodecMap[audioCodec.toLowerCase()] || audioCodec;
+                            const audioEncoderName = audioCodecMap[audioCodec.toLowerCase?.()] || audioCodec;
                             args.push('-c:a', audioEncoderName);
-                            args.push('-b:a', options.audioBitrate);
+                            if (options.audioBitrate) {
+                                args.push('-b:a', options.audioBitrate);
+                            }
                         }
                     }
 
@@ -267,8 +269,8 @@ export function convertCommand(videoCmd: Command): void {
                     }
                 }
 
-                if (inputPaths.length > 1) {
-                    console.log(chalk.green.bold(`\n✓ Converted ${inputPaths.length} videos successfully!`));
+                if (inputFiles.length > 1) {
+                    console.log(chalk.green.bold(`\n✓ Converted ${inputFiles.length} videos successfully!`));
                 }
 
             } catch (error) {
