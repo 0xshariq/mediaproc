@@ -11,7 +11,8 @@ import {
   formatFileSize,
   formatDuration,
 } from '../utils/ffmpeg.js';
-import { fileExists, validatePaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { fileExists, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { validatePaths } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import { MergeOptions } from '../types.js';
 
@@ -96,12 +97,24 @@ export function mergeCommand(videoCmd: Command): void {
         });
         process.exit(0);
       }
+
       const tempListFile = join(tmpdir(), `mediaproc-merge-${Date.now()}.txt`);
       const spinner = ora('Processing video merge...').start();
 
       try {
-        if (inputs.length < 2) {
+        if (!inputs || inputs.length < 2) {
           spinner.fail(chalk.red('At least 2 videos are required for merging'));
+          process.exit(1);
+        }
+
+        // Centralized input validation using pathValidator
+        const { inputFiles, errors } = validatePaths(inputs.join(','), undefined, { allowedExtensions: VIDEO_EXTENSIONS });
+        if (errors.length > 0) {
+          spinner.fail(chalk.red(errors.join('\n')));
+          process.exit(1);
+        }
+        if (inputFiles.length < 2) {
+          spinner.fail(chalk.red('At least 2 valid video files are required for merging'));
           process.exit(1);
         }
 
@@ -113,33 +126,18 @@ export function mergeCommand(videoCmd: Command): void {
         }
 
         spinner.text = 'Analyzing videos...';
-        const inputPaths: string[] = [];
         const metadataList: any[] = [];
         let totalDuration = 0;
         let totalSize = 0;
 
-        for (let i = 0; i < inputs.length; i++) {
-          const validation = validatePaths(inputs[i], undefined, { allowedExtensions: VIDEO_EXTENSIONS});
-          if (validation.errors.length > 0) {
-            throw new Error(`Input ${i + 1}: ${validation.errors.join(', ')}`);
-          }
-          const inputPath = validation.inputFiles[0];
-
-          // Check if input file exists
-          if (!(fileExists(inputPath))) {
-            throw new Error(`Input ${i + 1} does not exist: ${inputPath}`);
-          }
-
-          inputPaths.push(inputPath);
-
+        for (let i = 0; i < inputFiles.length; i++) {
+          const inputPath = inputFiles[i];
           const metadata = await getVideoMetadata(inputPath);
           const fileStat = await stat(inputPath);
-
           metadataList.push(metadata);
           totalDuration += metadata.duration;
           totalSize += fileStat.size;
-
-          console.log(chalk.gray(`   ${i + 1}. ${inputs[i]}`));
+          console.log(chalk.gray(`   ${i + 1}. ${inputPath}`));
           console.log(chalk.dim(`      ${metadata.width}x${metadata.height}, ${formatDuration(metadata.duration)}, ${metadata.codec}`));
         }
 
@@ -158,18 +156,15 @@ export function mergeCommand(videoCmd: Command): void {
           console.log(chalk.dim('   Use --re-encode to skip this warning\n'));
         }
 
-        // Validate and resolve output path
-        const outputValidation = validatePaths(inputPaths[0], options.output, {
-          allowedExtensions: VIDEO_EXTENSIONS
-        });
+        // Centralized output path validation and resolution
+        const outputExt = options.formats ? `.${options.formats}` : '.mp4';
+        const outputValidation = validatePaths(inputFiles[0], options.output, { allowedExtensions: VIDEO_EXTENSIONS });
         if (outputValidation.errors.length > 0) {
-          throw new Error(`Output path invalid: ${outputValidation.errors.join(', ')}`);
+          spinner.fail(chalk.red(`Output path invalid: ${outputValidation.errors.join(', ')}`));
+          process.exit(1);
         }
-
-        const outputMap = resolveOutputPaths([inputPaths[0]], options.output, {
-          newExtension: '.mp4'
-        });
-        const output = outputMap.get(inputPaths[0])!;
+        const outputMap = resolveOutputPaths([inputFiles[0]], options.output, { newExtension: outputExt });
+        const output = outputMap.get(inputFiles[0])!;
 
         // Check if output file already exists
         if (fileExists(output) && !options.dryRun) {
@@ -180,18 +175,18 @@ export function mergeCommand(videoCmd: Command): void {
 
         if (needsReEncode) {
           // Re-encode mode: use filter_complex
-          const filterInputs = inputPaths.map((_, i) => `[${i}:v][${i}:a]`).join('');
-          const filterComplex = `${filterInputs}concat=n=${inputPaths.length}:v=1:a=1[outv][outa]`;
+          const filterInputs = inputFiles.map((_: string, i: number) => `[${i}:v][${i}:a]`).join('');
+          const filterComplex = `${filterInputs}concat=n=${inputFiles.length}:v=1:a=1[outv][outa]`;
 
           args = [];
-          inputPaths.forEach((path) => {
+          inputFiles.forEach((path: string) => {
             args.push('-i', path);
           });
           args.push('-filter_complex', filterComplex, '-map', '[outv]', '-map', '[outa]', '-c:v', 'libx264', '-crf', '23', '-c:a', 'aac', '-y', output);
         } else {
           // Fast concat mode: use concat demuxer (no re-encode)
           // Create concat list file
-          const listContent = inputPaths.map((path) => `file '${path.replace(/'/g, "'\\''")}'`).join('\n');
+          const listContent = inputFiles.map((path: string) => `file '${path.replace(/'/g, "'\\''")}'`).join('\n');
           await writeFile(tempListFile, listContent);
 
           args = ['-f', 'concat', '-safe', '0', '-i', tempListFile, '-c', 'copy', '-y', output];
