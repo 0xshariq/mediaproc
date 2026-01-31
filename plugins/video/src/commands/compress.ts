@@ -8,7 +8,8 @@ import {
   checkFFmpeg,
   formatFileSize,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { validatePaths } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import { CompressOptions } from '../types.js';
 
@@ -119,9 +120,15 @@ export function compressCommand(videoCmd: Command): void {
           process.exit(1);
         }
 
-        // Parse input files
-        const inputFiles = parseInputPaths(input, VIDEO_EXTENSIONS);
+        // Validate input and output paths using centralized pathValidator
+        const { inputFiles, outputPath, errors } = validatePaths(input, options.output, {
+          allowedExtensions: VIDEO_EXTENSIONS,
+        });
 
+        if (errors.length > 0) {
+          spinner.fail(chalk.red(errors.join('\n')));
+          process.exit(1);
+        }
         if (inputFiles.length === 0) {
           spinner.fail(chalk.red('No valid video files found'));
           process.exit(1);
@@ -129,10 +136,13 @@ export function compressCommand(videoCmd: Command): void {
 
         spinner.text = `Found ${inputFiles.length} video file(s) to process`;
 
-        // Resolve output paths
-        const outputPaths = resolveOutputPaths(inputFiles, options.output, {
+        // Determine output extension
+        const outputExt = options.formats ? `.${options.formats}` : '.mp4';
+
+        // Resolve output paths centrally
+        const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
           suffix: '-compressed',
-          newExtension: `.${options.formats || 'mp4'}`
+          newExtension: outputExt,
         });
 
         // Determine CRF based on quality preset
@@ -153,7 +163,7 @@ export function compressCommand(videoCmd: Command): void {
           'vp9': 'libvpx-vp9',
           'av1': 'libaom-av1',
         };
-        const codec = codecMap[options.codec] || 'libx264';
+        const codec = options.codec ? codecMap[options.codec] || 'libx264' : 'libx264';
 
         // Process each file
         for (let i = 0; i < inputFiles.length; i++) {
