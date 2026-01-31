@@ -6,9 +6,10 @@ import {
   getVideoMetadata,
   checkFFmpeg,
   formatDuration,
-  parseTimeToSeconds,
+  parseTime,
 } from '../utils/ffmpeg.js';
-import { parseInputPaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
+import { validatePaths } from '@mediaproc/core';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
 import { TrimOptions } from '../types.js';
 
@@ -111,9 +112,14 @@ export function trimCommand(videoCmd: Command): void {
           process.exit(1);
         }
 
-        // Parse input files
-        const inputFiles = parseInputPaths(input, VIDEO_EXTENSIONS);
-
+        // Centralized input/output validation
+        const { inputFiles, outputPath, errors } = validatePaths(input, options.output, {
+          allowedExtensions: VIDEO_EXTENSIONS,
+        });
+        if (errors.length > 0) {
+          spinner.fail(chalk.red(errors.join('\n')));
+          process.exit(1);
+        }
         if (inputFiles.length === 0) {
           spinner.fail(chalk.red('No valid video files found'));
           process.exit(1);
@@ -122,7 +128,7 @@ export function trimCommand(videoCmd: Command): void {
         spinner.text = `Found ${inputFiles.length} video file(s) to process`;
 
         // Parse start time
-        const startSeconds = parseTimeToSeconds(options.start || '0');
+        const startSeconds = parseTime(options.start || '0');
 
         // Validate time options
         if (!options.end && !options.duration) {
@@ -130,13 +136,16 @@ export function trimCommand(videoCmd: Command): void {
           process.exit(1);
         }
 
-        // Resolve output paths
-        const outputPaths = resolveOutputPaths(inputFiles, options.output, {
+        // Determine output extension
+        const outputExt = options.formats ? `.${options.formats}` : undefined;
+        // Centralized output path resolution
+        const outputPaths = resolveOutputPaths(inputFiles, outputPath, {
           suffix: '-trimmed',
-          newExtension: options.formats ? `.${options.formats}` : undefined
+          newExtension: outputExt,
         });
 
         // Process each file
+
         for (let i = 0; i < inputFiles.length; i++) {
           const inputFile = inputFiles[i];
           const outputFile = outputPaths.get(inputFile)!;
@@ -149,9 +158,9 @@ export function trimCommand(videoCmd: Command): void {
           // Calculate end time
           let endSeconds: number;
           if (options.duration) {
-            endSeconds = startSeconds + parseTimeToSeconds(options.duration);
+            endSeconds = startSeconds + parseTime(options.duration);
           } else {
-            endSeconds = parseTimeToSeconds(options.end);
+            endSeconds = parseTime(options.end);
           }
 
           // Validate times
@@ -181,7 +190,7 @@ export function trimCommand(videoCmd: Command): void {
           // Codec settings
           if (options.fast) {
             args.push('-c', 'copy');
-          } else if (options.codec && options.codec !== 'copy') {
+          } else if (options.codec && ['h264','h265','hevc'].includes(options.codec)) {
             const codecMap: Record<string, string> = {
               'h264': 'libx264',
               'h265': 'libx265',
@@ -215,6 +224,23 @@ export function trimCommand(videoCmd: Command): void {
               chalk.dim(`   ${outputFile}`)
             )
           );
+
+          // Try to get metadata for the output file (ffprobe)
+          try {
+            const outMeta = await getVideoMetadata(outputFile);
+            if (options.verbose) {
+              console.log(chalk.gray(`Output file metadata: duration=${outMeta.duration}, codec=${outMeta.codec}, size=${outMeta.width}x${outMeta.height}`));
+            }
+          } catch (ffprobeErr: any) {
+            const msg = ffprobeErr && ffprobeErr.message ? ffprobeErr.message : String(ffprobeErr);
+            const isWarning = options.fast; // In fast mode, this is often not critical
+            const prefix = isWarning ? chalk.yellow('⚠️  Warning:') : chalk.red('✖ Error:');
+            console.log(prefix, `ffprobe failed for output file: ${outputFile}`);
+            console.log(chalk.dim(msg));
+            if (!isWarning) {
+              console.log(chalk.yellow('This may be due to an unsupported format, incomplete file, or codec issue. The file may still be usable.'));
+            }
+          }
         }
 
         if (!options.dryRun) {
