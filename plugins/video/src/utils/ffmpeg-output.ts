@@ -1,106 +1,86 @@
+
 import chalk from 'chalk';
 
+
 /**
- * Parse and style FFmpeg output for better readability
+ * Style FFmpeg output line with appropriate colors and formatting (video only)
  */
 export function styleFFmpegOutput(line: string): string {
-  line = line.trim();
-  
-  // Skip empty lines
-  if (!line) return '';
+  const trimmed = line.trim();
+  if (!trimmed) return '';
 
-  // Error messages (red)
-  if (line.includes('Error') || line.includes('error') || line.includes('failed')) {
-    return chalk.red(line);
-  }
-
-  // Warning messages (yellow)
-  if (line.includes('Warning') || line.includes('warning')) {
-    return chalk.yellow(line);
-  }
-
-  // Progress information (cyan)
-  if (line.includes('frame=') || line.includes('fps=') || line.includes('time=') || line.includes('speed=')) {
-    // Parse progress line
-    const frameMatch = line.match(/frame=\s*(\d+)/);
-    const fpsMatch = line.match(/fps=\s*([\d.]+)/);
-    const timeMatch = line.match(/time=\s*([\d:\.]+)/);
-    const speedMatch = line.match(/speed=\s*([\d.]+x)/);
-    const sizeMatch = line.match(/size=\s*(\d+\w+)/);
-    const bitrateMatch = line.match(/bitrate=\s*([\d.]+\w+)/);
-
-    let output = chalk.cyan('⚡ Progress: ');
+  // Progress updates (frame=, fps=, time=, speed=)
+  if (trimmed.match(/frame=|fps=|time=|speed=/)) {
+    // Parse progress line for richer output
+    const frameMatch = trimmed.match(/frame=\s*(\d+)/);
+    const fpsMatch = trimmed.match(/fps=\s*([\d.]+)/);
+    const timeMatch = trimmed.match(/time=\s*([\d:\.]+)/);
+    const speedMatch = trimmed.match(/speed=\s*([\d.]+x)/);
+    const sizeMatch = trimmed.match(/size=\s*(\d+\w+)/);
+    const bitrateMatch = trimmed.match(/bitrate=\s*([\d.]+\w+)/);
+    let output = chalk.cyan.bold('\u23f3 Progress: ');
     if (frameMatch) output += chalk.white(`Frame ${frameMatch[1]} `);
-    if (fpsMatch) output += chalk.gray(`• ${fpsMatch[1]} fps `);
-    if (timeMatch) output += chalk.white(`• ${timeMatch[1]} `);
-    if (sizeMatch) output += chalk.gray(`• ${sizeMatch[1]} `);
-    if (bitrateMatch) output += chalk.gray(`• ${bitrateMatch[1]} `);
-    if (speedMatch) output += chalk.green(`• ${speedMatch[1]}`);
-    
+    if (fpsMatch) output += chalk.gray(`\u2022 ${fpsMatch[1]} fps `);
+    if (timeMatch) output += chalk.white(`\u2022 ${timeMatch[1]} `);
+    if (sizeMatch) output += chalk.gray(`\u2022 ${sizeMatch[1]} `);
+    if (bitrateMatch) output += chalk.gray(`\u2022 ${bitrateMatch[1]} `);
+    if (speedMatch) output += chalk.green(`\u2022 ${speedMatch[1]}`);
     return output;
   }
 
-  // Input/Output file info (blue)
-  if (line.includes('Input #') || line.includes('Output #')) {
-    return chalk.blue.bold(line);
+  // Input file info
+  if (trimmed.startsWith('Input #') || trimmed.includes('Duration:') || trimmed.includes('Stream #')) {
+    return chalk.blue(trimmed);
   }
 
-  // Stream info (magenta)
-  if (line.includes('Stream #')) {
-    return chalk.magenta(line);
+  // Output file info
+  if (trimmed.startsWith('Output #')) {
+    return chalk.green(trimmed);
   }
 
-  // Duration and metadata (green)
-  if (line.includes('Duration:') || line.includes('Metadata:')) {
-    return chalk.green(line);
+  // Warnings
+  if (trimmed.toLowerCase().includes('warning')) {
+    return chalk.yellow(trimmed);
   }
 
-  // Configuration info (gray)
-  if (line.includes('configuration:') || line.includes('libav') || line.includes('built with')) {
-    return chalk.gray(line);
+  // Errors
+  if (trimmed.toLowerCase().includes('error') || trimmed.toLowerCase().includes('failed')) {
+    return chalk.red(trimmed);
   }
 
-  // Success messages (green)
-  if (line.includes('successfully') || line.includes('completed')) {
-    return chalk.green(line);
+  // Success messages
+  if (trimmed.includes('successfully') || trimmed.includes('complete')) {
+    return chalk.green(trimmed);
   }
 
-  // Default: dim for general info
-  return chalk.dim(line);
+  // Default gray for other lines
+  return chalk.gray(trimmed);
+}
+
+
+/**
+ * Check if a line should be displayed based on content (video only)
+ */
+export function shouldDisplayLine(line: string): boolean {
+  const trimmed = line.trim();
+  if (!trimmed) return false;
+  // Always show errors and warnings
+  if (trimmed.toLowerCase().includes('error') || trimmed.toLowerCase().includes('failed') || trimmed.toLowerCase().includes('warning')) return true;
+  // Show progress and status lines always
+  if (trimmed.match(/frame=|fps=|time=|speed=/)) return true;
+  // Show input/output info
+  if (trimmed.startsWith('Input #') || trimmed.startsWith('Output #')) return true;
+  return false;
 }
 
 /**
- * Check if line should be displayed based on verbosity
+ * Log FFmpeg output (video only, plain, no styling)
  */
-export function shouldDisplayLine(line: string, verbose: boolean): boolean {
-  line = line.trim();
-  
-  if (!line) return false;
-  
-  // Always show errors and warnings
-  if (line.includes('Error') || line.includes('error') || line.includes('Warning') || line.includes('warning')) {
-    return true;
+export function logFFmpegOutput(output: string, verbose = false): void {
+  const lines = output.split('\n');
+  for (const line of lines) {
+    if (shouldDisplayLine(line) || verbose) {
+      console.log(line);
+    }
   }
-
-  // Always show progress
-  if (line.includes('frame=') && line.includes('time=')) {
-    return true;
-  }
-
-  // Show important info
-  if (line.includes('Input #') || line.includes('Output #') || line.includes('Stream #')) {
-    return verbose;
-  }
-
-  // Show duration and metadata if verbose
-  if (line.includes('Duration:') || line.includes('Metadata:')) {
-    return verbose;
-  }
-
-  // Filter out configuration and build info unless very verbose
-  if (line.includes('configuration:') || line.includes('built with')) {
-    return false;
-  }
-
-  return verbose;
 }
