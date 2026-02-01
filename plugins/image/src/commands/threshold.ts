@@ -14,7 +14,7 @@ interface ThresholdOptions extends FilterOptions {
 
 export function thresholdCommand(imageCmd: Command): void {
   const cmd = imageCmd
-    .command('threshold <input>')
+    .command('threshold [input]')
     .description('Apply threshold to image (convert to binary black/white)')
     .option('-t, --threshold <value>', 'Threshold value 0-255 (default: 128)', parseInt, 128)
     .option('--grayscale', 'Convert to grayscale first (recommended)', true)

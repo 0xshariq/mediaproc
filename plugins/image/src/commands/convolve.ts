@@ -30,7 +30,7 @@ const KERNELS = {
 
 export function convolveCommand(imageCmd: Command): void {
   imageCmd
-    .command('convolve <input>')
+    .command('convolve [input]')
     .description('Apply custom convolution kernel (advanced filtering)')
     .option('-k, --kernel <preset>', `Predefined kernel: ${Object.keys(KERNELS).join(', ')}`)
     .option('--custom <matrix>', 'Custom kernel as JSON array: "[[1,2,1],[2,4,2],[1,2,1]]"')

@@ -18,7 +18,7 @@ interface SepiaOptions extends ImageOptions {
 
 export function sepiaCommand(imageCmd: Command): void {
   imageCmd
-    .command('sepia <input>')
+    .command('sepia [input]')
     .description('Apply sepia tone effect (vintage/antique look)')
     .option('-i, --intensity <value>', 'Sepia intensity 0-100 (default: 80)', parseFloat, 80)
     .option('-o, --output <path>', 'Output file path')

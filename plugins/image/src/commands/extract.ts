@@ -13,7 +13,7 @@ interface ExtractOptionsExtended extends ExtractOptions {
 
 export function extractCommand(imageCmd: Command): void {
   imageCmd
-    .command('extract <input>')
+    .command('extract [input]')
     .description('Extract color channels or specific regions from image')
     .option('-c, --channel <channel>', 'Extract channel: red, green, blue, alpha')
     .option('--left <pixels>', 'X position for region extraction', parseInt)

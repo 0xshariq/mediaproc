@@ -22,7 +22,7 @@ export function medianCommand(imageCmd: Command): void {
     return n;
   }
   imageCmd
-    .command('median <input>')
+    .command('median [input]')
     .description('Apply median filter (noise reduction)')
     .option('-s, --size <size>', 'Filter size (1-50, default: 3)', parseFilterSize, 3)
     .option('-o, --output <path>', 'Output file path')

@@ -14,7 +14,7 @@ interface TintOptions extends FilterOptions {
 
 export function tintCommand(imageCmd: Command): void {
   imageCmd
-    .command('tint <input>')
+    .command('tint [input]')
     .description('Apply color tint to image')
     .option('-c, --color <color>', 'Tint color (hex, rgb, or name, default: #0000ff)', '#0000ff')
     .option('-o, --output <path>', 'Output file path')

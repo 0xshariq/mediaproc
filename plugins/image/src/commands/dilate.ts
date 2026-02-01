@@ -10,7 +10,7 @@ interface DilateOptions extends ImageOptions { }
 
 export function dilateCommand(imageCmd: Command): void {
   const cmd = imageCmd
-    .command('dilate <input>')
+    .command('dilate [input]')
     .description('Dilate image (expand bright regions)')
     .option('-o, --output <path>', 'Output file path')
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)

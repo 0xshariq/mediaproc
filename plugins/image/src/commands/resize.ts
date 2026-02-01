@@ -9,7 +9,7 @@ import path from 'node:path';
 
 export function resizeCommand(imageCmd: Command): void {
   imageCmd
-    .command('resize <input>')
+    .command('resize [input]')
     .description('Resize image to specified dimensions')
     .option('-w, --width <width>', 'Width in pixels', parseInt)
     .option('-h, --height <height>', 'Height in pixels', parseInt)

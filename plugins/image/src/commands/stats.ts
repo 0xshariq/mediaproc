@@ -14,7 +14,7 @@ interface StatsOptionsExtended extends StatsOptions {
 
 export function statsCommand(imageCmd: Command): void {
   imageCmd
-    .command('stats <input>')
+    .command('stats [input]')
     .description('Display detailed image information and statistics')
     .option('-d, --detailed', 'Show detailed EXIF and metadata')
     .option('--histogram', 'Calculate and display color histogram')

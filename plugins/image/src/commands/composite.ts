@@ -14,7 +14,7 @@ interface CompositeOptionsExtended extends CompositeOptions {
 
 export function compositeCommand(imageCmd: Command): void {
   imageCmd
-    .command('composite <input>')
+    .command('composite [input]')
     .description('Overlay/composite one image on top of another')
     .requiredOption('--overlay <path>', 'Overlay image to composite')
     .option('-o, --output <path>', 'Output file path')

@@ -16,7 +16,7 @@ interface SharpenOptions extends FilterOptions {
 
 export function sharpenCommand(imageCmd: Command): void {
   imageCmd
-    .command('sharpen <input>')
+    .command('sharpen [input]')
     .description('Sharpen image')
     .option('-s, --sigma <sigma>', 'Sharpening strength (0.01-10, default: 1)', parseFloat, 1)
     .option('--flat <flat>', 'Level of sharpening for flat areas (default: 1)', parseFloat, 1)

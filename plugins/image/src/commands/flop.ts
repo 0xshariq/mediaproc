@@ -11,7 +11,7 @@ interface FlopOptions extends ImageOptions { }
 
 export function flopCommand(imageCmd: Command): void {
   const cmd = imageCmd
-    .command('flop <input>')
+    .command('flop [input]')
     .description('Flip image horizontally (mirror left-right)')
     .option('-o, --output <path>', 'Output file path')
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)

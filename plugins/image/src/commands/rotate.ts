@@ -15,7 +15,7 @@ interface RotateOptions extends ImageOptions {
 
 export function rotateCommand(imageCmd: Command): void {
   imageCmd
-    .command('rotate <input>')
+    .command('rotate [input]')
     .description('Rotate image by specified angle')
     .option('-a, --angle <degrees>', 'Rotation angle in degrees (default: 90)', parseFloat, 90)
     .option('--background <color>', 'Background color for areas outside image (default: transparent)', 'transparent')

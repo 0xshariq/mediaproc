@@ -14,13 +14,13 @@ interface InfoOptions extends ImageOptions {
 
 export function infoCommand(imageCmd: Command): void {
   imageCmd
-    .command('info <input>')
+    .command('info [input]')
     .description('Display comprehensive image information and metadata')
     .option('--json', 'Output information in JSON format')
     .option('-v, --verbose', 'Verbose output with all available metadata')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for info command')
-    .action(async (input: string, options: InfoOptions) => {
+    .action(async (input: string | undefined, options: InfoOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'info',

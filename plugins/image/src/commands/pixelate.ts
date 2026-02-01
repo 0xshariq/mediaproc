@@ -17,7 +17,7 @@ interface PixelateOptions extends ImageOptions {
 
 export function pixelateCommand(imageCmd: Command): void {
   imageCmd
-    .command('pixelate <input>')
+    .command('pixelate [input]')
     .description('Apply pixelate effect (mosaic/retro style)')
     .option('-p, --pixels <size>', 'Pixel size 2-50 (default: 10)', parseInt, 10)
     .option('-o, --output <path>', 'Output file path')

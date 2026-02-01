@@ -18,7 +18,7 @@ interface ExtendOptions extends ImageOptions {
 
 export function extendCommand(imageCmd: Command): void {
   imageCmd
-    .command('extend <input>')
+    .command('extend [input]')
     .description('Add padding/border around image')
     .option('--top <pixels>', 'Top padding in pixels', parseInt, 0)
     .option('--bottom <pixels>', 'Bottom padding in pixels', parseInt, 0)

@@ -20,7 +20,7 @@ interface MetadataCommandOptions extends ImageOptions {
 
 export function metadataCommand(imageCmd: Command): void {
   imageCmd
-    .command('metadata <input>')
+    .command('metadata [input]')
     .description('View, export, or remove image metadata/EXIF data')
     .option('--remove', 'Remove all metadata (create clean copy)')
     .option('--remove-all', 'Alias for --remove')

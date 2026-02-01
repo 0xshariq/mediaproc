@@ -15,7 +15,7 @@ interface GammaOptions extends FilterOptions {
 
 export function gammaCommand(imageCmd: Command): void {
   imageCmd
-    .command('gamma <input>')
+    .command('gamma [input]')
     .description('Apply gamma correction')
     .option('-g, --gamma <value>', 'Gamma value (1-3, default: 2.2)', parseFloat, 2.2)
     .option('--gamma-out <value>', 'Output gamma (optional)', parseFloat)

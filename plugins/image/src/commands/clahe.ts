@@ -20,7 +20,7 @@ interface ClaheOptions extends ImageOptions {
 
 export function claheCommand(imageCmd: Command): void {
   imageCmd
-    .command('clahe <input>')
+    .command('clahe [input]')
     .description('Apply CLAHE (Contrast Limited Adaptive Histogram Equalization)')
     .option('-w, --width <size>', 'Tile width in pixels (default: 3)', parseInt, 3)
     .option('-h, --height <size>', 'Tile height in pixels (default: 3)', parseInt, 3)

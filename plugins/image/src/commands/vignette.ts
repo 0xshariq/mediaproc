@@ -18,7 +18,7 @@ interface VignetteOptions extends ImageOptions {
 
 export function vignetteCommand(imageCmd: Command): void {
   imageCmd
-    .command('vignette <input>')
+    .command('vignette [input]')
     .description('Add vignette effect (darkened edges)')
     .option('-s, --strength <value>', 'Vignette strength 0-100 (default: 50)', parseFloat, 50)
     .option('-o, --output <path>', 'Output file path')

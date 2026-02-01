@@ -15,7 +15,7 @@ interface BooleanOptions extends ImageOptions {
 
 export function booleanCommand(imageCmd: Command): void {
   const cmd = imageCmd
-    .command('boolean <input>')
+    .command('boolean [input]')
     .description('Perform boolean operations between images')
     .requiredOption('--operation <op>', 'Boolean operation: and, or, eor (XOR)', 'and')
     .requiredOption('--operand <path>', 'Second image for operation')

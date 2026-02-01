@@ -16,7 +16,7 @@ interface ModulateOptions extends FilterOptions {
 
 export function modulateCommand(imageCmd: Command): void {
   imageCmd
-    .command('modulate <input>')
+    .command('modulate [input]')
     .description('Adjust brightness, saturation, and hue')
     .option('-b, --brightness <value>', 'Brightness multiplier (0.1-10, default: 1)', parseFloat, 1)
     .option('-s, --saturation <value>', 'Saturation multiplier (0.1-10, default: 1)', parseFloat, 1)

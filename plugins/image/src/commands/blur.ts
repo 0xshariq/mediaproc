@@ -9,7 +9,7 @@ import path from 'node:path';
 
 export function blurCommand(imageCmd: Command): void {
   imageCmd
-    .command('blur <input>')
+    .command('blur [input]')
     .description('Apply blur effect to image')
     .option('-s, --sigma <sigma>', 'Blur strength (0.3-1000, default: 10)', parseFloat, 10)
     .option('-o, --output <path>', 'Output file path')

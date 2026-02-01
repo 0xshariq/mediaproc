@@ -15,7 +15,7 @@ interface CropOptions extends ImageOptions {
 
 export function cropCommand(imageCmd: Command): void {
   imageCmd
-    .command('crop <input>')
+    .command('crop [input]')
     .description('Crop image to specified dimensions and position')
     .option('-x, --x <x>', 'X position (left offset in pixels)', parseInt, 0)
     .option('-y, --y <y>', 'Y position (top offset in pixels)', parseInt, 0)

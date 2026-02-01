@@ -23,7 +23,7 @@ interface BatchOptions extends ImageOptions {
 
 export function batchCommand(imageCmd: Command): void {
   imageCmd
-    .command('batch <directory>')
+    .command('batch [directory]')
     .description('Process multiple images in batch with any operation')
     .requiredOption('--operation <operation>', 'Operation: resize, convert, optimize, grayscale, etc.')
     .option('-o, --output <directory>', 'Output directory (default: ./output)')

@@ -14,7 +14,7 @@ interface ThumbnailOptions extends ResizeOptions {
 
 export function thumbnailCommand(imageCmd: Command): void {
   imageCmd
-    .command('thumbnail <input>')
+    .command('thumbnail [input]')
     .description('Generate thumbnail from image')
     .option('-s, --size <size>', 'Thumbnail size in pixels (default: 150)', parseInt, 150)
     .option('-o, --output <path>', 'Output file path')

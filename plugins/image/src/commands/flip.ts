@@ -16,7 +16,7 @@ interface FlipOptions extends ImageOptions {
 
 export function flipCommand(imageCmd: Command): void {
   imageCmd
-    .command('flip <input>')
+    .command('flip [input]')
     .description('Flip image horizontally, vertically, or both')
     .option('--horizontal', 'Flip horizontally (mirror left-right)')
     .option('--vertical', 'Flip vertically (mirror top-bottom)')

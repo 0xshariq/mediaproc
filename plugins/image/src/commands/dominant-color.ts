@@ -19,7 +19,7 @@ interface DominantColorOptions extends ImageOptions {
 
 export function dominantColorCommand(imageCmd: Command): void {
   imageCmd
-    .command('dominant-color <input>')
+    .command('dominant-color [input]')
     .description('Extract dominant colors from an image')
     .option('-c, --count <number>', 'Number of dominant colors to extract (default: 5)', parseInt, 5)
     .option('--export <path>', 'Export color palette to JSON file')

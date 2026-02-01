@@ -18,7 +18,7 @@ interface MirrorOptions extends ImageOptions {
 
 export function mirrorCommand(imageCmd: Command): void {
   imageCmd
-    .command('mirror <input>')
+    .command('mirror [input]')
     .description('Create mirror/kaleidoscope effects')
     .option('-m, --mode <mode>', 'Mirror mode: horizontal, vertical, both, quad (kaleidoscope) (default: horizontal)', 'horizontal')
     .option('-o, --output <path>', 'Output file path')

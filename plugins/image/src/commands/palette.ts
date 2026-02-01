@@ -19,7 +19,7 @@ interface PaletteOptions extends ImageOptions {
 
 export function paletteCommand(imageCmd: Command): void {
   imageCmd
-    .command('palette <input>')
+    .command('palette [input]')
     .description('Extract dominant color palette from image')
     .option('-c, --colors <count>', 'Number of colors to extract 1-10 (default: 5)', parseInt, 5)
     .option('--dry-run', 'Show what would be analyzed without executing')

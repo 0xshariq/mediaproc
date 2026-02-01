@@ -16,7 +16,7 @@ interface AffineOptions extends ImageOptions {
 
 export function affineCommand(imageCmd: Command): void {
   imageCmd
-    .command('affine <input>')
+    .command('affine [input]')
     .description('Apply affine transformation matrix')
     .option('--matrix <values>', 'Affine matrix [a,b,c,d] or 6 values', '[1,0,0,1]')
     .option('--background <color>', 'Background color (default: transparent)', 'transparent')

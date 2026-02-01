@@ -13,7 +13,7 @@ interface BorderOptionsExtended extends BorderOptions {
 
 export function borderCommand(imageCmd: Command): void {
   imageCmd
-    .command('border <input>')
+    .command('border [input]')
     .description('Add decorative border/frame around image')
     .option('-w, --width <pixels>', 'Border width in pixels', parseInt, 10)
     .option('--color <color>', 'Border color (hex, rgb, or name)', '#000000')

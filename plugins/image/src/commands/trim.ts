@@ -14,7 +14,7 @@ interface TrimOptions extends ImageOptions {
 
 export function trimCommand(imageCmd: Command): void {
   imageCmd
-    .command('trim <input>')
+    .command('trim [input]')
     .description('Trim/remove border edges from image')
     .option('-t, --threshold <value>', 'Threshold for edge detection (1-100, default: 10)', parseInt, 10)
     .option('-o, --output <path>', 'Output file path')

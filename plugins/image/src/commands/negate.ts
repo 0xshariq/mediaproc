@@ -14,7 +14,7 @@ interface NegateOptions extends FilterOptions {
 
 export function negateCommand(imageCmd: Command): void {
   imageCmd
-    .command('negate <input>')
+    .command('negate [input]')
     .description('Create negative/inverted image')
     .option('-o, --output <path>', 'Output file path')
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)

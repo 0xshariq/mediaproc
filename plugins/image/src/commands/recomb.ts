@@ -14,7 +14,7 @@ interface RecombOptions extends ImageOptions {
 
 export function recombCommand(imageCmd: Command): void {
   imageCmd
-    .command('recomb <input>')
+    .command('recomb [input]')
     .description('Recombine RGB channels using matrix')
     .option('--matrix <values>', 'Recombination matrix (3x3) as JSON', '[[1,0,0],[0,1,0],[0,0,1]]')
     .option('-o, --output <path>', 'Output file path')

@@ -11,7 +11,7 @@ interface UnflattenOptions extends ImageOptions { }
 
 export function unflattenCommand(imageCmd: Command): void {
   const cmd = imageCmd
-    .command('unflatten <input>')
+    .command('unflatten [input]')
     .description('Add alpha channel to RGB image (inverse of flatten)')
     .option('-o, --output <path>', 'Output file path')
     .option('-q, --quality <quality>', 'Output quality (optional; only for JPEG, WEBP, AVIF; mapped to compressionLevel for PNG; ignored for other formats)', parseInt)

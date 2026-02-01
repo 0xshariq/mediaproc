@@ -21,7 +21,7 @@ interface SplitOptions extends ImageOptions {
 
 export function splitCommand(imageCmd: Command): void {
   imageCmd
-    .command('split <input>')
+    .command('split [input]')
     .description('Split image into tiles/grid pieces')
     .option('-t, --tiles <grid>', 'Grid pattern like "2x2", "3x3", "4x2"')
     .option('-r, --rows <number>', 'Number of rows', parseInt)

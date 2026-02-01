@@ -14,7 +14,7 @@ interface OptimizeOptions extends ImageOptions {
 
 export function optimizeCommand(imageCmd: Command): void {
   imageCmd
-    .command('optimize <input>')
+    .command('optimize [input]')
     .description('Optimize image size without quality loss')
     .option('-o, --output <path>', 'Output file path')
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)

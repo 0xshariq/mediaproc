@@ -14,7 +14,7 @@ interface LinearOptions extends ImageOptions {
 
 export function linearCommand(imageCmd: Command): void {
   const cmd = imageCmd
-    .command('linear <input>')
+    .command('linear [input]')
     .description('Apply linear formula: output = (a * input) + b')
     .option('-a, --a <value>', 'Multiplier (default: 1)', parseFloat, 1)
     .option('-b, --b <value>', 'Offset (default: 0)', parseFloat, 0)

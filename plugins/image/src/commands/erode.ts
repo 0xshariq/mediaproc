@@ -11,7 +11,7 @@ interface ErodeOptions extends ImageOptions { }
 
 export function erodeCommand(imageCmd: Command): void {
   const cmd = imageCmd
-    .command('erode <input>')
+    .command('erode [input]')
     .description('Erode image (expand dark regions)')
     .option('-o, --output <path>', 'Output file path')
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)

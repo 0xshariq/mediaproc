@@ -13,7 +13,7 @@ interface NormalizeOptions extends FilterOptions {
 
 export function normalizeCommand(imageCmd: Command): void {
   imageCmd
-    .command('normalize <input>')
+    .command('normalize [input]')
     .description('Normalize image (enhance contrast)')
     .option('-o, --output <path>', 'Output file path')
     .option('-q, --quality <quality>', 'Quality (1-100)', parseInt)

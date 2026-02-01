@@ -13,7 +13,7 @@ interface FlattenOptions extends ImageOptions {
 
 export function flattenCommand(imageCmd: Command): void {
   const cmd = imageCmd
-    .command('flatten <input>')
+    .command('flatten [input]')
     .description('Flatten alpha transparency onto background color')
     .option('--background <color>', 'Background color as hex (default: #ffffff)', '#ffffff')
     .option('-o, --output <path>', 'Output file path')

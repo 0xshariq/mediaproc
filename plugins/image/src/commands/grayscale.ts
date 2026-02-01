@@ -9,7 +9,7 @@ import path from 'node:path';
 
 export function grayscaleCommand(imageCmd: Command): void {
   imageCmd
-    .command('grayscale <input>')
+    .command('grayscale [input]')
     .alias('greyscale')
     .description('Convert image to grayscale (black and white)')
     .option('-o, --output <path>', 'Output file path')
@@ -18,7 +18,7 @@ export function grayscaleCommand(imageCmd: Command): void {
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for grayscale command')
-    .action(async (input: string, options: FilterOptions) => {
+    .action(async (input: string | undefined, options: FilterOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           commandName: 'grayscale',

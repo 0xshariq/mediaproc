@@ -14,7 +14,7 @@ interface CompressOptions extends ImageOptions {
 
 export function compressCommand(imageCmd: Command): void {
   imageCmd
-    .command('compress <input>')
+    .command('compress [input]')
     .description('Compress images with advanced quality control')
     .option('-o, --output <path>', 'Output file path')
     .option('-q, --quality <quality>', 'Compression quality (1-100)', parseInt)
