@@ -3,7 +3,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { showBranding } from '@mediaproc/core';
-import { PluginManager } from './plugin-manager.js';
+import { PluginManager } from './utils/index.js';
 import { addCommand } from './commands/add.js';
 import { removeCommand } from './commands/remove.js';
 import { listCommand } from './commands/list.js';
@@ -33,14 +33,24 @@ const version = '0.8.5';
  */
 async function autoLoadPlugins(): Promise<void> {
   const officialPlugins = pluginManager.getOfficialPlugins();
+  const loadResults = { success: 0, failed: 0 };
   
   for (const pluginName of officialPlugins) {
     try {
+      // Check if plugin is actually installed first
+      await import(pluginName);
       // Try to load plugin silently - if it's installed, it will load
       await pluginManager.loadPlugin(pluginName, program);
+      loadResults.success++;
     } catch {
-      // Plugin not installed, skip silently
+      // Plugin not installed or failed to load, skip silently
+      loadResults.failed++;
     }
+  }
+  
+  // Optional: Log stats in debug mode
+  if (process.env.DEBUG === 'mediaproc') {
+    console.log(`[DEBUG] Loaded ${loadResults.success} plugins, ${loadResults.failed} unavailable`);
   }
 }
 
@@ -63,7 +73,7 @@ export async function cli(): Promise<void> {
   removeCommand(program, pluginManager);
   listCommand(program, pluginManager);
   pluginsCommand(program, pluginManager);
-  updateCommand(program);
+  updateCommand(program, pluginManager);
   helpCommand(program);
 
   // System & utility commands
