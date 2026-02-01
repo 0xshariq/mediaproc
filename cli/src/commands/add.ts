@@ -2,54 +2,20 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import { execa } from 'execa';
-import { resolvePluginPackage, PLUGIN_REGISTRY, detectPluginType } from '../plugin-registry.js';
-import type { PluginManager } from '../plugin-manager.js';
-
-type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun' | 'deno';
-
-/**
- * Detect available package managers
- */
-async function detectPackageManager(): Promise<PackageManager> {
-  const managers: PackageManager[] = ['pnpm', 'bun', 'yarn', 'npm', 'deno'];
-
-  for (const manager of managers) {
-    try {
-      await execa(manager, ['--version'], { stdio: 'pipe' });
-      return manager;
-    } catch {
-      continue;
-    }
-  }
-
-  return 'npm'; // Fallback
-}
-
-/**
- * Check if CLI is running from a global installation
- */
-async function isGlobalInstall(): Promise<boolean> {
-  const execPath = process.argv[1];
-
-  // Check common global paths
-  const globalPaths = [
-    '/usr/local',
-    '/usr/lib',
-    '/.nvm/',
-    '/.npm-global/',
-    '/.npm/',
-    '/AppData/Roaming/npm',
-    '/pnpm-global/',
-    '/.bun/install/global',
-    '/.yarn/global'
-  ];
-
-  if (globalPaths.some(p => execPath.includes(p))) {
-    return true;
-  }
-
-  return false;
-}
+import {
+  resolvePluginPackage,
+  PLUGIN_REGISTRY,
+  detectPluginType,
+  type PluginManager,
+  detectPackageManager,
+  isGlobalInstall,
+  buildInstallArgs,
+  verifyPluginInstallation,
+  loadPluginSafe,
+  isPluginLoaded,
+  getPluginCommand,
+  getPluginExamples
+} from '../utils/index.js';
 
 export function addCommand(program: Command, pluginManager: PluginManager): void {
   program
@@ -66,20 +32,18 @@ export function addCommand(program: Command, pluginManager: PluginManager): void
         const registryEntry = Object.values(PLUGIN_REGISTRY).find(e => e.package === pluginName);
 
         // Check if already loaded
-        if (pluginManager.getPlugin(pluginName)) {
+        if (isPluginLoaded(pluginName, pluginManager)) {
           ora().succeed(chalk.green(`✓ Plugin ${chalk.cyan(pluginName)} is already loaded`));
-          console.log(chalk.dim(`Use: ${chalk.white(`mediaproc ${plugin.replace('@mediaproc/', '')} <command>`)}`));
+          console.log(chalk.dim(`Use: ${chalk.white(`mediaproc ${getPluginCommand(pluginName)} <command>`)}`));
           return;
         }
 
         // Try loading if already installed
-        try {
-          await pluginManager.loadPlugin(pluginName, program);
+        const initialLoadResult = await loadPluginSafe(pluginName, program, pluginManager);
+        if (initialLoadResult.success) {
           ora().succeed(chalk.green(`✓ Plugin ${pluginName} loaded successfully`));
-          console.log(chalk.dim(`Use: ${chalk.white(`mediaproc ${plugin.replace('@mediaproc/', '')} <command>`)}`));
+          console.log(chalk.dim(`Use: ${chalk.white(`mediaproc ${getPluginCommand(pluginName)} <command>`)}`));
           return;
-        } catch {
-          // Not installed, proceed with installation
         }
 
         const spinner = ora(`Installing ${chalk.cyan(pluginName)}...`).start();
@@ -113,102 +77,75 @@ export function addCommand(program: Command, pluginManager: PluginManager): void
         const packageManager = await detectPackageManager();
 
         // Build command args
-        const args: string[] = [];
+        const args = buildInstallArgs(packageManager, [pluginName], {
+          global: installGlobally,
+          saveDev: options.saveDev
+        });
 
-        switch (packageManager) {
-          case 'pnpm':
-            args.push('add');
-            if (installGlobally) args.push('-g');
-            else if (options.saveDev) args.push('-D');
-            break;
-          case 'bun':
-            args.push('add');
-            if (installGlobally) args.push('-g');
-            else if (options.saveDev) args.push('-d');
-            break;
-          case 'yarn':
-            args.push('add');
-            if (installGlobally) args.push('global');
-            else if (options.saveDev) args.push('--dev');
-            break;
-          case 'deno':
-            // Deno doesn't need traditional installation
-            spinner.warn(chalk.yellow('Deno detected - plugins work via npm: specifiers'));
-            return;
-          default:
-            args.push('install');
-            if (installGlobally) args.push('-g');
-            else if (options.saveDev) args.push('--save-dev');
+        // Handle Deno
+        if (args.length === 0 && packageManager === 'deno') {
+          spinner.warn(chalk.yellow('Deno detected - plugins work via npm: specifiers'));
+          return;
         }
 
-        args.push(pluginName);
-
-        // Execute
-        await execa(packageManager, args, {
-          stdio: 'inherit',
-          cwd: installGlobally ? undefined : process.cwd()
-        });
+        // Execute installation with proper error handling
+        try {
+          await execa(packageManager, args, {
+            stdio: 'inherit',
+            cwd: installGlobally ? undefined : process.cwd(),
+            timeout: 120000 // 2 minute timeout
+          });
+        } catch (installError) {
+          spinner.fail(chalk.red(`Failed to install ${pluginName}`));
+          const errorMessage = installError instanceof Error ? installError.message : String(installError);
+          console.error(chalk.red(errorMessage));
+          
+          // Provide helpful troubleshooting tips
+          if (errorMessage.includes('EACCES') || errorMessage.includes('permission denied')) {
+            console.log(chalk.yellow('\n💡 Try running with sudo or check file permissions'));
+          } else if (errorMessage.includes('ETIMEDOUT') || errorMessage.includes('timeout')) {
+            console.log(chalk.yellow('\n💡 Network timeout - check your internet connection and try again'));
+          } else if (errorMessage.includes('404') || errorMessage.includes('not found')) {
+            console.log(chalk.yellow(`\n💡 Package "${pluginName}" not found - check the name and try again`));
+          }
+          
+          process.exit(1);
+        }
 
         spinner.succeed(chalk.green(`✓ Installed ${pluginName}`));
 
         const scope = installGlobally ? 'globally' : 'locally';
         console.log(chalk.dim(`Installed ${scope} using ${packageManager}`));
 
+        // Verify installation before loading
+        const isInstalled = await verifyPluginInstallation(pluginName);
+        if (!isInstalled) {
+          console.log(chalk.yellow('\n⚠️  Plugin installed but may require terminal restart'));
+          console.log(chalk.dim('Try running your command again or restart terminal'));
+          return;
+        }
+
         // Load the plugin
         const loadSpinner = ora('Loading plugin...').start();
-        try {
-          await pluginManager.loadPlugin(pluginName, program);
+        const loadResult = await loadPluginSafe(pluginName, program, pluginManager);
+        
+        if (loadResult.success) {
           loadSpinner.succeed(chalk.green('✓ Plugin loaded and ready'));
-          console.log(chalk.dim(`Use: ${chalk.white(`mediaproc ${plugin.replace('@mediaproc/', '')} <command>`)}`));
-        } catch (loadError) {
+          console.log(chalk.dim(`Use: ${chalk.white(`mediaproc ${getPluginCommand(pluginName)} <command>`)}`));
+        } else {
           loadSpinner.warn(chalk.yellow('Plugin installed but needs restart to load'));
           console.log(chalk.dim('Run your command again or restart terminal'));
         }
 
         // Show example commands
         if (registryEntry) {
-          console.log(chalk.dim('\nExample commands:'));
-          const shortName = registryEntry.name;
-
-          // Show category-specific examples
-          switch (registryEntry.package) {
-            case '@mediaproc/image':
-              console.log(chalk.dim(`  mediaproc ${shortName} resize photo.jpg -w 800`));
-              console.log(chalk.dim(`  mediaproc ${shortName} convert image.png --format webp`));
-              break;
-            case '@mediaproc/video':
-              console.log(chalk.dim(`  mediaproc ${shortName} compress movie.mp4 --quality high`));
-              console.log(chalk.dim(`  mediaproc ${shortName} transcode video.avi --format mp4`));
-              break;
-            case '@mediaproc/audio':
-              console.log(chalk.dim(`  mediaproc ${shortName} convert song.wav --format mp3`));
-              console.log(chalk.dim(`  mediaproc ${shortName} normalize audio.mp3`));
-              break;
-            case '@mediaproc/document':
-              console.log(chalk.dim(`  mediaproc ${shortName} compress report.pdf --quality ebook`));
-              console.log(chalk.dim(`  mediaproc ${shortName} ocr scanned.pdf`));
-              break;
-            case '@mediaproc/animation':
-              console.log(chalk.dim(`  mediaproc ${shortName} gifify video.mp4 --fps 15`));
-              break;
-            case '@mediaproc/3d':
-              console.log(chalk.dim(`  mediaproc ${shortName} optimize model.glb`));
-              console.log(chalk.dim(`  mediaproc ${shortName} compress textures/`));
-              break;
-            case '@mediaproc/metadata':
-              console.log(chalk.dim(`  mediaproc ${shortName} inspect video.mp4`));
-              console.log(chalk.dim(`  mediaproc ${shortName} strip-metadata image.jpg`));
-              break;
-            case '@mediaproc/stream':
-              console.log(chalk.dim(`  mediaproc ${shortName} pack video.mp4 --hls`));
-              break;
-            case '@mediaproc/ai':
-              console.log(chalk.dim(`  mediaproc ${shortName} blur-faces video.mp4`));
-              console.log(chalk.dim(`  mediaproc ${shortName} caption audio.wav`));
-              break;
-            case '@mediaproc/pipeline':
-              console.log(chalk.dim(`  mediaproc ${shortName} run workflow.yaml`));
-              break;
+          const examples = getPluginExamples(registryEntry.package);
+          if (examples.length > 0) {
+            console.log(chalk.dim('\nExample commands:'));
+            const shortName = getPluginCommand(pluginName);
+            examples.slice(0, 3).forEach(example => {
+              console.log(chalk.dim(`  mediaproc ${shortName} ${example}`));
+            });
           }
         }
       } catch (error) {
