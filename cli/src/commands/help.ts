@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { getPluginsByCategory } from '../plugin-registry.js';
+import { getPluginsByCategory } from '../utils/index.js';
 
 export function helpCommand(program: Command): void {
   program
