@@ -50,6 +50,14 @@ export async function cli(): Promise<void> {
     .description('Modern, plugin-based media processing CLI')
     .version(version);
 
+  // Add hooks before adding commands
+  program.hook('preAction', explainPreActionHook);
+  
+  // Show CLI branding after all commands
+  program.hook('postAction', () => {
+    showBranding();
+  });
+
   // Plugin management commands
   addCommand(program, pluginManager);
   removeCommand(program, pluginManager);
@@ -72,18 +80,14 @@ export async function cli(): Promise<void> {
   // Auto-load installed plugins before parsing commands
   await autoLoadPlugins();
 
-  // Parse arguments
-  program.parse(process.argv);
-
   // Show help if no command provided
   if (!process.argv.slice(2).length) {
     program.outputHelp();
+    return;
   }
-  program.hook('preAction', explainPreActionHook);
-  // Show CLI branding after all commands
-  program.hook('postAction', () => {
-    showBranding();
-  });
+
+  // Parse arguments
+  program.parse(process.argv);
 }
 
 // Run CLI if this is the main module
