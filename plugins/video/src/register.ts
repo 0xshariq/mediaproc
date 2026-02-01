@@ -6,6 +6,7 @@ import { extractCommand } from './commands/extract.js';
 import { trimCommand } from './commands/trim.js';
 import { resizeCommand } from './commands/resize.js';
 import { mergeCommand } from './commands/merge.js';
+import { metadataCommand } from './commands/metadata.js';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
@@ -24,7 +25,7 @@ try {
 
 export const name = '@mediaproc/video';
 export const version = currentVersion;
-export const isBuiltIn  = true;
+export const isBuiltIn = true;
 
 export function register(program: Command): void {
   const videoCmd = program
@@ -39,4 +40,5 @@ export function register(program: Command): void {
   trimCommand(videoCmd);
   resizeCommand(videoCmd);
   mergeCommand(videoCmd);
+  metadataCommand(videoCmd);
 }

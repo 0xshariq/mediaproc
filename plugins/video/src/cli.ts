@@ -9,6 +9,7 @@ import { resizeCommand } from './commands/resize.js';
 import { transcodeCommand } from './commands/transcode.js';
 import { trimCommand } from './commands/trim.js';
 import { version } from './register.js';
+import { metadataCommand } from './commands/metadata.js';
 
 const program = new Command();
 program
@@ -54,6 +55,7 @@ mergeCommand(program);
 resizeCommand(program);
 transcodeCommand(program);
 trimCommand(program);
+metadataCommand(program);
 
 program.hook('preAction', explainPreActionHook);
 program.hook('postAction', () => {
