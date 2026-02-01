@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { HistoryManager } from '../history-manager.js';
+import { HistoryManager } from '../utils/history-manager.js';
 
 const historyManager = new HistoryManager();
 
