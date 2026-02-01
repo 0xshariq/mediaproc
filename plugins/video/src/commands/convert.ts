@@ -22,8 +22,22 @@ const formatConfig: Record<string, { codec: string; audioCodec: string; ext: str
     avi: { codec: 'libx264', audioCodec: 'mp3', ext: 'avi' },
     mov: { codec: 'libx264', audioCodec: 'aac', ext: 'mov' },
     flv: { codec: 'libx264', audioCodec: 'aac', ext: 'flv' },
-    '3gp': { codec: 'libx264', audioCodec: 'aac', ext: '3gp' },
+    wmv: { codec: 'wmv2', audioCodec: 'wmav2', ext: 'wmv' },
+    mpg: { codec: 'mpeg2video', audioCodec: 'mp2', ext: 'mpg' },
+    mpeg: { codec: 'mpeg2video', audioCodec: 'mp2', ext: 'mpeg' },
     m4v: { codec: 'libx264', audioCodec: 'aac', ext: 'm4v' },
+    '3gp': { codec: 'libx264', audioCodec: 'aac', ext: '3gp' },
+    '3g2': { codec: 'libx264', audioCodec: 'aac', ext: '3g2' },
+    f4v: { codec: 'libx264', audioCodec: 'aac', ext: 'f4v' },
+    ts: { codec: 'libx264', audioCodec: 'aac', ext: 'ts' },
+    mts: { codec: 'libx264', audioCodec: 'aac', ext: 'mts' },
+    m2ts: { codec: 'libx264', audioCodec: 'aac', ext: 'm2ts' },
+    vob: { codec: 'mpeg2video', audioCodec: 'mp2', ext: 'vob' },
+    ogv: { codec: 'libtheora', audioCodec: 'libvorbis', ext: 'ogv' },
+    divx: { codec: 'mpeg4', audioCodec: 'mp3', ext: 'divx' },
+    asf: { codec: 'wmv2', audioCodec: 'wmav2', ext: 'asf' },
+    rm: { codec: 'rv10', audioCodec: 'ac3', ext: 'rm' },
+    rmvb: { codec: 'rv10', audioCodec: 'ac3', ext: 'rmvb' },
 };
 
 export function convertCommand(videoCmd: Command): void {
@@ -109,7 +123,7 @@ export function convertCommand(videoCmd: Command): void {
                 const format = options.formats?.toLowerCase() || 'mp4';
                 if (!formatConfig[format]) {
                     console.log(chalk.red(`❌ Unsupported format: ${format}`));
-                    console.log(chalk.yellow('Supported formats: mp4, mkv, webm, avi, mov, flv, 3gp, m4v'));
+                    console.log(chalk.yellow('Supported formats: mp4, avi, mkv, mov, webm, flv, wmv, mpg, mpeg, m4v, 3gp, 3g2, f4v, ts, mts, m2ts, vob, ogv, divx, asf, rm, rmvb'));
                     process.exit(1);
                 }
 
