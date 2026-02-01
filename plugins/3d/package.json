@@ -5,15 +5,34 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "bin": { "mediaproc-3d": "./bin/cli.js" },
-  "keywords": ["3d", "gltf", "glb", "ar", "vr", "textures"],
-  "scripts": { "build": "tsc", "dev": "tsx src/cli.ts" },
+  "keywords": [
+    "3d",
+    "gltf",
+    "glb",
+    "ar",
+    "vr",
+    "textures"
+  ],
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts"
+  },
   "dependencies": {
-    "chalk": "^5.3.0",
-    "commander": "^14.0.2"
+    "@gltf-transform/cli": "^4.3.0",
+    "@gltf-transform/core": "^4.3.0",
+    "@mediaproc/core": "^1.11.0",
+    "boxen": "^8.0.1",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2",
+    "execa": "^9.6.1",
+    "ora": "^9.1.0"
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
-    "tsx": "^4.7.0"
+    "@types/node": "^25.0.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

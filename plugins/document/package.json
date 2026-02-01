@@ -11,12 +11,20 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
-  "keywords": ["mediaproc", "pdf", "document", "ocr", "ghostscript"],
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "mediaproc",
+    "pdf",
+    "document",
+    "ocr",
+    "ghostscript"
+  ],
   "author": "Sharique Chaudhary",
   "license": "ISC",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "build": "tsc",
@@ -25,13 +33,19 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "chalk": "^5.3.0",
+    "@mediaproc/core": "^1.11.0",
+    "boxen": "^8.0.1",
+    "chalk": "^5.6.2",
     "commander": "^14.0.2",
-    "ora": "^9.0.0"
+    "execa": "^9.6.1",
+    "ora": "^9.1.0",
+    "ghostscript4js": "^3.2.3",
+    "node-poppler": "^9.1.0",
+    "tesseract.js": "^7.0.0"
   },
   "devDependencies": {
-    "@types/node": "^25.0.9",
-    "typescript": "^5.3.3",
-    "tsx": "^4.7.0"
+    "@types/node": "^25.0.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

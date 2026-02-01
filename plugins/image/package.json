@@ -27,7 +27,7 @@
   "author": "Sharique Chaudhary",
   "license": "ISC",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "scripts": {
     "build": "tsc",
@@ -35,5 +35,19 @@
     "watch": "tsc --watch",
     "clean": "rm -rf dist",
     "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "@mediaproc/core": "^1.11.0",
+    "boxen": "^8.0.1",
+    "chalk": "^5.6.2",
+    "commander": "^14.0.2",
+    "execa": "^9.6.1",
+    "sharp": "^0.34.5",
+    "ora": "^9.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
