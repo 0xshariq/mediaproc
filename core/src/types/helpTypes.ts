@@ -26,8 +26,9 @@ export interface HelpSection {
  * Interface for command help configuration
  */
 export interface CommandHelpConfig {
+  pluginName: string;
   commandName: string;
-  emoji: string;
+  emoji?: string;
   description: string;
   usage: string[];
   options: HelpOption[];

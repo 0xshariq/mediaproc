@@ -1,6 +1,7 @@
 /**
- * Standardized Help Formatter for MediaProc Image CLI
- * Creates consistent, beautiful help displays for all image commands
+ * Standardized Help Formatter for MediaProc CLI
+ * Creates consistent, beautiful help displays for all plugin commands
+ * Plugin-agnostic: works with image, video, audio, and all future plugins
  */
 
 import chalk from 'chalk';
@@ -49,7 +50,8 @@ export function createStandardHelp(config: CommandHelpConfig): void {
   let helpContent = '';
 
   // Header
-  helpContent += createGradientText(`${config.emoji} MediaProc Image - ${config.commandName} Command`, '#4facfe') + '\n\n';
+  const pluginTitle = config.pluginName.charAt(0).toUpperCase() + config.pluginName.slice(1);
+  helpContent += createGradientText(`${config.emoji} MediaProc ${pluginTitle} - ${config.commandName} Command`, '#4facfe') + '\n\n';
 
   // Description
   helpContent += chalk.white(config.description) + '\n\n';
@@ -57,7 +59,7 @@ export function createStandardHelp(config: CommandHelpConfig): void {
   // Usage
   helpContent += chalk.cyan.bold('Usage:') + '\n';
   config.usage.forEach(usage => {
-    helpContent += chalk.white(`  ${chalk.magenta('mediaproc')} ${chalk.cyan('image')} ${usage}`) + '\n';
+    helpContent += chalk.white(`  ${chalk.magenta('mediaproc')} ${chalk.cyan(config.pluginName)} ${usage}`) + '\n';
   });
   helpContent += '\n';
 
@@ -88,14 +90,16 @@ export function createStandardHelp(config: CommandHelpConfig): void {
   if (config.examples && config.examples.length > 0) {
     helpContent += chalk.cyan.bold('Examples:') + '\n';
     config.examples.forEach(example => {
-      // Check if command already starts with 'mediaproc image', if not add it
-      const command = example.command.startsWith('mediaproc image ') 
+      // Check if command already starts with 'mediaproc <plugin>', if not add it
+      const pluginPrefix = `mediaproc ${config.pluginName} `;
+      const command = example.command.startsWith(pluginPrefix) 
         ? example.command 
-        : `mediaproc image ${example.command}`;
+        : `${pluginPrefix}${example.command}`;
       
+      const pluginRegex = new RegExp(`${config.pluginName} `, 'g');
       const formattedCommand = command
         .replace(/^mediaproc /, `${chalk.magenta('mediaproc')} `)
-        .replace(/image /, `${chalk.cyan('image')} `);
+        .replace(pluginRegex, `${chalk.cyan(config.pluginName)} `);
       
       helpContent += chalk.white(`  ${formattedCommand}`) + '\n';
       helpContent += chalk.dim(`    → ${example.description}`) + '\n\n';
@@ -123,7 +127,8 @@ export function createStandardHelp(config: CommandHelpConfig): void {
 
   // Footer
   helpContent += chalk.dim(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`) + '\n';
-  helpContent += chalk.hex('#636e72')(`🖼️  MediaProc Image Plugin • Powered by Sharp • High Performance`);
+  const pluginTitleFooter = config.pluginName.charAt(0).toUpperCase() + config.pluginName.slice(1);
+  helpContent += chalk.hex('#636e72')(`📦 MediaProc ${pluginTitleFooter} Plugin • High Performance Processing`);
 
   console.log(createBox(helpContent, 'cyan'));
 }
@@ -132,6 +137,7 @@ export function createStandardHelp(config: CommandHelpConfig): void {
  * Quick help display for commands with minimal options
  */
 export function createQuickHelp(
+  pluginName: string,
   commandName: string, 
   emoji: string, 
   description: string, 
@@ -143,7 +149,7 @@ export function createQuickHelp(
   helpContent += createGradientText(`${emoji} ${commandName.toUpperCase()} COMMAND`, '#4facfe') + '\n\n';
   helpContent += chalk.white(description) + '\n\n';
   helpContent += chalk.cyan.bold('Usage:') + '\n';
-  helpContent += chalk.white(`  ${chalk.magenta('mediaproc')} ${chalk.cyan('image')} ${usage}`) + '\n\n';
+  helpContent += chalk.white(`  ${chalk.magenta('mediaproc')} ${chalk.cyan(pluginName)} ${usage}`) + '\n\n';
 
   if (options.length > 0) {
     helpContent += chalk.cyan.bold('Options:') + '\n';
@@ -158,7 +164,7 @@ export function createQuickHelp(
 /**
  * Create error help display
  */
-export function createErrorHelp(commandName: string, error: string, suggestion?: string): void {
+export function createErrorHelp(pluginName: string, commandName: string, error: string, suggestion?: string): void {
   let helpContent = '';
   
   helpContent += chalk.red.bold(`❌ ${commandName.toUpperCase()} ERROR`) + '\n\n';
@@ -168,7 +174,7 @@ export function createErrorHelp(commandName: string, error: string, suggestion?:
     helpContent += '\n' + chalk.yellow(`💡 Suggestion: ${suggestion}`) + '\n';
   }
 
-  helpContent += '\n' + chalk.gray(`Run: `) + chalk.cyan(`mediaproc image ${commandName} --help`) + chalk.gray(` for more information`);
+  helpContent += '\n' + chalk.gray(`Run: `) + chalk.cyan(`mediaproc ${pluginName} ${commandName} --help`) + chalk.gray(` for more information`);
 
   console.log(createBox(helpContent, 'red'));
 }
