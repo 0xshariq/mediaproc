@@ -243,6 +243,12 @@ export async function getVideoMetadata(input: string): Promise<VideoMetadata> {
         reject(new Error(`Failed to parse ffprobe output: ${(error as Error).message}`));
       }
     });
+
+    // Handle spawn error to prevent memory leaks
+    ffprobe.on('error', (error) => {
+      console.error(styleFFmpegOutput(`Failed to start ffprobe: ${error.message}`));
+      reject(new Error(`Failed to start ffprobe: ${error.message}`));
+    });
   });
 }
 
@@ -293,6 +299,11 @@ export async function getStreamInfo(input: string): Promise<StreamInfo> {
       } catch (error) {
         reject(new Error(`Failed to parse ffprobe output: ${(error as Error).message}`));
       }
+    });
+
+    // Handle spawn error to prevent memory leaks
+    ffprobe.on('error', (error) => {
+      reject(new Error(`Failed to start ffprobe: ${error.message}`));
     });
   });
 }
