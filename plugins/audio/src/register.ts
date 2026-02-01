@@ -26,6 +26,9 @@ try {
 export const name = '@mediaproc/audio';
 export const version = currentVersion;
 export const isBuiltIn = true;
+export const description = 'Audio processing powered by FFmpeg - convert, normalize, trim, merge, and extract audio tracks';
+export const author = 'MediaProc Team';
+export const systemRequirements = ['FFmpeg 4.0+'];
 
 export function register(program: Command): void {
   const audioCmd = program
