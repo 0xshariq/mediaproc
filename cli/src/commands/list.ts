@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
-import { detectPluginType } from '../plugin-registry.js';
-import type { PluginManager } from '../plugin-manager.js';
+import { detectPluginType, type PluginManager, formatPluginName } from '../utils/index.js';
 
 export function listCommand(program: Command, pluginManager: PluginManager): void {
   program
@@ -42,7 +41,7 @@ export function listCommand(program: Command, pluginManager: PluginManager): voi
         console.log(chalk.bold('\u2728 Official Plugins:\n'));
 
         official.forEach((pluginName, index) => {
-          const shortName = pluginName.replace('@mediaproc/', '');
+          const shortName = formatPluginName(pluginName);
           const plugin = pluginManager.getPlugin(pluginName);
 
           console.log(`${chalk.green('✓')} ${chalk.cyan(shortName)} ${chalk.dim(`(${pluginName})`)} ${chalk.blue('★ OFFICIAL')}`);
@@ -62,7 +61,7 @@ export function listCommand(program: Command, pluginManager: PluginManager): voi
         console.log(chalk.bold('\n🌐 Community Plugins:\n'));
 
         community.forEach((pluginName, index) => {
-          const shortName = pluginName.replace('mediaproc-', '');
+          const shortName = formatPluginName(pluginName);
           const plugin = pluginManager.getPlugin(pluginName);
 
           console.log(`${chalk.green('✓')} ${chalk.cyan(shortName)} ${chalk.dim(`(${pluginName})`)}`);
