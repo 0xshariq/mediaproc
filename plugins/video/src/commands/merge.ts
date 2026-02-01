@@ -7,6 +7,7 @@ import { join } from 'path';
 import {
   runFFmpeg,
   getVideoMetadata,
+  getStreamInfo,
   checkFFmpeg,
   formatFileSize,
   formatDuration,
@@ -127,14 +128,18 @@ export function mergeCommand(videoCmd: Command): void {
 
         spinner.text = 'Analyzing videos...';
         const metadataList: any[] = [];
+        const validInputFiles: string[] = [];  // Track only valid files
+        const audioStreamInfo: boolean[] = [];  // Track which files have audio
         let totalDuration = 0;
         let totalSize = 0;
 
         for (let i = 0; i < inputFiles.length; i++) {
           const inputPath = inputFiles[i];
           let metadata;
+          let streamInfo;
           try {
             metadata = await getVideoMetadata(inputPath);
+            streamInfo = await getStreamInfo(inputPath);
           } catch (metaErr: any) {
             // Make ffprobe failures non-fatal warnings
             console.log(chalk.yellow('\u26a0\ufe0f  Warning:'), `ffprobe failed for ${inputPath}`);
@@ -145,20 +150,28 @@ export function mergeCommand(videoCmd: Command): void {
           }
           const fileStat = await stat(inputPath);
           metadataList.push(metadata);
+          validInputFiles.push(inputPath);  // Only add if validation passed
+          audioStreamInfo.push(streamInfo.hasAudio);  // Track audio presence
           totalDuration += metadata.duration;
           totalSize += fileStat.size;
-          console.log(chalk.gray(`   ${i + 1}. ${inputPath}`));
-          console.log(chalk.dim(`      ${metadata.width}x${metadata.height}, ${formatDuration(metadata.duration)}, ${metadata.codec}`));
+          console.log(chalk.gray(`   ${validInputFiles.length}. ${inputPath}`));
+          console.log(chalk.dim(`      ${metadata.width}x${metadata.height}, ${formatDuration(metadata.duration)}, ${metadata.codec}${streamInfo.hasAudio ? '' : ' (no audio)'}`));
         }
-        
+
         // Check if we have any valid files after analysis
         if (metadataList.length === 0) {
           spinner.fail(chalk.red('No valid video files to merge'));
           process.exit(1);
         }
-        
+
         if (metadataList.length < inputFiles.length) {
           console.log(chalk.yellow(`\u26a0\ufe0f  Only ${metadataList.length} of ${inputFiles.length} files are valid for merging`));
+        }
+
+        // Require at least 2 valid files to merge
+        if (validInputFiles.length < 2) {
+          spinner.fail(chalk.red('At least 2 valid video files are required for merging'));
+          process.exit(1);
         }
 
         console.log();
@@ -178,13 +191,13 @@ export function mergeCommand(videoCmd: Command): void {
 
         // Centralized output path validation and resolution
         const outputExt = options.formats ? `.${options.formats}` : '.mp4';
-        const outputValidation = validatePaths(inputFiles[0], options.output, { allowedExtensions: VIDEO_EXTENSIONS });
+        const outputValidation = validatePaths(validInputFiles[0], options.output, { allowedExtensions: VIDEO_EXTENSIONS });
         if (outputValidation.errors.length > 0) {
           spinner.fail(chalk.red(`Output path invalid: ${outputValidation.errors.join(', ')}`));
           process.exit(1);
         }
-        const outputMap = resolveOutputPaths([inputFiles[0]], options.output, { newExtension: outputExt });
-        const output = outputMap.get(inputFiles[0])!;
+        const outputMap = resolveOutputPaths([validInputFiles[0]], options.output, { newExtension: outputExt });
+        const output = outputMap.get(validInputFiles[0])!;
 
         // Check if output file already exists
         if (fileExists(output) && !options.dryRun) {
@@ -194,19 +207,119 @@ export function mergeCommand(videoCmd: Command): void {
         let args: string[];
 
         if (needsReEncode) {
-          // Re-encode mode: use filter_complex
-          const filterInputs = inputFiles.map((_: string, i: number) => `[${i}:v][${i}:a]`).join('');
-          const filterComplex = `${filterInputs}concat=n=${inputFiles.length}:v=1:a=1[outv][outa]`;
+          // Re-encode mode: use filter_complex with conditional audio handling
+          // Determine target resolution (use first video's resolution or largest resolution)
+          const targetWidth = Math.max(...metadataList.map(m => m.width));
+          const targetHeight = Math.max(...metadataList.map(m => m.height));
+          const needsScaling = metadataList.some(m => m.width !== targetWidth || m.height !== targetHeight);
+          
+          if (needsScaling) {
+            console.log(chalk.yellow(`⚠️  Videos have different resolutions - scaling all to ${targetWidth}x${targetHeight}`));
+          }
 
-          args = [];
-          inputFiles.forEach((path: string) => {
-            args.push('-i', path);
-          });
-          args.push('-filter_complex', filterComplex, '-map', '[outv]', '-map', '[outa]', '-c:v', 'libx264', '-crf', '23', '-c:a', 'aac', '-y', output);
+          const hasAnyAudio = audioStreamInfo.some(hasAudio => hasAudio);
+
+          if (hasAnyAudio) {
+            // Check if all videos have audio or only some
+            const allHaveAudio = audioStreamInfo.every(hasAudio => hasAudio);
+
+            if (allHaveAudio) {
+              // All videos have audio - use standard concat with audio and scaling
+              args = [];
+              validInputFiles.forEach((path: string) => {
+                args.push('-i', path);
+              });
+
+              if (needsScaling) {
+                // Scale videos first, then concat
+                const scaleFilters = metadataList.map((_, i) => 
+                  `[${i}:v]scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=decrease,pad=${targetWidth}:${targetHeight}:(ow-iw)/2:(oh-ih)/2,setsar=1[v${i}]`
+                ).join(';');
+                const concatInputs = metadataList.map((_, i) => `[v${i}][${i}:a]`).join('');
+                const filterComplex = `${scaleFilters};${concatInputs}concat=n=${validInputFiles.length}:v=1:a=1[outv][outa]`;
+                args.push('-filter_complex', filterComplex, '-map', '[outv]', '-map', '[outa]', '-c:v', 'libx264', '-crf', '23', '-c:a', 'aac', '-y', output);
+              } else {
+                // No scaling needed
+                const filterInputs = validInputFiles.map((_: string, i: number) => `[${i}:v][${i}:a]`).join('');
+                const filterComplex = `${filterInputs}concat=n=${validInputFiles.length}:v=1:a=1[outv][outa]`;
+                args.push('-filter_complex', filterComplex, '-map', '[outv]', '-map', '[outa]', '-c:v', 'libx264', '-crf', '23', '-c:a', 'aac', '-y', output);
+              }
+            } else {
+              // Mixed: some have audio, some don't - generate silent audio for videos without audio
+              console.log(chalk.yellow('⚠️  Some videos have no audio - will add silent audio track'));
+
+              args = [];
+              validInputFiles.forEach((path: string) => {
+                args.push('-i', path);
+              });
+
+              const filterParts: string[] = [];
+              const scaleFilters: string[] = [];
+              const silentFilters: string[] = [];
+
+              // Build filters for each video
+              metadataList.forEach((_, i) => {
+                if (needsScaling) {
+                  // Scale video
+                  scaleFilters.push(`[${i}:v]scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=decrease,pad=${targetWidth}:${targetHeight}:(ow-iw)/2:(oh-ih)/2,setsar=1[v${i}]`);
+                  
+                  if (audioStreamInfo[i]) {
+                    // Has audio - use scaled video and original audio
+                    filterParts.push(`[v${i}][${i}:a]`);
+                  } else {
+                    // No audio - use scaled video and generate silent audio
+                    silentFilters.push(`anullsrc=channel_layout=stereo:sample_rate=44100[silent${i}]`);
+                    filterParts.push(`[v${i}][silent${i}]`);
+                  }
+                } else {
+                  // No scaling needed
+                  if (audioStreamInfo[i]) {
+                    // Has audio - use as-is
+                    filterParts.push(`[${i}:v][${i}:a]`);
+                  } else {
+                    // No audio - generate silent audio
+                    silentFilters.push(`anullsrc=channel_layout=stereo:sample_rate=44100[silent${i}]`);
+                    filterParts.push(`[${i}:v][silent${i}]`);
+                  }
+                }
+              });
+
+              // Combine all filters
+              const allFilters = [...scaleFilters, ...silentFilters].filter(f => f.length > 0);
+              const filterComplex = allFilters.length > 0
+                ? `${allFilters.join(';')};${filterParts.join('')}concat=n=${validInputFiles.length}:v=1:a=1[outv][outa]`
+                : `${filterParts.join('')}concat=n=${validInputFiles.length}:v=1:a=1[outv][outa]`;
+
+              args.push('-filter_complex', filterComplex, '-map', '[outv]', '-map', '[outa]', '-c:v', 'libx264', '-crf', '23', '-c:a', 'aac', '-y', output);
+            }
+          } else {
+            // No videos have audio - video-only concat
+            console.log(chalk.yellow('⚠️  All videos have no audio - output will be video-only'));
+            
+            args = [];
+            validInputFiles.forEach((path: string) => {
+              args.push('-i', path);
+            });
+
+            if (needsScaling) {
+              // Scale videos first, then concat
+              const scaleFilters = metadataList.map((_, i) => 
+                `[${i}:v]scale=${targetWidth}:${targetHeight}:force_original_aspect_ratio=decrease,pad=${targetWidth}:${targetHeight}:(ow-iw)/2:(oh-ih)/2,setsar=1[v${i}]`
+              ).join(';');
+              const concatInputs = metadataList.map((_, i) => `[v${i}]`).join('');
+              const filterComplex = `${scaleFilters};${concatInputs}concat=n=${validInputFiles.length}:v=1:a=0[outv]`;
+              args.push('-filter_complex', filterComplex, '-map', '[outv]', '-c:v', 'libx264', '-crf', '23', '-y', output);
+            } else {
+              // No scaling needed
+              const filterInputs = validInputFiles.map((_: string, i: number) => `[${i}:v]`).join('');
+              const filterComplex = `${filterInputs}concat=n=${validInputFiles.length}:v=1:a=0[outv]`;
+              args.push('-filter_complex', filterComplex, '-map', '[outv]', '-c:v', 'libx264', '-crf', '23', '-y', output);
+            }
+          }
         } else {
           // Fast concat mode: use concat demuxer (no re-encode)
-          // Create concat list file
-          const listContent = inputFiles.map((path: string) => `file '${path.replace(/'/g, "'\\''")}'`).join('\n');
+          // Create concat list file with ONLY valid files
+          const listContent = validInputFiles.map((path: string) => `file '${path.replace(/'/g, "'\\''")}'`).join('\n');
           await writeFile(tempListFile, listContent);
 
           args = ['-f', 'concat', '-safe', '0', '-i', tempListFile, '-c', 'copy', '-y', output];
@@ -239,7 +352,7 @@ export function mergeCommand(videoCmd: Command): void {
 
         console.log();
         console.log(chalk.green.bold('✓ Merging Complete!\n'));
-        console.log(chalk.gray(`   Videos merged: ${inputs.length}`));
+        console.log(chalk.gray(`   Videos merged: ${validInputFiles.length}`));
         console.log(chalk.gray(`   Total duration: ${formatDuration(totalDuration)}`));
         console.log(chalk.gray(`   Output size: ${formatFileSize(outputStat.size)}`));
         console.log(chalk.dim(`\n   ${output}`));
@@ -247,7 +360,7 @@ export function mergeCommand(videoCmd: Command): void {
         console.error(chalk.red(`\n✗ Error: ${(error as Error).message}`));
         process.exit(1);
       } finally {
-        // Clean up temp file
+        // Clean up temp file (even on error)
         try {
           await unlink(tempListFile);
         } catch {
