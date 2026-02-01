@@ -26,6 +26,7 @@ export function compressCommand(imageCmd: Command): void {
     .action(async (input: string, options: CompressOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'compress',
           emoji: '🗜️',
           description: 'Advanced image compression with fine-grained quality control. Reduce file sizes significantly while maintaining visual quality.',

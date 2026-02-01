@@ -26,6 +26,7 @@ export function tintCommand(imageCmd: Command): void {
     .action(async (input: string, options: TintOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'tint',
           emoji: '🎨',
           description: 'Apply color tint overlay to images. Accepts hex, rgb(a), named, and ascii color formats.',

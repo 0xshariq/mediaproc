@@ -30,6 +30,7 @@ export function dominantColorCommand(imageCmd: Command): void {
     .action(async (input: string, options: DominantColorOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'dominant-color',
           emoji: '🎨',
           description: 'Extract the most dominant colors from an image. Supports hex, rgb(a), named, and ascii color formats. Useful for palette generation, theme creation, and color analysis.',

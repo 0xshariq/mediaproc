@@ -29,6 +29,7 @@ export function extractCommand(imageCmd: Command): void {
     .action(async (input: string, options: ExtractOptionsExtended) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'extract',
           emoji: '✂️',
           description: 'Extract specific color channels (R, G, B, alpha) or rectangular regions from images. Useful for analysis, masking, and advanced editing.',

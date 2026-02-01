@@ -35,6 +35,7 @@ export function extendCommand(imageCmd: Command): void {
     .action(async (input: string, options: ExtendOptions & { all?: number }) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'extend',
           emoji: '🖼️',
           description: 'Add padding or borders around images. Perfect for creating frames, adding space, or preparing images for specific aspect ratios.',

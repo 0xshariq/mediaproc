@@ -32,6 +32,7 @@ export function compositeCommand(imageCmd: Command): void {
     .action(async (input: string, options: CompositeOptionsExtended) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'composite',
           emoji: '🎨',
           description: 'Layer images on top of each other with precise positioning and blending modes. Perfect for watermarks, overlays, and creative compositions.',

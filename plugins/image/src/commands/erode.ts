@@ -22,6 +22,7 @@ export function erodeCommand(imageCmd: Command): void {
   cmd.addHelpText('after', () => {
     return '\n' +
       createStandardHelp({
+        pluginName: 'image',
         commandName: 'erode',
         emoji: '⚫',
         description: 'Apply morphological erosion to expand dark regions and shrink bright areas. Useful for removing noise and separating objects.',

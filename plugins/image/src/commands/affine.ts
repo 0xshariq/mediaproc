@@ -29,6 +29,7 @@ export function affineCommand(imageCmd: Command): void {
     .action(async (input: string, options: AffineOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'affine',
           emoji: '🔢',
           description: 'Apply affine transformation using a 2x2 matrix. Enables custom scaling, rotation, shearing, and reflection transformations.',

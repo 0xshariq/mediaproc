@@ -26,6 +26,7 @@ export function borderCommand(imageCmd: Command): void {
     .action(async (input: string, options: BorderOptionsExtended) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'border',
           emoji: '🖼️',
           description: 'Add solid color borders or decorative frames around images. Accepts hex, rgb(a), named, and ascii color formats.',

@@ -21,6 +21,7 @@ export function flopCommand(imageCmd: Command): void {
 
   cmd.addHelpText('after', () => {
     return '\n' + createStandardHelp({
+      pluginName: 'image',
       commandName: 'flop',
       emoji: '🔄',
       description: 'Flip image horizontally (mirror left-right). Standalone horizontal flip operation from Sharp.',

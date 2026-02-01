@@ -26,6 +26,7 @@ export function recombCommand(imageCmd: Command): void {
     .action(async (input: string, options: RecombOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'recomb',
           emoji: '🌈',
           description: 'Recombine image channels using a transformation matrix. Create custom color effects by mixing R, G, B channels.',

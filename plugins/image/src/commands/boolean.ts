@@ -28,6 +28,7 @@ export function booleanCommand(imageCmd: Command): void {
   cmd.addHelpText('after', () => {
     return '\n' +
       createStandardHelp({
+          pluginName: 'image',
         commandName: 'boolean',
         emoji: '⚡',
         description: 'Perform bitwise boolean operations between two images. Combine images using AND, OR, or XOR (EOR) logic.',

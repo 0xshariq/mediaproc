@@ -26,6 +26,7 @@ export function optimizeCommand(imageCmd: Command): void {
     .action(async (input: string, options: OptimizeOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'optimize',
           emoji: '⚡',
           description: 'Optimize image file size with minimal quality loss. Perfect for web optimization, faster loading times, and reduced storage.',

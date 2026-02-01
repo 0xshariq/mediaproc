@@ -27,6 +27,7 @@ export function linearCommand(imageCmd: Command): void {
   cmd.addHelpText('after', () => {
     return '\n' +
       createStandardHelp({
+        pluginName: 'image',
         commandName: 'linear',
         emoji: '📐',
         description: 'Apply linear transformation to pixel values. Formula: output = (a * input) + b. Control brightness and contrast precisely.',

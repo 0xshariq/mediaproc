@@ -30,6 +30,7 @@ export function modulateCommand(imageCmd: Command): void {
     .action(async (input: string, options: ModulateOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'modulate',
           emoji: '🎚️',
           description: 'Adjust brightness, saturation, and hue of images. Fine-tune colors and lighting for perfect image appearance.',

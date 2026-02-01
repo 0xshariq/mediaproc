@@ -30,6 +30,7 @@ export function flipCommand(imageCmd: Command): void {
     .action(async (input: string, options: FlipOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'flip',
           emoji: '🔃',
           description: 'Flip (mirror) images horizontally, vertically, or both. Create mirror effects or correct image orientation.',

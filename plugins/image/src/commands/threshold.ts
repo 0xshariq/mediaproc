@@ -26,6 +26,7 @@ export function thresholdCommand(imageCmd: Command): void {
 
   cmd.addHelpText('after', () => {
     return '\n' + createStandardHelp({
+          pluginName: 'image',
       commandName: 'threshold',
       emoji: '⚫⚪',
       description: 'Convert image to pure black and white using threshold value. Pixels above threshold become white, below become black.',

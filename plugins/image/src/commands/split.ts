@@ -35,6 +35,7 @@ export function splitCommand(imageCmd: Command): void {
     .action(async (input: string, options: SplitOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'split',
           emoji: '✂️',
           description: 'Split large images into smaller tiles or grid pieces. Perfect for Instagram carousels, large prints, or processing huge images in chunks.',

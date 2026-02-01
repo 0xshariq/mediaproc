@@ -28,6 +28,7 @@ export function gammaCommand(imageCmd: Command): void {
     .action(async (input: string, options: GammaOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'gamma',
           emoji: '🌓',
           description: 'Apply gamma correction to adjust image midtones without affecting shadows/highlights. Essential for color correction and monitor calibration.',

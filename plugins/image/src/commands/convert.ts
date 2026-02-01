@@ -22,6 +22,7 @@ export function convertCommand(imageCmd: Command): void {
     .action(async (input: string, options: ConvertOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'convert',
           emoji: '🔄',
           description: 'Convert images between different formats. Supports modern formats like WebP and AVIF for better compression and quality.',

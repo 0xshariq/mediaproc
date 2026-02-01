@@ -21,6 +21,7 @@ export function grayscaleCommand(imageCmd: Command): void {
     .action(async (input: string | undefined, options: FilterOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'grayscale',
           emoji: '⚫',
           description: 'Convert color images to grayscale (black and white). Perfect for creating artistic effects, reducing file size, or preparing images for print.',

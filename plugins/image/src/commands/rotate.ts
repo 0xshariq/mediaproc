@@ -28,6 +28,7 @@ export function rotateCommand(imageCmd: Command): void {
     .action(async (input: string, options: RotateOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'rotate',
           emoji: '🔄',
           description: 'Rotate images by any angle. Use positive values for clockwise rotation, negative for counter-clockwise.',

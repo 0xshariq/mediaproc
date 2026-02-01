@@ -27,6 +27,7 @@ export function thumbnailCommand(imageCmd: Command): void {
     .action(async (input: string, options: ThumbnailOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'thumbnail',
           emoji: '🖼️',
           description: 'Generate thumbnails from images. Supports advanced fit modes and quality settings. Perfect for preview images, avatars, or gallery thumbnails.',

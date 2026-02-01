@@ -26,6 +26,7 @@ export function negateCommand(imageCmd: Command): void {
     .action(async (input: string, options: NegateOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'negate',
           emoji: '🔄',
           description: 'Create negative (inverted) image by reversing all colors. Perfect for artistic effects, X-ray style images, or creating unique visual styles.',

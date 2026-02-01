@@ -30,6 +30,7 @@ export function sharpenCommand(imageCmd: Command): void {
     .action(async (input: string, options: SharpenOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'sharpen',
           emoji: '🔪',
           description: 'Sharpen images to enhance details and edges. Perfect for improving slightly blurry photos or enhancing image clarity.',

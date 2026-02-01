@@ -22,6 +22,7 @@ export function blurCommand(imageCmd: Command): void {
       // Show help if requested
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'blur',
           emoji: '🌫️',
           description: 'Apply Gaussian blur effect to images. Control the blur intensity with sigma parameter for subtle to extreme blur effects.',

@@ -37,6 +37,7 @@ export function watermarkCommand(imageCmd: Command): void {
     .action(async (input: string, watermark: string, options: WatermarkOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'watermark',
           emoji: '©️',
           description: 'Add image or text watermark to images for copyright protection, branding, or attribution. Automatically detects if watermark is a file or text.',

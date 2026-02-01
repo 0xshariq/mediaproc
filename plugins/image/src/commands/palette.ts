@@ -30,6 +30,7 @@ export function paletteCommand(imageCmd: Command): void {
     .action(async (input: string, options: PaletteOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'palette',
           emoji: '🎨',
           description: 'Extract and display the dominant color palette from an image. Perfect for design inspiration, brand color extraction, and theme generation.',

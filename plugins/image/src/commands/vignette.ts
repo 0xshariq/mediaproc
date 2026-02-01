@@ -30,6 +30,7 @@ export function vignetteCommand(imageCmd: Command): void {
     .action(async (input: string, options: VignetteOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'vignette',
           emoji: '🌓',
           description: 'Add vignette effect by darkening or lightening the edges of an image. Creates focus on the center and adds artistic mood.',

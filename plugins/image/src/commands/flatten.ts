@@ -24,6 +24,7 @@ export function flattenCommand(imageCmd: Command): void {
 
   cmd.addHelpText('after', () => {
     return '\n' + createStandardHelp({
+      pluginName: 'image',
       commandName: 'flatten',
       emoji: '🎨',
       description: 'Remove alpha channel by merging transparency onto a solid background color. Essential for converting PNGs with transparency to JPEGs.',

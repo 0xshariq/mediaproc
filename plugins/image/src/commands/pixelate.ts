@@ -29,6 +29,7 @@ export function pixelateCommand(imageCmd: Command): void {
     .action(async (input: string, options: PixelateOptions & { quality?: number }) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'pixelate',
           emoji: '🎮',
           description: 'Apply pixelate/mosaic effect to images. Perfect for retro gaming aesthetics, privacy protection, and artistic effects.',

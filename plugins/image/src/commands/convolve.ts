@@ -45,6 +45,7 @@ export function convolveCommand(imageCmd: Command): void {
     .action(async (input: string, options: ConvolveOptionsExtended) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'convolve',
           emoji: '🔬',
           description: 'Apply custom convolution kernels for advanced image filtering. Create edge detection, embossing, custom blurs, and more.',

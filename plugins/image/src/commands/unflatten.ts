@@ -21,6 +21,7 @@ export function unflattenCommand(imageCmd: Command): void {
 
   cmd.addHelpText('after', () => {
     return '\n' + createStandardHelp({
+          pluginName: 'image',
       commandName: 'unflatten',
       emoji: '🔓',
       description: 'Add alpha channel to image (convert RGB to RGBA). Opposite of flatten command.',

@@ -30,6 +30,7 @@ export function mirrorCommand(imageCmd: Command): void {
     .action(async (input: string, options: MirrorOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'mirror',
           emoji: '🪞',
           description: 'Create stunning mirror and kaleidoscope effects by reflecting images horizontally, vertically, or in quadrants. Generate artistic symmetrical images.',

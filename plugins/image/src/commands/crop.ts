@@ -30,6 +30,7 @@ export function cropCommand(imageCmd: Command): void {
     .action(async (input: string, options: CropOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'crop',
           emoji: '✂️',
           description: 'Crop images to specific dimensions and position. Extract a rectangular region from your image with pixel-perfect precision.',

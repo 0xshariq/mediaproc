@@ -34,6 +34,7 @@ export function medianCommand(imageCmd: Command): void {
     .action(async (input: string, options: MedianOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'median',
           emoji: '🔇',
           description: 'Apply median filter to reduce noise while preserving edges. Excellent for removing salt-and-pepper noise, scanner artifacts, and compression noise.',

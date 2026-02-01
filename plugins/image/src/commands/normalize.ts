@@ -24,6 +24,7 @@ export function normalizeCommand(imageCmd: Command): void {
     .action(async (input: string, options: NormalizeOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'normalize',
           emoji: '📊',
           description: 'Normalize image by enhancing contrast using histogram stretching. Automatically adjusts brightness and contrast for optimal image quality.',

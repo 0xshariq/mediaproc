@@ -23,6 +23,7 @@ export function infoCommand(imageCmd: Command): void {
     .action(async (input: string | undefined, options: InfoOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'info',
           emoji: 'ℹ️',
           description: 'Display detailed image information including dimensions, format, color space, file size, and metadata. Perfect for quick inspection.',

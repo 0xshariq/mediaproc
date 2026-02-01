@@ -20,6 +20,7 @@ export function dilateCommand(imageCmd: Command): void {
 
   cmd.addHelpText('after', (): string => {
     createStandardHelp({
+          pluginName: 'image',
       commandName: 'dilate',
       emoji: '⚪',
       description: 'Apply morphological dilation to expand bright regions and fill gaps. Useful for closing holes and connecting nearby objects.',

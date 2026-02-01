@@ -29,6 +29,7 @@ export function resizeCommand(imageCmd: Command): void {
       // Show help if requested
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'resize',
           emoji: '📐',
           description: 'Resize images to specified dimensions with advanced options and filters. Supports multiple fit modes, quality control, and various output formats.',

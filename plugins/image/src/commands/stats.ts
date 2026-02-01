@@ -25,6 +25,7 @@ export function statsCommand(imageCmd: Command): void {
     .action(async (input: string, options: StatsOptionsExtended) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'stats',
           emoji: '📊',
           description: 'Analyze and display comprehensive image information including dimensions, format, color space, EXIF data, and color statistics.',

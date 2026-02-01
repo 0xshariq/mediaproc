@@ -34,6 +34,7 @@ export function claheCommand(imageCmd: Command): void {
     .action(async (input: string, options: ClaheOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'clahe',
           emoji: '✨',
           description: 'Apply Contrast Limited Adaptive Histogram Equalization to enhance local contrast. Especially useful for medical imaging, underwater photos, and low-light conditions.',

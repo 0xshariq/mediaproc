@@ -40,6 +40,7 @@ export function batchCommand(imageCmd: Command): void {
     .action(async (directory: string, options: BatchOptions) => {
       if (options.help || !directory) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'batch',
           emoji: '📦',
           description: 'Process multiple images at once with any operation. Perfect for bulk processing, batch conversions, and automated workflows.',

@@ -33,6 +33,7 @@ export function metadataCommand(imageCmd: Command): void {
     .action(async (input: string, options: MetadataCommandOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'metadata',
           emoji: '🏷️',
           description: 'View, export, or remove image metadata including EXIF, IPTC, XMP, and ICC profile data. Essential for privacy and optimization.',

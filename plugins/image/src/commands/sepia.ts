@@ -30,6 +30,7 @@ export function sepiaCommand(imageCmd: Command): void {
     .action(async (input: string, options: SepiaOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'sepia',
           emoji: '📜',
           description: 'Apply sepia tone effect to create vintage, antique, or nostalgic photographs. Converts colors to warm brown tones.',

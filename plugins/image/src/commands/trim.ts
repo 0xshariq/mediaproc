@@ -26,6 +26,7 @@ export function trimCommand(imageCmd: Command): void {
     .action(async (input: string, options: TrimOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'image',
           commandName: 'trim',
           emoji: '✂️',
           description: 'Automatically trim/remove boring border edges from images. Perfect for removing whitespace, borders, or uniform backgrounds.',
