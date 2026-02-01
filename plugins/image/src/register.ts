@@ -66,7 +66,9 @@ export const version = currentVersion;
 export function register(program: Command): void {
   const imageCmd = program
     .command('image')
-    .description('Image processing commands (powered by Sharp)');
+    .description('Image processing commands (powered by Sharp)')
+    .version(currentVersion, '-v, --version', 'Output the image plugin version')
+    .helpOption('-h, --help', 'Display help for image plugin');
 
   // Transform operations
   resizeCommand(imageCmd);
