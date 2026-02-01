@@ -107,7 +107,7 @@ mediaproc image watermark photo.jpg --text "Copyright 2026"
 
 [Full Image Plugin Documentation →](plugins/image/README.md)
 
-#### Video Plugin (7 commands)
+#### Video Plugin (8 commands)
 
 ```bash
 mediaproc video compress movie.mp4 --quality medium
@@ -124,7 +124,7 @@ mediaproc video extract movie.mp4 --type audio --output audio.mp3
 
 [Full Video Plugin Documentation →](plugins/video/README.md)
 
-#### Audio Plugin (5 commands)
+#### Audio Plugin (6 commands)
 
 ```bash
 mediaproc audio convert song.wav --format mp3 --quality high
