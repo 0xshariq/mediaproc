@@ -4,7 +4,10 @@ export interface MediaProcPlugin {
   name: string;
   version: string;
   register: (program: Command) => void | Promise<void>;
-  isBuiltIn?: boolean; // Flag to indicate if plugin is built-in/official
+  isBuiltIn?: boolean;
+  description?: string;
+  author?: string;
+  systemRequirements?: string[];
 }
 
 export interface PluginMetadata {
