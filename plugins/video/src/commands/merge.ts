@@ -132,13 +132,33 @@ export function mergeCommand(videoCmd: Command): void {
 
         for (let i = 0; i < inputFiles.length; i++) {
           const inputPath = inputFiles[i];
-          const metadata = await getVideoMetadata(inputPath);
+          let metadata;
+          try {
+            metadata = await getVideoMetadata(inputPath);
+          } catch (metaErr: any) {
+            // Make ffprobe failures non-fatal warnings
+            console.log(chalk.yellow('\u26a0\ufe0f  Warning:'), `ffprobe failed for ${inputPath}`);
+            console.log(chalk.dim(metaErr.message || String(metaErr)));
+            console.log(chalk.yellow('This may be due to an unsupported format, incomplete file, or codec issue.'));
+            console.log(chalk.yellow('Skipping this file from merge...'));
+            continue;
+          }
           const fileStat = await stat(inputPath);
           metadataList.push(metadata);
           totalDuration += metadata.duration;
           totalSize += fileStat.size;
           console.log(chalk.gray(`   ${i + 1}. ${inputPath}`));
           console.log(chalk.dim(`      ${metadata.width}x${metadata.height}, ${formatDuration(metadata.duration)}, ${metadata.codec}`));
+        }
+        
+        // Check if we have any valid files after analysis
+        if (metadataList.length === 0) {
+          spinner.fail(chalk.red('No valid video files to merge'));
+          process.exit(1);
+        }
+        
+        if (metadataList.length < inputFiles.length) {
+          console.log(chalk.yellow(`\u26a0\ufe0f  Only ${metadataList.length} of ${inputFiles.length} files are valid for merging`));
         }
 
         console.log();

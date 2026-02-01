@@ -29,6 +29,15 @@ export interface VideoMetadata {
   format: string;
 }
 
+export interface StreamInfo {
+  hasVideo: boolean;
+  hasAudio: boolean;
+  videoStreamIndex: number;
+  audioStreamIndex: number;
+  audioStreams: number[];
+  videoStreams: number[];
+}
+
 /**
  * Check if ffmpeg and ffprobe are available, with styled output
  * If strict=true, both must be present. If strict=false, only ffmpeg is checked.
@@ -231,6 +240,57 @@ export async function getVideoMetadata(input: string): Promise<VideoMetadata> {
         resolve(metadata);
       } catch (error) {
         console.error(styleFFmpegOutput(`Failed to parse ffprobe output: ${(error as Error).message}`));
+        reject(new Error(`Failed to parse ffprobe output: ${(error as Error).message}`));
+      }
+    });
+  });
+}
+
+/**
+ * Get stream information (audio/video streams) from a media file
+ */
+export async function getStreamInfo(input: string): Promise<StreamInfo> {
+  if (!(await ensureFFmpegAvailable())) return Promise.reject(new Error('FFmpeg/ffprobe not installed'));
+  return new Promise((resolve, reject) => {
+    const ffprobe = spawn('ffprobe', [
+      '-v', 'quiet',
+      '-print_format', 'json',
+      '-show_streams',
+      input,
+    ]);
+    let stdout = '';
+    let stderr = '';
+    ffprobe.stdout.on('data', (data) => {
+      stdout += data.toString();
+    });
+    ffprobe.stderr.on('data', (data) => {
+      stderr += data.toString();
+    });
+    ffprobe.on('close', (code) => {
+      if (code !== 0) {
+        reject(new Error(`ffprobe failed: ${stderr}`));
+        return;
+      }
+      try {
+        const data = JSON.parse(stdout);
+        const videoStreams = data.streams
+          .map((s: any, idx: number) => ({ ...s, index: idx }))
+          .filter((s: any) => s.codec_type === 'video')
+          .map((s: any) => s.index);
+        const audioStreams = data.streams
+          .map((s: any, idx: number) => ({ ...s, index: idx }))
+          .filter((s: any) => s.codec_type === 'audio')
+          .map((s: any) => s.index);
+        const streamInfo: StreamInfo = {
+          hasVideo: videoStreams.length > 0,
+          hasAudio: audioStreams.length > 0,
+          videoStreamIndex: videoStreams[0] ?? -1,
+          audioStreamIndex: audioStreams[0] ?? -1,
+          videoStreams,
+          audioStreams,
+        };
+        resolve(streamInfo);
+      } catch (error) {
         reject(new Error(`Failed to parse ffprobe output: ${(error as Error).message}`));
       }
     });

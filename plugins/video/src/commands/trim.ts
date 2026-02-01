@@ -190,7 +190,7 @@ export function trimCommand(videoCmd: Command): void {
           // Codec settings
           if (options.fast) {
             args.push('-c', 'copy');
-          } else if (options.codec && ['h264','h265','hevc'].includes(options.codec)) {
+          } else if (options.codec && ['h264', 'h265', 'hevc'].includes(options.codec)) {
             const codecMap: Record<string, string> = {
               'h264': 'libx264',
               'h265': 'libx265',
@@ -225,21 +225,33 @@ export function trimCommand(videoCmd: Command): void {
             )
           );
 
-          // Try to get metadata for the output file (ffprobe)
+          // Try to get metadata for the output file (ffprobe), but always treat failure as a warning, never an error
+          const fs = await import('fs/promises');
+          let fileExists = false;
           try {
-            const outMeta = await getVideoMetadata(outputFile);
-            if (options.verbose) {
-              console.log(chalk.gray(`Output file metadata: duration=${outMeta.duration}, codec=${outMeta.codec}, size=${outMeta.width}x${outMeta.height}`));
-            }
-          } catch (ffprobeErr: any) {
-            const msg = ffprobeErr && ffprobeErr.message ? ffprobeErr.message : String(ffprobeErr);
-            const isWarning = options.fast; // In fast mode, this is often not critical
-            const prefix = isWarning ? chalk.yellow('⚠️  Warning:') : chalk.red('✖ Error:');
-            console.log(prefix, `ffprobe failed for output file: ${outputFile}`);
-            console.log(chalk.dim(msg));
-            if (!isWarning) {
+            await fs.access(outputFile);
+            fileExists = true;
+          } catch { }
+          if (fileExists) {
+            try {
+              const outMeta = await getVideoMetadata(outputFile);
+              if (options.verbose) {
+                console.log(chalk.gray(`Output file metadata: duration=${outMeta.duration}, codec=${outMeta.codec}, size=${outMeta.width}x${outMeta.height}`));
+              }
+            } catch (ffprobeErr: any) {
+              const msg = ffprobeErr && ffprobeErr.message ? ffprobeErr.message : String(ffprobeErr);
+              // Always treat as warning, never error
+              console.log(chalk.yellow('⚠️  Warning:'), `ffprobe failed for output file: ${outputFile}`);
+              console.log(chalk.dim(msg));
               console.log(chalk.yellow('This may be due to an unsupported format, incomplete file, or codec issue. The file may still be usable.'));
+              // Optionally, try a fallback: print file size and mtime
+              try {
+                const stat = await fs.stat(outputFile);
+                console.log(chalk.gray(`Output file exists. Size: ${stat.size} bytes, Modified: ${stat.mtime}`));
+              } catch { }
             }
+          } else {
+            console.log(chalk.yellow('⚠️  Warning:'), `Output file not found: ${outputFile}`);
           }
         }
 

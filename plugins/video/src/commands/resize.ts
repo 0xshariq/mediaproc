@@ -187,7 +187,7 @@ export function resizeCommand(videoCmd: Command): void {
           targetWidth = preset.width;
           targetHeight = preset.height;
         } else {
-          throw new Error(`Invalid scale: ${options.scale}. Use: 360p-8K or WIDTHxHEIGHT`);
+          throw new Error(`Invalid scale: ${options.scale}. Use: 144p-8K or WIDTHxHEIGHT`);
         }
 
         // Ensure even dimensions
@@ -275,7 +275,30 @@ export function resizeCommand(videoCmd: Command): void {
           // Execute
           spinner.text = `[${i + 1}/${inputFiles.length}] Resizing: ${inputFile}`;
 
+          let lastProgress = '';
           await runFFmpeg(args, options.verbose, (line) => {
+            // Parse progress from FFmpeg output
+            if (line.includes('frame=') && line.includes('fps=') && line.includes('time=')) {
+              const frameMatch = line.match(/frame=\s*(\d+)/);
+              const fpsMatch = line.match(/fps=\s*([\d.]+)/);
+              const timeMatch = line.match(/time=\s*([\d:.]+)/);
+              const sizeMatch = line.match(/size=\s*([\d.]+\w+)/);
+              const speedMatch = line.match(/speed=\s*([\d.]+x)/);
+              
+              if (frameMatch && fpsMatch && timeMatch) {
+                const frame = frameMatch[1];
+                const fps = fpsMatch[1];
+                const time = timeMatch[1];
+                const size = sizeMatch ? sizeMatch[1] : 'N/A';
+                const speed = speedMatch ? speedMatch[1] : 'N/A';
+                const progress = `Frame ${frame} • ${fps} fps • ${time} • ${size} • ${speed}`;
+                
+                if (progress !== lastProgress) {
+                  spinner.text = `[${i + 1}/${inputFiles.length}] Resizing: ${inputFile} | ${progress}`;
+                  lastProgress = progress;
+                }
+              }
+            }
             if (options.verbose) {
               logFFmpegOutput(line);
             }

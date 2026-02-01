@@ -121,8 +121,13 @@ export function transcodeCommand(videoCmd: Command): void {
           args.push('-crf', '23');
         }
 
-        // Audio encoding
-        const audioCodec = options.audioCodec || 'aac';
+        // Audio encoding - map to proper codec names
+        const audioCodecMap: Record<string, string> = {
+          'opus': 'libopus',
+          'mp3': 'libmp3lame',
+          'aac': 'aac',
+        };
+        const audioCodec = audioCodecMap[options.audioCodec || 'aac'] || options.audioCodec || 'aac';
         args.push('-c:a', audioCodec);
         args.push('-b:a', options.audioBitrate || '128k');
 
