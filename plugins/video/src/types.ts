@@ -11,10 +11,17 @@ export type VideoFormats =
   | 'mpeg'
   | 'm4v'
   | '3gp'
+  | '3g2'
   | 'f4v'
   | 'ts'
   | 'mts'
-  | 'm2ts';
+  | 'm2ts'
+  | 'vob'
+  | 'ogv'
+  | 'divx'
+  | 'asf'
+  | 'rm'
+  | 'rmvb';
 
 // All common options for video commands
 export interface InVideoOptions {
