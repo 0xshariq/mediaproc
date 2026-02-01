@@ -2,32 +2,15 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import { execa } from 'execa';
-import type { PluginManager } from '../plugin-manager.js';
-
-/**
- * Check if a plugin is installed globally
- */
-async function isPluginGlobal(pluginName: string): Promise<boolean> {
-  try {
-    // Try npm list -g
-    const { stdout } = await execa('npm', ['list', '-g', '--depth=0', pluginName], {
-      stdio: 'pipe',
-      reject: false
-    });
-    return stdout.includes(pluginName);
-  } catch { }
-
-  try {
-    // Try pnpm list -g
-    const { stdout } = await execa('pnpm', ['list', '-g', '--depth=0', pluginName], {
-      stdio: 'pipe',
-      reject: false
-    });
-    return stdout.includes(pluginName);
-  } catch { }
-
-  return false;
-}
+import {
+  type PluginManager,
+  detectPackageManager,
+  isPluginGlobal,
+  buildUninstallArgs,
+  verifyPluginInstallation,
+  isPluginLoaded,
+  resolvePluginPackage
+} from '../utils/index.js';
 
 export function removeCommand(program: Command, pluginManager: PluginManager): void {
   program
@@ -40,10 +23,17 @@ export function removeCommand(program: Command, pluginManager: PluginManager): v
       const spinner = ora(`Removing ${chalk.cyan(plugin)}...`).start();
 
       try {
-        // Ensure plugin name is properly formatted
-        const pluginName = plugin.startsWith('@mediaproc/')
-          ? plugin
-          : `@mediaproc/${plugin}`;
+        // Resolve plugin name properly (supports all plugin types)
+        const pluginName = resolvePluginPackage(plugin);
+
+        // Check if plugin is actually installed
+        const isInstalled = await verifyPluginInstallation(pluginName) || isPluginLoaded(pluginName, pluginManager);
+        
+        if (!isInstalled) {
+          spinner.fail(chalk.red(`Plugin ${pluginName} is not installed`));
+          console.log(chalk.dim('View installed plugins: ') + chalk.white('mediaproc list'));
+          process.exit(1);
+        }
 
         // Check if plugin is loaded and is marked as built-in (shouldn't happen, but safety check)
         const pluginInstance = pluginManager.getPlugin(pluginName);
@@ -75,23 +65,12 @@ export function removeCommand(program: Command, pluginManager: PluginManager): v
         }
 
         // Determine package manager (prefer pnpm, fallback to npm)
-        let packageManager = 'pnpm';
-        try {
-          await execa('pnpm', ['--version'], { stdio: 'pipe' });
-        } catch {
-          packageManager = 'npm';
-        }
+        const packageManager = await detectPackageManager();
 
         // Build uninstall command
-        const args: string[] = [];
-        if (packageManager === 'pnpm') {
-          args.push('remove');
-          if (uninstallGlobally) args.push('-g');
-        } else {
-          args.push('uninstall');
-          if (uninstallGlobally) args.push('-g');
-        }
-        args.push(pluginName);
+        const args = buildUninstallArgs(packageManager, [pluginName], {
+          global: uninstallGlobally
+        });
 
         // Set working directory for local uninstalls
         const uninstallOptions: any = {
