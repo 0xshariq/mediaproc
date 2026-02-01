@@ -5,6 +5,7 @@ import { normalizeCommand } from './commands/normalize.js';
 import { trimCommand } from './commands/trim.js';
 import { mergeCommand } from './commands/merge.js';
 import { extractCommand } from './commands/extract.js';
+import { metadataCommand } from './commands/metadata.js';
 
 // ESM dynamic import for package.json version
 import { fileURLToPath } from 'url';
@@ -33,4 +34,5 @@ export function register(program: Command): void {
   trimCommand(program);
   mergeCommand(program);
   extractCommand(program);
+  metadataCommand(program);
 }

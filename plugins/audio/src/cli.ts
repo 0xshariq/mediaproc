@@ -7,6 +7,7 @@ import { mergeCommand } from './commands/merge.js';
 import { normalizeCommand } from './commands/normalize.js';
 import { extractCommand } from './commands/extract.js';
 import { version } from './register.js';
+import { metadataCommand } from './commands/metadata.js';
 
 const program = new Command();
 program
@@ -108,6 +109,7 @@ extractCommand(program);
 mergeCommand(program);
 normalizeCommand(program);
 trimCommand(program);
+metadataCommand(program);
 
 program.hook('preAction', explainPreActionHook);
 program.hook('postAction', () => {
