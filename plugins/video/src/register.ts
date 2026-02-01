@@ -26,6 +26,9 @@ try {
 export const name = '@mediaproc/video';
 export const version = currentVersion;
 export const isBuiltIn = true;
+export const description = 'Professional video processing powered by FFmpeg - compress, transcode, trim, resize, merge, and extract media';
+export const author = 'MediaProc Team';
+export const systemRequirements = ['FFmpeg 4.0+'];
 
 export function register(program: Command): void {
   const videoCmd = program
