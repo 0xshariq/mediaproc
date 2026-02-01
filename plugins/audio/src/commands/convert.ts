@@ -32,6 +32,7 @@ export function convertCommand(audioCmd: Command): void {
     .action(async (input: string | undefined, options: ConvertOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'audio',
           commandName: 'convert',
           emoji: '🔄',
           description: 'Convert audio files between formats (MP3, AAC, WAV, FLAC, OGG, Opus). Supports quality presets, bitrate control, and sample rate adjustment.',

@@ -23,6 +23,7 @@ export function normalizeCommand(audioCmd: Command): void {
     .action(async function (input: string | undefined, options: NormalizeOptions) {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'audio',
           commandName: 'normalize',
           emoji: '📊',
           description: 'Normalize audio levels using EBU R128 loudness normalization standard. Ensures consistent volume across different audio files.',

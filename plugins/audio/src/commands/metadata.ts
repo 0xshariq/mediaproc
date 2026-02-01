@@ -52,6 +52,7 @@ export function metadataCommand(audioCmd: Command): void {
     .action(async (input: string, options: MetadataOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'audio',
           commandName: 'metadata',
           emoji: '📊',
           description: 'Display comprehensive metadata information about audio files. Shows format details, streams, codecs, bitrates, sample rates, durations, channels, and tags. Export to JSON for programmatic use.',
@@ -145,7 +146,7 @@ export function metadataCommand(audioCmd: Command): void {
         // JSON output
         if (options.json) {
           const jsonOutput = JSON.stringify(allMetadata.length === 1 ? allMetadata[0] : allMetadata, null, 2);
-          
+
           if (options.output) {
             await writeFile(options.output, jsonOutput, 'utf-8');
             console.log(chalk.green(`\n✓ Metadata exported to ${options.output}`));
@@ -249,13 +250,13 @@ function displayHumanReadableMetadata(metadata: ComprehensiveAudioMetadata, verb
     console.log(chalk.yellow.bold('\n🏷️  Tags:'));
     const importantTags = ['title', 'artist', 'album', 'album_artist', 'date', 'genre', 'track', 'disc'];
     const tags = metadata.format.tags || {};
-    
+
     importantTags.forEach(tag => {
       if (tags[tag]) {
         console.log(chalk.gray(`  ${capitalize(tag)}: ${tags[tag]}`));
       }
     });
-    
+
     if (verbose) {
       const otherTags = Object.keys(tags).filter(k => !importantTags.includes(k.toLowerCase()));
       if (otherTags.length > 0) {

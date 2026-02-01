@@ -37,6 +37,7 @@ export function extractCommand(audioCmd: Command): void {
     .action(async (input: string | undefined, options: ExtractOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'audio',
           commandName: 'extract',
           emoji: '🎵',
           description: 'Extract audio track from video files. Supports multiple output formats and quality presets.',

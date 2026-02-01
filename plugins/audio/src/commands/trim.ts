@@ -28,6 +28,7 @@ export function trimCommand(audioCmd: Command): void {
     .action(async function (input: string | undefined, options: TrimOptions) {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'audio',
           commandName: 'trim',
           emoji: '✂️',
           description: 'Cut audio files to specific time ranges. Supports precise timing with optional fade effects.',

@@ -29,6 +29,7 @@ export function mergeCommand(audioCmd: Command): void {
     .action(async (inputs: string[] | undefined, options: MergeOptions) => {
       if (options.help || !inputs || inputs.length === 0) {
         createStandardHelp({
+          pluginName: 'audio',
           commandName: 'merge',
           emoji: '🔗',
           description: 'Concatenate multiple audio files into a single output file. Supports crossfade transitions and automatic audio normalization.',
