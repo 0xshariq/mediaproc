@@ -62,6 +62,10 @@ try {
 
 export const name = '@mediaproc/image';
 export const version = currentVersion;
+export const isBuiltIn = true;
+export const description = 'Image processing powered by Sharp - resize, convert, filters, effects, compression, and optimization';
+export const author = 'MediaProc Team';
+export const systemRequirements = ['Sharp (auto-installed)'];
 
 export function register(program: Command): void {
   const imageCmd = program
