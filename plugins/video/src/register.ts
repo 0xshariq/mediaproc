@@ -31,7 +31,9 @@ export function register(program: Command): void {
   const videoCmd = program
     .command('video')
     .description('Video processing commands (powered by FFmpeg)')
-    .version(version);
+    .version(currentVersion, '-v, --version', 'Output the video plugin version')
+    .helpOption('-h, --help', 'Display help for video plugin');
+    
   // Register commands directly without 'video' subcommand
   compressCommand(videoCmd);
   convertCommand(videoCmd);
