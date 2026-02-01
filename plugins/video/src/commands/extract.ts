@@ -1,6 +1,6 @@
 import type { Command } from 'commander';
 import chalk from 'chalk';
-import { runFFmpeg, checkFFmpeg } from '../utils/ffmpeg.js';
+import { runFFmpeg, checkFFmpeg, getStreamInfo } from '../utils/ffmpeg.js';
 import { validatePaths, resolveOutputPaths, createStandardHelp, VIDEO_EXTENSIONS } from '@mediaproc/core';
 import ora from 'ora';
 import { logFFmpegOutput } from '../utils/ffmpegLogger.js';
@@ -67,10 +67,31 @@ export function extractCommand(videoCmd: Command): void {
         const spinner = ora(chalk.cyan(`Extracting audio from ${inputFile}`)).start();
         try {
           if (!(await checkFFmpeg())) throw new Error(chalk.red('FFmpeg not found.'));
+          
+          // Detect audio streams before extraction
+          spinner.text = chalk.cyan(`Checking streams in ${inputFile}...`);
+          const streamInfo = await getStreamInfo(inputFile);
+          if (!streamInfo.hasAudio) {
+            spinner.fail(chalk.yellow(`⚠️  No audio stream found in ${inputFile}`));
+            console.log(chalk.dim('This file does not contain any audio tracks. Skipping...'));
+            continue;
+          }
+          if (streamInfo.audioStreams.length > 1) {
+            console.log(chalk.cyan(`Found ${streamInfo.audioStreams.length} audio streams. Using stream ${options.stream || 0}.`));
+          }
+          
+          spinner.text = chalk.cyan(`Extracting audio from ${inputFile}...`);
           const args = ['-i', inputFile];
           if (options.force) args.push('-y');
           args.push('-vn');
-          if (options.stream) args.push('-map', `0:a:${options.stream}`);
+          // Use flexible mapping to handle stream detection properly
+          const streamIdx = parseInt(options.stream || '0');
+          if (streamIdx < streamInfo.audioStreams.length) {
+            args.push('-map', `0:${streamInfo.audioStreams[streamIdx]}`);
+          } else {
+            spinner.fail(chalk.red(`Audio stream ${streamIdx} not found. Available streams: ${streamInfo.audioStreams.length}`));
+            continue;
+          }
           if (options.start) args.push('-ss', options.start);
           if (options.duration) args.push('-t', options.duration);
           args.push('-acodec', options.format || 'mp3');
@@ -150,6 +171,17 @@ export function extractCommand(videoCmd: Command): void {
         const spinner = ora(chalk.cyan(`Extracting frame(s) from ${inputFile}`)).start();
         try {
           if (!(await checkFFmpeg())) throw new Error(chalk.red('FFmpeg not found.'));
+          
+          // Verify video stream exists
+          spinner.text = chalk.cyan(`Checking video stream in ${inputFile}...`);
+          const streamInfo = await getStreamInfo(inputFile);
+          if (!streamInfo.hasVideo) {
+            spinner.fail(chalk.yellow(`⚠️  No video stream found in ${inputFile}`));
+            console.log(chalk.dim('This file does not contain any video tracks. Skipping...'));
+            continue;
+          }
+          
+          spinner.text = chalk.cyan(`Extracting frame(s) from ${inputFile}...`);
           const args = ['-i', inputFile];
           if (options.force) args.push('-y');
           if (options.time) args.push('-ss', options.time);
@@ -232,6 +264,17 @@ export function extractCommand(videoCmd: Command): void {
         const spinner = ora(chalk.cyan(`Extracting thumbnail from ${inputFile}`)).start();
         try {
           if (!(await checkFFmpeg())) throw new Error(chalk.red('FFmpeg not found.'));
+          
+          // Verify video stream exists
+          spinner.text = chalk.cyan(`Checking video stream in ${inputFile}...`);
+          const streamInfo = await getStreamInfo(inputFile);
+          if (!streamInfo.hasVideo) {
+            spinner.fail(chalk.yellow(`⚠️  No video stream found in ${inputFile}`));
+            console.log(chalk.dim('This file does not contain any video tracks. Skipping...'));
+            continue;
+          }
+          
+          spinner.text = chalk.cyan(`Extracting thumbnail from ${inputFile}...`);
           const [width, height] = options.size.split('x');
           const args = ['-i', inputFile];
           if (options.force) args.push('-y');
