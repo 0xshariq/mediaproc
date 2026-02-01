@@ -39,6 +39,7 @@ export function trimCommand(videoCmd: Command): void {
       // Show help if requested
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'video',
           commandName: 'trim',
           emoji: '✂️',
           description: 'Trim videos to specific time ranges. Extract clips from longer videos with precision timing. Supports both fast stream copy mode and re-encoding mode. Can process single files or entire directories.',

@@ -64,6 +64,7 @@ export function convertCommand(videoCmd: Command): void {
             // Show help if requested
             if (options.help || !input) {
                 createStandardHelp({
+                    pluginName: 'video',
                     commandName: 'convert',
                     emoji: '🔄',
                     description: 'Convert videos between different formats with smart codec defaults. Supports remuxing (fast, lossless) when only container changes, or re-encoding when codec conversion needed. Handles single files or entire directories.',
@@ -102,6 +103,12 @@ export function convertCommand(videoCmd: Command): void {
                         'Fast mode: Uses remuxing when only container changes (instant, lossless)',
                         'Directory support: Automatically processes all video files in folder',
                         'Format detection: Automatically detects if re-encoding needed or remux possible'
+                    ],
+                    tips: [
+                        'Use --fast for quick container changes without quality loss',
+                        'Lower CRF values yield better quality but larger files',
+                        'Specify --bitrate for precise file size control',
+                        'Use --hw-accel if you have a compatible GPU for faster encoding'
                     ]
                 });
                 return;

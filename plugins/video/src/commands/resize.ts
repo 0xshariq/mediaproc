@@ -43,6 +43,7 @@ export function resizeCommand(videoCmd: Command): void {
       // Show help if requested (before input validation)
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'video',
           commandName: 'resize',
           emoji: '🎬',
           description: 'Resize videos to different resolutions while maintaining quality. Supports standard resolutions from 360p to 8K (4320p), custom dimensions, aspect ratios, and various codecs. Can process single files or entire directories.',

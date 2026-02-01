@@ -42,6 +42,7 @@ export function compressCommand(videoCmd: Command): void {
       // Show help if requested (before input validation)
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'video',
           commandName: 'compress',
           emoji: '🗜️',
           description: 'Compress video files to reduce file size while maintaining visual quality. Uses modern codecs and smart compression techniques to achieve optimal file sizes. Can process single files or entire directories.',

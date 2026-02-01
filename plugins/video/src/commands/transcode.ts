@@ -30,6 +30,7 @@ export function transcodeCommand(videoCmd: Command): void {
     .action(async (input: string, options: TranscodeOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'video',
           commandName: 'transcode',
           emoji: '🎬',
           description: 'Transcode video files to different formats and codecs. Supports popular formats like MP4, WebM, MKV, and AVI with various codec options.',
@@ -55,6 +56,11 @@ export function transcodeCommand(videoCmd: Command): void {
             { command: 'transcode video.avi -f mkv --codec h265 --audio-codec aac', description: 'Transcode AVI to MKV with H.265 video and AAC audio' },
             { command: 'transcode videos/ -o output/ --format mp4', description: 'Batch transcode all videos in folder to MP4 format' }
           ],
+          tips: [
+            'Choose codecs based on target device compatibility and quality needs',
+            'Higher bitrates yield better quality but larger file sizes',
+            'Use --dry-run to preview the FFmpeg command before execution'
+          ]
         })
       }
       try {

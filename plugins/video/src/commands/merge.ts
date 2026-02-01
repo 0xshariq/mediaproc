@@ -39,6 +39,7 @@ export function mergeCommand(videoCmd: Command): void {
     .action(async (inputs: string[], options: MergeOptions) => {
       if (options.help || !inputs) {
         createStandardHelp({
+          pluginName: 'video',
           commandName: 'merge',
           emoji: '🔗',
           description: 'Merge multiple video files into a single video. Supports fast concatenation (same format) or re-encoding (different formats). Can merge videos from different sources with automatic format conversion.',

@@ -26,6 +26,7 @@ export function extractCommand(videoCmd: Command): void {
     .action(async (input: string, options: any) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'video',
           commandName: 'extract audio',
           emoji: '🎵',
           description: 'Extract audio from video files with advanced options.',
@@ -48,6 +49,10 @@ export function extractCommand(videoCmd: Command): void {
             { command: 'extract audio video.mp4 -o out.wav -f wav', description: 'Extract as WAV format' },
             { command: 'extract audio video.mp4 --bitrate 256k', description: 'Set audio bitrate to 256k' },
             { command: 'extract audio video.mp4 --stream 1', description: 'Extract second audio stream' }
+          ],
+          tips: [
+            'Specify --stream to choose among multiple audio tracks',
+            'Use --volume to adjust loudness of extracted audio',
           ]
         });
         return;
@@ -67,7 +72,7 @@ export function extractCommand(videoCmd: Command): void {
         const spinner = ora(chalk.cyan(`Extracting audio from ${inputFile}`)).start();
         try {
           if (!(await checkFFmpeg())) throw new Error(chalk.red('FFmpeg not found.'));
-          
+
           // Detect audio streams before extraction
           spinner.text = chalk.cyan(`Checking streams in ${inputFile}...`);
           const streamInfo = await getStreamInfo(inputFile);
@@ -79,7 +84,7 @@ export function extractCommand(videoCmd: Command): void {
           if (streamInfo.audioStreams.length > 1) {
             console.log(chalk.cyan(`Found ${streamInfo.audioStreams.length} audio streams. Using stream ${options.stream || 0}.`));
           }
-          
+
           spinner.text = chalk.cyan(`Extracting audio from ${inputFile}...`);
           const args = ['-i', inputFile];
           if (options.force) args.push('-y');
@@ -133,6 +138,7 @@ export function extractCommand(videoCmd: Command): void {
     .action(async function (input: string, options: any) {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'video',
           commandName: 'extract frame',
           emoji: '🖼️',
           description: 'Extract frames from video files with advanced options.',
@@ -152,6 +158,11 @@ export function extractCommand(videoCmd: Command): void {
             { command: 'extract frame video.mp4 -t 00:00:10', description: 'Extract frame at 10 seconds' },
             { command: 'extract frame video.mp4 --frames 0:100:10', description: 'Extract every 10th frame from 0 to 100' },
             { command: 'extract frame video.mp4 --vf "crop=320:240"', description: 'Apply crop filter to frame' }
+          ],
+          tips: [
+            'Specify --frames for batch extraction of multiple frames',
+            'Use --vf to apply additional filters like crop or rotate',
+            'Choose output format based on your image quality and size needs'
           ]
         });
         return;
@@ -171,7 +182,7 @@ export function extractCommand(videoCmd: Command): void {
         const spinner = ora(chalk.cyan(`Extracting frame(s) from ${inputFile}`)).start();
         try {
           if (!(await checkFFmpeg())) throw new Error(chalk.red('FFmpeg not found.'));
-          
+
           // Verify video stream exists
           spinner.text = chalk.cyan(`Checking video stream in ${inputFile}...`);
           const streamInfo = await getStreamInfo(inputFile);
@@ -180,7 +191,7 @@ export function extractCommand(videoCmd: Command): void {
             console.log(chalk.dim('This file does not contain any video tracks. Skipping...'));
             continue;
           }
-          
+
           spinner.text = chalk.cyan(`Extracting frame(s) from ${inputFile}...`);
           const args = ['-i', inputFile];
           if (options.force) args.push('-y');
@@ -225,6 +236,7 @@ export function extractCommand(videoCmd: Command): void {
     .action(async function (input: string, options: any) {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'video',
           commandName: 'extract thumbnail',
           emoji: '🖼️',
           description: 'Extract thumbnails from video files with advanced options.',
@@ -245,6 +257,11 @@ export function extractCommand(videoCmd: Command): void {
             { command: 'extract thumbnail video.mp4 -t 00:00:05', description: 'Extract thumbnail at 5 seconds' },
             { command: 'extract thumbnail video.mp4 --size 640x360', description: 'Set thumbnail size to 640x360' },
             { command: 'extract thumbnail video.mp4 --quality 5', description: 'Set JPEG/PNG quality to 5' }
+          ],
+          tips: [
+            'Choose size based on your display needs to optimize file size',
+            'Lower quality values yield better image quality but larger files',
+            'Use --vf to apply additional filters like crop or rotate'
           ]
         });
         return;
@@ -264,7 +281,7 @@ export function extractCommand(videoCmd: Command): void {
         const spinner = ora(chalk.cyan(`Extracting thumbnail from ${inputFile}`)).start();
         try {
           if (!(await checkFFmpeg())) throw new Error(chalk.red('FFmpeg not found.'));
-          
+
           // Verify video stream exists
           spinner.text = chalk.cyan(`Checking video stream in ${inputFile}...`);
           const streamInfo = await getStreamInfo(inputFile);
@@ -273,7 +290,7 @@ export function extractCommand(videoCmd: Command): void {
             console.log(chalk.dim('This file does not contain any video tracks. Skipping...'));
             continue;
           }
-          
+
           spinner.text = chalk.cyan(`Extracting thumbnail from ${inputFile}...`);
           const [width, height] = options.size.split('x');
           const args = ['-i', inputFile];

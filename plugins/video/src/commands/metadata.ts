@@ -67,6 +67,7 @@ export function metadataCommand(videoCmd: Command): void {
     .action(async (input: string, options: MetadataOptions) => {
       if (options.help || !input) {
         createStandardHelp({
+          pluginName: 'video',
           commandName: 'metadata',
           emoji: '📊',
           description: 'Display comprehensive metadata information about video files. Shows format details, streams (video/audio/subtitle), codecs, bitrates, durations, dimensions, and more. Export to JSON for programmatic use.',
@@ -161,7 +162,7 @@ export function metadataCommand(videoCmd: Command): void {
         // JSON output
         if (options.json) {
           const jsonOutput = JSON.stringify(allMetadata.length === 1 ? allMetadata[0] : allMetadata, null, 2);
-          
+
           if (options.output) {
             await writeFile(options.output, jsonOutput, 'utf-8');
             console.log(chalk.green(`\n✓ Metadata exported to ${options.output}`));
