@@ -1,120 +1,59 @@
 import chalk from 'chalk';
 import ora from 'ora';
-import { execSync } from 'child_process';
+import { execa } from 'execa';
 import type { Command } from 'commander';
-
-/**
- * Plugin type detection
- */
-type PluginType = 'official' | 'community' | 'third-party';
-
-interface PluginInfo {
-  name: string;
-  type: PluginType;
-  displayName: string;
-}
-
-/**
- * Detect plugin type and return full package name
- */
-function detectPluginInfo(plugin: string): PluginInfo {
-  // Official plugin (@mediaproc/*)
-  if (plugin.startsWith('@mediaproc/')) {
-    return {
-      name: plugin,
-      type: 'official',
-      displayName: plugin.replace('@mediaproc/', ''),
-    };
-  }
-
-  // Community plugin (mediaproc-*)
-  if (plugin.startsWith('mediaproc-')) {
-    return {
-      name: plugin,
-      type: 'community',
-      displayName: plugin,
-    };
-  }
-
-  // Check if it's a short name for official plugin
-  if (!plugin.includes('/') && !plugin.includes('-')) {
-    return {
-      name: `@mediaproc/${plugin}`,
-      type: 'official',
-      displayName: plugin,
-    };
-  }
-
-  // Third-party plugin (any other package)
-  return {
-    name: plugin,
-    type: 'third-party',
-    displayName: plugin,
-  };
-}
+import {
+  type PluginManager,
+  resolvePluginPackage,
+  detectPluginType,
+  detectPackageManager,
+  buildInstallArgs,
+  verifyPluginInstallation
+} from '../utils/index.js';
 
 /**
  * Get plugin type badge for display
  */
-function getPluginTypeBadge(type: PluginType): string {
+function getPluginTypeBadge(type: 'official' | 'community' | 'third-party'): string {
   switch (type) {
     case 'official':
       return chalk.blue('★ OFFICIAL');
     case 'community':
-      return chalk.green('◆ COMMUNITY');
+      return chalk.green('🌐 COMMUNITY');
     case 'third-party':
-      return chalk.yellow('◇ THIRD-PARTY');
+      return chalk.yellow('📦 THIRD-PARTY');
   }
-}
-
-/**
- * Detect which package manager is being used
- */
-function detectPackageManager(): string {
-  try {
-    execSync('bun --version', { stdio: 'ignore' });
-    return 'bun';
-  } catch {}
-
-  try {
-    execSync('pnpm --version', { stdio: 'ignore' });
-    return 'pnpm';
-  } catch {}
-
-  try {
-    execSync('yarn --version', { stdio: 'ignore' });
-    return 'yarn';
-  } catch {}
-
-  return 'npm';
 }
 
 /**
  * Get current installed version of a package
  */
-function getInstalledVersion(packageName: string, isGlobal: boolean): string | null {
+async function getInstalledVersion(packageName: string, isGlobal: boolean): Promise<string | null> {
   try {
-    const packageManager = detectPackageManager();
-    let cmd: string;
+    const packageManager = await detectPackageManager();
+    let cmd: string[];
 
     if (packageManager === 'npm') {
-      cmd = isGlobal
-        ? `npm list -g ${packageName} --depth=0 --json`
-        : `npm list ${packageName} --depth=0 --json`;
+      cmd = ['list', packageName, '--depth=0', '--json'];
+      if (isGlobal) cmd.splice(1, 0, '-g');
     } else if (packageManager === 'pnpm') {
-      cmd = isGlobal
-        ? `pnpm list -g ${packageName} --depth=0 --json`
-        : `pnpm list ${packageName} --depth=0 --json`;
+      cmd = ['list', packageName, '--depth=0', '--json'];
+      if (isGlobal) cmd.splice(1, 0, '-g');
     } else if (packageManager === 'yarn') {
-      cmd = isGlobal
-        ? `yarn global list --pattern ${packageName} --json`
-        : `yarn list --pattern ${packageName} --json`;
+      if (isGlobal) {
+        cmd = ['global', 'list', '--pattern', packageName, '--json'];
+      } else {
+        cmd = ['list', '--pattern', packageName, '--json'];
+      }
+    } else if (packageManager === 'bun') {
+      cmd = ['pm', 'ls', packageName, '--json'];
+      if (isGlobal) cmd.push('--global');
     } else {
       return null;
     }
 
-    const output = execSync(cmd, { encoding: 'utf-8', stdio: 'pipe' });
-    const data = JSON.parse(output);
+    const { stdout } = await execa(packageManager, cmd, { reject: false });
+    const data = JSON.parse(stdout);
     
     if (data.dependencies && data.dependencies[packageName]) {
       return data.dependencies[packageName].version;
@@ -129,8 +68,8 @@ function getInstalledVersion(packageName: string, isGlobal: boolean): string | n
 /**
  * Update a plugin to the latest version or specific version
  */
-export function updateCommand(program: Command): void {
-  program
+export function updateCommand(program: Command, pluginManager: PluginManager): void {
+  const updateCmd = program
     .command('update [plugin]')
     .description('Update plugin(s) to the latest or specific version')
     .option('-g, --global', 'Update plugin globally')
@@ -144,8 +83,8 @@ export function updateCommand(program: Command): void {
       const spinner = ora('Starting update...').start();
 
       try {
-        const packageManager = detectPackageManager();
-        const isGlobal = options.global;
+        const packageManager = await detectPackageManager();
+        const isGlobal = options.global || false;
         const targetVersion = options.version || 'latest';
 
         if (options.verbose) {
@@ -154,105 +93,152 @@ export function updateCommand(program: Command): void {
 
         // Update specific plugin
         if (plugin) {
-          const pluginInfo = detectPluginInfo(plugin);
+          // Resolve plugin name
+          const pluginPackage = resolvePluginPackage(plugin);
+          const pluginType = detectPluginType(pluginPackage);
           
-          spinner.text = `Detecting plugin type for ${chalk.cyan(pluginInfo.displayName)}...`;
+          spinner.text = `Detecting plugin type for ${chalk.cyan(plugin)}...`;
           
           if (options.verbose) {
-            spinner.info(chalk.dim(`Plugin type: ${getPluginTypeBadge(pluginInfo.type)}`));
-            spinner.info(chalk.dim(`Package name: ${pluginInfo.name}`));
+            spinner.info(chalk.dim(`Plugin type: ${getPluginTypeBadge(pluginType)}`));
+            spinner.info(chalk.dim(`Package name: ${pluginPackage}`));
           }
 
           // Get current version
-          const currentVersion = getInstalledVersion(pluginInfo.name, isGlobal || false);
+          const currentVersion = await getInstalledVersion(pluginPackage, isGlobal);
           
           if (currentVersion && options.verbose) {
             spinner.info(chalk.dim(`Current version: ${currentVersion}`));
           }
 
-          spinner.text = `Updating ${chalk.cyan(pluginInfo.displayName)} ${getPluginTypeBadge(pluginInfo.type)}...`;
+          spinner.text = `Updating ${chalk.cyan(plugin)} ${getPluginTypeBadge(pluginType)}...`;
 
           // Build the update command
-          const versionSpec = targetVersion === 'latest' ? pluginInfo.name : `${pluginInfo.name}@${targetVersion}`;
-          let updateCmd: string;
-          
-          if (packageManager === 'npm') {
-            updateCmd = isGlobal
-              ? `npm install -g ${versionSpec}`
-              : `npm install ${versionSpec}`;
-          } else if (packageManager === 'pnpm') {
-            updateCmd = isGlobal
-              ? `pnpm add -g ${versionSpec}`
-              : `pnpm add ${versionSpec}`;
-          } else if (packageManager === 'yarn') {
-            updateCmd = isGlobal
-              ? `yarn global add ${versionSpec}`
-              : `yarn add ${versionSpec}`;
-          } else if (packageManager === 'bun') {
-            updateCmd = isGlobal
-              ? `bun add -g ${versionSpec}`
-              : `bun add ${versionSpec}`;
-          } else {
-            throw new Error('Unknown package manager');
-          }
+          const versionSpec = targetVersion === 'latest' ? pluginPackage : `${pluginPackage}@${targetVersion}`;
+          const updateArgs = buildInstallArgs(packageManager, [versionSpec], {
+            global: isGlobal
+          });
 
           if (options.verbose) {
-            spinner.info(chalk.dim(`Running: ${updateCmd}`));
+            spinner.info(chalk.dim(`Running: ${packageManager} ${updateArgs.join(' ')}`));
           }
 
           // Execute the update command
-          execSync(updateCmd, { stdio: options.verbose ? 'inherit' : 'ignore' });
+          await execa(packageManager, updateArgs, { 
+            stdio: options.verbose ? 'inherit' : 'pipe',
+            reject: true
+          });
+
+          // Verify installation
+          const installed = await verifyPluginInstallation(pluginPackage, isGlobal);
+          if (!installed) {
+            throw new Error(`Failed to verify ${pluginPackage} installation`);
+          }
 
           // Get new version
-          const newVersion = getInstalledVersion(pluginInfo.name, isGlobal || false);
+          const newVersion = await getInstalledVersion(pluginPackage, isGlobal);
+
+          // Reload the plugin if it was already loaded
+          const loadedPlugin = pluginManager.getPlugin(plugin);
+          if (loadedPlugin) {
+            spinner.text = `Reloading ${chalk.cyan(plugin)}...`;
+            await pluginManager.reloadPlugin(plugin, updateCmd.parent!);
+            if (options.verbose) {
+              spinner.info(chalk.dim('Plugin reloaded successfully'));
+            }
+          }
           
           spinner.succeed(
-            chalk.green(`✓ ${pluginInfo.displayName} ${getPluginTypeBadge(pluginInfo.type)} updated successfully`) +
+            chalk.green(`✓ ${plugin} ${getPluginTypeBadge(pluginType)} updated successfully`) +
             (currentVersion && newVersion ? chalk.dim(` (${currentVersion} → ${newVersion})`) : '')
           );
 
         } else {
-          // Update all plugins
-          spinner.text = 'Finding all installed MediaProc plugins...';
+          // Update all loaded plugins
+          spinner.text = 'Finding all loaded MediaProc plugins...';
 
-          if (options.verbose) {
-            spinner.info(chalk.dim('Scanning for official, community, and third-party plugins...'));
-          }
-
-          // Build update command for all @mediaproc packages
-          let updateCmd: string;
+          const loadedPlugins = pluginManager.getLoadedPlugins();
           
-          if (packageManager === 'npm') {
-            updateCmd = isGlobal
-              ? 'npm update -g $(npm list -g --depth=0 --parseable 2>/dev/null | xargs -n1 basename 2>/dev/null | grep -E "^@mediaproc|^mediaproc-")'
-              : 'npm update';
-          } else if (packageManager === 'pnpm') {
-            updateCmd = isGlobal
-              ? 'pnpm update -g "@mediaproc/*" "mediaproc-*"'
-              : 'pnpm update "@mediaproc/*" "mediaproc-*"';
-          } else if (packageManager === 'yarn') {
-            updateCmd = isGlobal
-              ? 'yarn global upgrade'
-              : 'yarn upgrade';
-          } else if (packageManager === 'bun') {
-            updateCmd = isGlobal
-              ? 'bun update -g'
-              : 'bun update';
-          } else {
-            throw new Error('Unknown package manager');
+          if (loadedPlugins.length === 0) {
+            spinner.info(chalk.yellow('No plugins currently loaded'));
+            return;
           }
 
           if (options.verbose) {
-            spinner.info(chalk.dim(`Running: ${updateCmd}`));
+            spinner.info(chalk.dim(`Found ${loadedPlugins.length} loaded plugin(s)`));
           }
 
-          spinner.text = 'Updating all plugins...';
-          execSync(updateCmd, { stdio: options.verbose ? 'inherit' : 'ignore' });
+          const updateResults: Array<{ name: string; success: boolean; error?: string }> = [];
 
-          spinner.succeed(chalk.green('✓ All MediaProc plugins updated successfully'));
+          // Update each loaded plugin
+          for (const pluginName of loadedPlugins) {
+            try {
+              const pluginPackage = resolvePluginPackage(pluginName);
+              const pluginType = detectPluginType(pluginPackage);
+
+              spinner.text = `Updating ${chalk.cyan(pluginName)} ${getPluginTypeBadge(pluginType)}...`;
+
+              const currentVersion = await getInstalledVersion(pluginPackage, isGlobal);
+              
+              const updateArgs = buildInstallArgs(packageManager, [pluginPackage], {
+                global: isGlobal
+              });
+              
+              await execa(packageManager, updateArgs, { 
+                stdio: 'pipe',
+                reject: true
+              });
+
+              const installed = await verifyPluginInstallation(pluginPackage, isGlobal);
+              if (!installed) {
+                throw new Error('Verification failed');
+              }
+
+              const newVersion = await getInstalledVersion(pluginPackage, isGlobal);
+              
+              // Reload the plugin
+              await pluginManager.reloadPlugin(pluginName, updateCmd.parent!);
+
+              if (options.verbose) {
+                spinner.info(
+                  chalk.green(`✓ ${pluginName}`) +
+                  (currentVersion && newVersion ? chalk.dim(` (${currentVersion} → ${newVersion})`) : '')
+                );
+              }
+
+              updateResults.push({ name: pluginName, success: true });
+            } catch (error) {
+              updateResults.push({ 
+                name: pluginName, 
+                success: false, 
+                error: error instanceof Error ? error.message : 'Unknown error'
+              });
+
+              if (options.verbose) {
+                spinner.warn(chalk.yellow(`⚠ ${pluginName} update failed: ${error instanceof Error ? error.message : 'Unknown error'}`));
+              }
+            }
+          }
+
+          // Summary
+          const successful = updateResults.filter(r => r.success).length;
+          const failed = updateResults.filter(r => !r.success).length;
+
+          if (failed === 0) {
+            spinner.succeed(chalk.green(`✓ All ${successful} plugin(s) updated successfully`));
+          } else {
+            spinner.warn(chalk.yellow(`⚠ Updated ${successful}/${loadedPlugins.length} plugin(s)`));
+            
+            if (options.verbose) {
+              console.log(chalk.red('\nFailed updates:'));
+              updateResults.filter(r => !r.success).forEach(r => {
+                console.log(chalk.red(`  × ${r.name}: ${r.error}`));
+              });
+            }
+          }
         }
 
-        console.log(chalk.dim('\n💡 Tip: Run a command to use the updated version, or restart your terminal.'));
+        console.log(chalk.dim('\n💡 Tip: Updated plugins are now active. No restart needed.'));
       } catch (error) {
         spinner.fail(chalk.red('Failed to update plugin(s)'));
         if (error instanceof Error) {
