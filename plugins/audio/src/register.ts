@@ -28,11 +28,17 @@ export const version = currentVersion;
 export const isBuiltIn = true;
 
 export function register(program: Command): void {
-  // Register each command directly on the root program
-  convertCommand(program);
-  normalizeCommand(program);
-  trimCommand(program);
-  mergeCommand(program);
-  extractCommand(program);
-  metadataCommand(program);
+  const audioCmd = program
+    .command('audio')
+    .description('Audio processing commands (powered by FFmpeg)')
+    .version(currentVersion, '-v, --version', 'Output the audio plugin version')
+    .helpOption('-h, --help', 'Display help for audio plugin');
+
+  // Register each command on the audio subcommand
+  convertCommand(audioCmd);
+  normalizeCommand(audioCmd);
+  trimCommand(audioCmd);
+  mergeCommand(audioCmd);
+  extractCommand(audioCmd);
+  metadataCommand(audioCmd);
 }
