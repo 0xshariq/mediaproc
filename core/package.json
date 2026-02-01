@@ -1,6 +1,6 @@
 {
   "name": "@mediaproc/core",
-  "version": "1.10.1",
+  "version": "1.11.0",
   "description": "Core utilities for MediaProc CLI and Plugins",
   "type": "module",
   "main": "./dist/index.js",
