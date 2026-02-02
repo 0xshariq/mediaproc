@@ -36,7 +36,7 @@ export function register(program: Command): void {
   const audioCmd = program
     .command('audio')
     .description('Audio processing commands (powered by FFmpeg)')
-    .version(currentVersion, '-v, --version', 'Output the audio plugin version')
+    .version(currentVersion, '-V, --version', 'Output the audio plugin version')
     .helpOption('-h, --help', 'Display help for audio plugin');
 
   // Register each command on the audio subcommand
