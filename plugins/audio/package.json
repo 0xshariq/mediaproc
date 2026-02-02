@@ -27,7 +27,7 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist/ && tsc",
     "dev": "tsx src/cli.ts",
     "watch": "tsc --watch",
     "clean": "rm -rf dist"

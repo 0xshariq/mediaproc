@@ -9,26 +9,6 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    },
-    "./branding": {
-      "import": "./dist/branding.js",
-      "types": "./dist/branding.d.ts"
-    },
-    "./helpFormatter": {
-      "import": "./dist/helpFormatter.js",
-      "types": "./dist/helpFormatter.d.ts"
-    },
-    "./pathValidator": {
-      "import": "./dist/pathValidator.js",
-      "types": "./dist/pathValidator.d.ts"
-    },
-    "./explainFormatter": {
-      "import": "./dist/explainFormatter.js",
-      "types": "./dist/explainFormatter.d.ts"
-    },
-    "./supportedExtensions": {
-      "import": "./dist/supportedExtensions.js",
-      "types": "./dist/supportedExtensions.d.ts"
     }
   },
   "files": [
@@ -36,7 +16,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist/ && tsc",
     "clean": "rm -rf dist",
     "dev": "tsc --watch",
     "test": "vitest run",
