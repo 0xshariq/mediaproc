@@ -26,6 +26,76 @@ MediaProc is organized as a monorepo with the following packages:
 
 ---
 
+## [@mediaproc/cli@1.0.0] - 2026-02-02
+
+### 🎉 First Stable Release
+
+First stable release of MediaProc — a modular, cross-platform media processing CLI.
+
+### Highlights
+
+- **Plugin-based architecture** - Modular design with standalone and CLI-integrated plugin support
+- **47 image commands** - Comprehensive image processing capabilities with Sharp
+- **Stable audio & video plugins** - 8 video and 6 audio commands powered by FFmpeg
+- **Advanced --explain flag** - Command transparency with human, detailed, and JSON output modes
+- **Improved validation** - Better error handling and path validation across all commands
+- **Cleaner core structure** - Refactored codebase with improved type safety and maintainability
+
+### Core Features
+
+#### Plugin System
+- ✅ Dynamic plugin loading and registration
+- ✅ Standalone plugin execution support
+- ✅ Plugin version management
+- ✅ Consistent command interface across all plugins
+
+#### Image Plugin (47 commands)
+- ✅ Basic operations: resize, crop, rotate, flip, convert
+- ✅ Filters: blur, sharpen, grayscale, sepia, tint, negate
+- ✅ Advanced: affine, boolean, convolve, threshold
+- ✅ Morphology: erode, dilate, flatten, unflatten
+- ✅ Effects: vignette, watermark, mirror, gamma
+- ✅ Optimization: compress, optimize, thumbnail
+- ✅ Metadata: view, export, remove
+
+#### Video Plugin (8 commands)
+- ✅ compress, transcode, trim, resize
+- ✅ merge, extract, metadata, info
+
+#### Audio Plugin (6 commands)
+- ✅ convert, normalize, trim
+- ✅ merge, extract, metadata
+
+### Developer Experience
+
+- **Help System** - Plugin-agnostic help formatter with emoji-rich output
+- **Type Safety** - Full TypeScript support with strict null checks
+- **ES Modules** - Modern JavaScript module system
+- **Testing** - Vitest-based test suite (expanding)
+
+### Breaking Changes
+
+- Version flag changed from `-v` to `-V` to avoid conflicts with verbose flags
+- Input arguments are now optional to support `--help` flag properly
+- Improved error messages for missing required arguments
+
+### Known Issues
+
+- Some commands may show inconsistent help formatting (being addressed)
+- TypeScript build may show test-related warnings (non-blocking)
+
+### What's Next
+
+v1.0 focuses on **stability and foundation**. Future releases will add:
+- Document processing plugin
+- Workflow automation features
+- Plugin marketplace
+- Advanced AI-powered features
+
+Core CLI commands will remain free forever. Automation and large-scale workflows may be introduced as paid features to support long-term development.
+
+---
+
 ## [@mediaproc/core@1.9.0] - 2026-01-27
 
 ### Added

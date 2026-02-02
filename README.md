@@ -5,7 +5,7 @@
 > In the future, paid plans may be introduced for automation, pipelines, scheduling, and large-scale workflows to support long-term development. Core CLI commands will remain free.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-0.6.0--beta-blue.svg)](https://www.npmjs.com/package/@mediaproc/cli)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://www.npmjs.com/package/@mediaproc/cli)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
 
 ```bash
@@ -91,7 +91,7 @@ mediaproc image --help
 
 Included with CLI installation:
 
-#### Image Plugin (46 commands)
+#### Image Plugin (47 commands)
 
 ```bash
 mediaproc image resize photo.jpg --width 1920
@@ -101,7 +101,7 @@ mediaproc image blur photo.jpg --sigma 10
 mediaproc image watermark photo.jpg --text "Copyright 2026"
 ```
 
-**Commands:** resize, crop, rotate, flip, convert, compress, optimize, blur, sharpen, grayscale, tint, watermark, thumbnail, and 36 more...
+**Commands:** resize, crop, rotate, flip, convert, compress, optimize, blur, sharpen, grayscale, tint, watermark, thumbnail, and 34 more...
 
 **Formats:** JPG, PNG, WebP, AVIF, TIFF, GIF, SVG
 
@@ -325,31 +325,34 @@ See [Plugin Integration Guide](docs/plugin-integration-guide.md) for complete do
 
 ## Roadmap
 
-**Current (v0.8.5):**
+**Current (v1.0.0) - Stable Release:**
 
 - ✅ Core CLI with plugin system
-- ✅ Image Plugin (46 commands)
-- ✅ Video Plugin (7 commands)
-- ✅ Audio Plugin (5 commands)
+- ✅ Image Plugin (47 commands)
+- ✅ Video Plugin (8 commands)
+- ✅ Audio Plugin (6 commands)
+- ✅ Advanced --explain flag (human, details, json)
+- ✅ Improved validation and reliability
+- ✅ Cleaner core structure
 
 **Q1 2026:**
 
 - 🚧 Document Plugin
-- 🚧 Comprehensive testing
+- 🚧 Comprehensive testing suite
 - 🚧 CI/CD pipeline
 
 **Q2 2026:**
 
 - 📋 Animation Plugin
-- 📋 Metadata Plugin
-- 📋 v1.0 Release
+- 📋 Metadata Plugin enhancements
+- 📋 Plugin Marketplace beta
 
 **Q3-Q4 2026:**
 
 - 📋 3D Plugin
 - 📋 Stream Plugin
 - 📋 AI Plugin
-- 📋 Plugin Marketplace
+- 📋 Workflow automation features
 
 See [Upcoming Features](docs/upcoming-features.md) for details.
 
