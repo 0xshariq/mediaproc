@@ -58,7 +58,8 @@ export async function cli(): Promise<void> {
   program
     .name('mediaproc')
     .description('Modern, plugin-based media processing CLI')
-    .version(version, '-V, --version', 'Output the CLI version'); // Changed from lowercase -v to uppercase -V
+    .version(version, '-V, --version', 'Output the CLI version')
+    .enablePositionalOptions(); // Allow subcommands to handle their own options
 
   // Add hooks before adding commands
   program.hook('preAction', explainPreActionHook);
