@@ -1,6 +1,6 @@
 {
   "name": "@mediaproc/image",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "description": "Image processing plugin for mediaproc - powered by Sharp",
   "type": "module",
   "main": "./dist/index.js",
