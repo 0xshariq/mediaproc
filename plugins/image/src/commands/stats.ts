@@ -22,7 +22,7 @@ export function statsCommand(imageCmd: Command): void {
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for stats command')
-    .action(async (input: string, options: StatsOptionsExtended) => {
+    .action(async (input: string | undefined, options: StatsOptionsExtended) => {
       if (options.help || !input) {
         createStandardHelp({
           pluginName: 'image',

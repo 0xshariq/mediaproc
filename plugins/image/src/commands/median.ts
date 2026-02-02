@@ -31,7 +31,7 @@ export function medianCommand(imageCmd: Command): void {
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for median command')
-    .action(async (input: string, options: MedianOptions) => {
+    .action(async (input: string | undefined, options: MedianOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           pluginName: 'image',

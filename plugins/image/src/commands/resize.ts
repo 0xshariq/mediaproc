@@ -25,7 +25,7 @@ export function resizeCommand(imageCmd: Command): void {
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-v, --verbose', 'Verbose output')
     .option('--help', 'Display help for resize command')
-    .action(async function (input: string, options: ResizeOptions) {
+    .action(async function (input: string | undefined, options: ResizeOptions) {
       // Show help if requested
       if (options.help || !input) {
         createStandardHelp({

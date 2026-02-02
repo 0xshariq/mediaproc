@@ -57,7 +57,11 @@ export function unflattenCommand(imageCmd: Command): void {
     });
   });
 
-  cmd.action(async (input: string, options: UnflattenOptions) => {
+  cmd.action(async (input: string | undefined, options: UnflattenOptions) => {
+    if (!input) {
+      console.error(chalk.red('Error: input argument is required'));
+      process.exit(1);
+    }
     const spinner = ora('Validating inputs...').start();
 
     try {

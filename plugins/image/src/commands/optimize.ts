@@ -23,7 +23,7 @@ export function optimizeCommand(imageCmd: Command): void {
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for optimize command')
-    .action(async (input: string, options: OptimizeOptions) => {
+    .action(async (input: string | undefined, options: OptimizeOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           pluginName: 'image',

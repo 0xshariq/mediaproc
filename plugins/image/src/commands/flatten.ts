@@ -73,7 +73,11 @@ export function flattenCommand(imageCmd: Command): void {
     });
   });
 
-  cmd.action(async (input: string, options: FlattenOptions) => {
+  cmd.action(async (input: string | undefined, options: FlattenOptions) => {
+    if (!input) {
+      console.error(chalk.red('Error: input argument is required'));
+      process.exit(1);
+    }
     const spinner = ora('Validating inputs...').start();
 
     try {

@@ -29,7 +29,7 @@ export function compositeCommand(imageCmd: Command): void {
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for composite command')
-    .action(async (input: string, options: CompositeOptionsExtended) => {
+    .action(async (input: string | undefined, options: CompositeOptionsExtended) => {
       if (options.help || !input) {
         createStandardHelp({
           pluginName: 'image',

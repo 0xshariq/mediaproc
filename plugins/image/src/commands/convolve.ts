@@ -42,7 +42,7 @@ export function convolveCommand(imageCmd: Command): void {
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for convolve command')
-    .action(async (input: string, options: ConvolveOptionsExtended) => {
+    .action(async (input: string | undefined, options: ConvolveOptionsExtended) => {
       if (options.help || !input) {
         createStandardHelp({
           pluginName: 'image',

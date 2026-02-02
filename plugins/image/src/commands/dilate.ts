@@ -88,7 +88,11 @@ export function dilateCommand(imageCmd: Command): void {
     return '';
   });
 
-  cmd.action(async (input: string, options: DilateOptions) => {
+  cmd.action(async (input: string | undefined, options: DilateOptions) => {
+    if (!input) {
+      console.error(chalk.red('Error: input argument is required'));
+      process.exit(1);
+    }
     const spinner = ora('Validating inputs...').start();
 
     try {

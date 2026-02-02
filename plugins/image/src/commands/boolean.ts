@@ -98,7 +98,11 @@ export function booleanCommand(imageCmd: Command): void {
       });
   });
 
-  cmd.action(async (input: string, options: BooleanOptions) => {
+  cmd.action(async (input: string | undefined, options: BooleanOptions) => {
+    if (!input) {
+      console.error(chalk.red('Error: input argument is required'));
+      process.exit(1);
+    }
     const spinner = ora('Processing image...').start();
 
     try {

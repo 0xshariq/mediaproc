@@ -27,7 +27,7 @@ export function paletteCommand(imageCmd: Command): void {
     .option('--export <path>', 'Export palette colors to JSON file')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for palette command')
-    .action(async (input: string, options: PaletteOptions) => {
+    .action(async (input: string | undefined, options: PaletteOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           pluginName: 'image',

@@ -26,7 +26,7 @@ export function affineCommand(imageCmd: Command): void {
     .option('--dry-run', 'Show what would be done without executing')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('-v, --verbose', 'Verbose output')
-    .action(async (input: string, options: AffineOptions) => {
+    .action(async (input: string | undefined, options: AffineOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           pluginName: 'image',
@@ -95,7 +95,8 @@ export function affineCommand(imageCmd: Command): void {
             'Background color matters for rotations/shears'
           ]
         });
-      };
+        process.exit(0);
+      }
       const spinner = ora('Validating inputs...').start();
 
       try {

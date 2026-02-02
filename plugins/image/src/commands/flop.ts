@@ -44,7 +44,11 @@ export function flopCommand(imageCmd: Command): void {
     });
   });
 
-  cmd.action(async (input: string, options: FlopOptions) => {
+  cmd.action(async (input: string | undefined, options: FlopOptions) => {
+    if (!input) {
+      console.error(chalk.red('Error: input argument is required'));
+      process.exit(1);
+    }
     const spinner = ora('Validating inputs...').start();
 
     try {

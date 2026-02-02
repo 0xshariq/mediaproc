@@ -20,7 +20,7 @@ interface WatermarkOptions extends ImageOptions {
 
 export function watermarkCommand(imageCmd: Command): void {
   imageCmd
-    .command('watermark <input> <watermark>')
+    .command('watermark [input] [watermark]')
     .description('Add image or text watermark to image')
     .option('-o, --output <path>', 'Output file path')
     .option('--position <position>', 'Position: center, top-left, top-right, bottom-left, bottom-right', 'bottom-right')
@@ -34,7 +34,7 @@ export function watermarkCommand(imageCmd: Command): void {
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for watermark command')
-    .action(async (input: string, watermark: string, options: WatermarkOptions) => {
+    .action(async (input: string | undefined, watermark: string | undefined, options: WatermarkOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           pluginName: 'image',
@@ -94,6 +94,11 @@ export function watermarkCommand(imageCmd: Command): void {
           ]
         });
         process.exit(0);
+      }
+
+      if (!input || !watermark) {
+        console.error(chalk.red('Error: both input and watermark arguments are required'));
+        process.exit(1);
       }
 
       const spinner = ora('Processing image...').start();

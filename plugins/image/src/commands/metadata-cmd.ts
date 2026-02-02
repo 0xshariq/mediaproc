@@ -30,7 +30,7 @@ export function metadataCommand(imageCmd: Command): void {
     .option('-v, --verbose', 'Show detailed metadata')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for metadata command')
-    .action(async (input: string, options: MetadataCommandOptions) => {
+    .action(async (input: string | undefined, options: MetadataCommandOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           pluginName: 'image',

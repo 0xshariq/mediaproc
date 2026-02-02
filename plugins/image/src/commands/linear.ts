@@ -90,7 +90,11 @@ export function linearCommand(imageCmd: Command): void {
       });
   });
 
-  cmd.action(async (input: string, options: LinearOptions) => {
+  cmd.action(async (input: string | undefined, options: LinearOptions) => {
+    if (!input) {
+      console.error(chalk.red('Error: input argument is required'));
+      process.exit(1);
+    }
     const spinner = ora('Validating inputs...').start();
 
     try {

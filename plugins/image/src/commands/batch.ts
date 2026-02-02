@@ -37,7 +37,7 @@ export function batchCommand(imageCmd: Command): void {
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for batch command')
-    .action(async (directory: string, options: BatchOptions) => {
+    .action(async (directory: string | undefined, options: BatchOptions) => {
       if (options.help || !directory) {
         createStandardHelp({
           pluginName: 'image',

@@ -27,7 +27,7 @@ export function dominantColorCommand(imageCmd: Command): void {
     .option('-v, --verbose', 'Show detailed color information')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Show detailed help for dominant-color command')
-    .action(async (input: string, options: DominantColorOptions) => {
+    .action(async (input: string | undefined, options: DominantColorOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           pluginName: 'image',

@@ -26,7 +26,7 @@ export function pixelateCommand(imageCmd: Command): void {
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for pixelate command')
-    .action(async (input: string, options: PixelateOptions & { quality?: number }) => {
+    .action(async (input: string | undefined, options: PixelateOptions & { quality?: number }) => {
       if (options.help || !input) {
         createStandardHelp({
           pluginName: 'image',

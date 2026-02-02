@@ -31,7 +31,7 @@ export function claheCommand(imageCmd: Command): void {
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for clahe command')
-    .action(async (input: string, options: ClaheOptions) => {
+    .action(async (input: string | undefined, options: ClaheOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           pluginName: 'image',
