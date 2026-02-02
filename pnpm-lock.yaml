@@ -75,17 +75,180 @@ importers:
 
   cli:
     dependencies:
+      '@mediaproc/core':
+        specifier: latest
+        version: 1.11.0
+      '@mediaproc/image':
+        specifier: ^1.4.4
+        version: 1.4.4
+      boxen:
+        specifier: ^8.0.1
+        version: 8.0.1
+      chalk:
+        specifier: ^5.6.2
+        version: 5.6.2
+      commander:
+        specifier: ^14.0.2
+        version: 14.0.3
+      execa:
+        specifier: ^9.6.1
+        version: 9.6.1
+      ora:
+        specifier: ^9.1.0
+        version: 9.1.0
+    devDependencies:
+      '@types/node':
+        specifier: ^25.0.10
+        version: 25.2.0
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@25.2.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@types/node@25.2.0)(tsx@4.21.0)(yaml@2.8.2)
+
+  core: {}
+
+  plugins/3d:
+    dependencies:
       '@gltf-transform/cli':
         specifier: ^4.3.0
         version: 4.3.0
       '@gltf-transform/core':
         specifier: ^4.3.0
         version: 4.3.0
+      '@mediaproc/core':
+        specifier: ^1.11.0
+        version: 1.11.0
+      boxen:
+        specifier: ^8.0.1
+        version: 8.0.1
+      chalk:
+        specifier: ^5.6.2
+        version: 5.6.2
+      commander:
+        specifier: ^14.0.2
+        version: 14.0.3
+      execa:
+        specifier: ^9.6.1
+        version: 9.6.1
+      ora:
+        specifier: ^9.1.0
+        version: 9.1.0
+    devDependencies:
+      '@types/node':
+        specifier: ^25.0.10
+        version: 25.2.0
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@25.2.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  plugins/ai:
+    dependencies:
+      '@mediaproc/core':
+        specifier: ^1.11.0
+        version: 1.11.0
+      boxen:
+        specifier: ^8.0.1
+        version: 8.0.1
+      chalk:
+        specifier: ^5.6.2
+        version: 5.6.2
+      commander:
+        specifier: ^14.0.2
+        version: 14.0.3
+      execa:
+        specifier: ^9.6.1
+        version: 9.6.1
+      ora:
+        specifier: ^9.1.0
+        version: 9.1.0
+    devDependencies:
+      '@types/node':
+        specifier: ^25.0.10
+        version: 25.2.0
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@25.2.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  plugins/animation:
+    dependencies:
       '@lottiefiles/dotlottie-web':
         specifier: ^0.61.0
         version: 0.61.0
       '@mediaproc/core':
-        specifier: latest
+        specifier: ^1.11.0
+        version: 1.11.0
+      boxen:
+        specifier: ^8.0.1
+        version: 8.0.1
+      chalk:
+        specifier: ^5.6.2
+        version: 5.6.2
+      commander:
+        specifier: ^14.0.2
+        version: 14.0.3
+      execa:
+        specifier: ^9.6.1
+        version: 9.6.1
+      ora:
+        specifier: ^9.1.0
+        version: 9.1.0
+    devDependencies:
+      '@types/node':
+        specifier: ^25.0.10
+        version: 25.2.0
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@25.2.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  plugins/audio:
+    dependencies:
+      '@mediaproc/core':
+        specifier: ^1.11.0
+        version: 1.11.0
+      boxen:
+        specifier: ^8.0.1
+        version: 8.0.1
+      chalk:
+        specifier: ^5.6.2
+        version: 5.6.2
+      commander:
+        specifier: ^14.0.2
+        version: 14.0.3
+      execa:
+        specifier: ^9.6.1
+        version: 9.6.1
+      ora:
+        specifier: ^9.1.0
+        version: 9.1.0
+    devDependencies:
+      '@types/node':
+        specifier: ^25.0.10
+        version: 25.2.0
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@25.2.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  plugins/document:
+    dependencies:
+      '@mediaproc/core':
+        specifier: ^1.11.0
         version: 1.11.0
       boxen:
         specifier: ^8.0.1
@@ -102,24 +265,85 @@ importers:
       ghostscript4js:
         specifier: ^3.2.3
         version: 3.2.3
-      node-cron:
-        specifier: ^4.2.1
-        version: 4.2.1
       node-poppler:
         specifier: ^9.1.0
         version: 9.1.1
       ora:
         specifier: ^9.1.0
         version: 9.1.0
-      shaka-player:
-        specifier: ^4.16.14
-        version: 4.16.15
-      sharp:
-        specifier: ^0.34.5
-        version: 0.34.5
       tesseract.js:
         specifier: ^7.0.0
         version: 7.0.0
+    devDependencies:
+      '@types/node':
+        specifier: ^25.0.10
+        version: 25.2.0
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@25.2.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  plugins/image:
+    dependencies:
+      '@mediaproc/core':
+        specifier: ^1.11.0
+        version: 1.11.0
+      boxen:
+        specifier: ^8.0.1
+        version: 8.0.1
+      chalk:
+        specifier: ^5.6.2
+        version: 5.6.2
+      commander:
+        specifier: ^14.0.2
+        version: 14.0.3
+      execa:
+        specifier: ^9.6.1
+        version: 9.6.1
+      ora:
+        specifier: ^9.1.0
+        version: 9.1.0
+      sharp:
+        specifier: ^0.34.5
+        version: 0.34.5
+    devDependencies:
+      '@types/node':
+        specifier: ^25.0.10
+        version: 25.2.0
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@25.2.0)(typescript@5.9.3)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  plugins/metadata: {}
+
+  plugins/pipeline:
+    dependencies:
+      '@mediaproc/core':
+        specifier: ^1.11.0
+        version: 1.11.0
+      boxen:
+        specifier: ^8.0.1
+        version: 8.0.1
+      chalk:
+        specifier: ^5.6.2
+        version: 5.6.2
+      commander:
+        specifier: ^14.0.2
+        version: 14.0.3
+      execa:
+        specifier: ^9.6.1
+        version: 9.6.1
+      node-cron:
+        specifier: ^4.2.1
+        version: 4.2.1
+      ora:
+        specifier: ^9.1.0
+        version: 9.1.0
       yaml:
         specifier: ^2.8.2
         version: 2.8.2
@@ -140,185 +364,69 @@ importers:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@25.2.0)(tsx@4.21.0)(yaml@2.8.2)
 
-  core: {}
-
-  plugins/3d:
-    dependencies:
-      chalk:
-        specifier: ^5.3.0
-        version: 5.6.2
-      commander:
-        specifier: ^14.0.2
-        version: 14.0.3
-    devDependencies:
-      tsx:
-        specifier: ^4.7.0
-        version: 4.21.0
-      typescript:
-        specifier: ^5.3.3
-        version: 5.9.3
-
-  plugins/ai:
-    dependencies:
-      chalk:
-        specifier: ^5.3.0
-        version: 5.6.2
-      commander:
-        specifier: ^14.0.2
-        version: 14.0.3
-    devDependencies:
-      tsx:
-        specifier: ^4.7.0
-        version: 4.21.0
-      typescript:
-        specifier: ^5.3.3
-        version: 5.9.3
-
-  plugins/animation:
-    dependencies:
-      chalk:
-        specifier: ^5.3.0
-        version: 5.6.2
-      commander:
-        specifier: ^14.0.2
-        version: 14.0.3
-      ora:
-        specifier: ^9.0.0
-        version: 9.1.0
-    devDependencies:
-      '@types/node':
-        specifier: ^25.0.9
-        version: 25.2.0
-      tsx:
-        specifier: ^4.7.0
-        version: 4.21.0
-      typescript:
-        specifier: ^5.3.3
-        version: 5.9.3
-
-  plugins/audio:
-    dependencies:
-      '@mediaproc/core':
-        specifier: ^1.2.2
-        version: 1.10.1
-      chalk:
-        specifier: ^5.3.0
-        version: 5.6.2
-      commander:
-        specifier: ^14.0.2
-        version: 14.0.3
-      ora:
-        specifier: ^9.0.0
-        version: 9.1.0
-    devDependencies:
-      '@types/node':
-        specifier: ^25.0.9
-        version: 25.2.0
-      tsx:
-        specifier: ^4.7.0
-        version: 4.21.0
-      typescript:
-        specifier: ^5.3.3
-        version: 5.9.3
-
-  plugins/document:
-    dependencies:
-      chalk:
-        specifier: ^5.3.0
-        version: 5.6.2
-      commander:
-        specifier: ^14.0.2
-        version: 14.0.3
-      ora:
-        specifier: ^9.0.0
-        version: 9.1.0
-    devDependencies:
-      '@types/node':
-        specifier: ^25.0.9
-        version: 25.2.0
-      tsx:
-        specifier: ^4.7.0
-        version: 4.21.0
-      typescript:
-        specifier: ^5.3.3
-        version: 5.9.3
-
-  plugins/image: {}
-
-  plugins/metadata:
-    dependencies:
-      chalk:
-        specifier: ^5.3.0
-        version: 5.6.2
-      commander:
-        specifier: ^14.0.2
-        version: 14.0.3
-    devDependencies:
-      tsx:
-        specifier: ^4.7.0
-        version: 4.21.0
-      typescript:
-        specifier: ^5.3.3
-        version: 5.9.3
-
-  plugins/pipeline:
-    dependencies:
-      chalk:
-        specifier: ^5.3.0
-        version: 5.6.2
-      commander:
-        specifier: ^14.0.2
-        version: 14.0.3
-      yaml:
-        specifier: ^2.3.4
-        version: 2.8.2
-    devDependencies:
-      tsx:
-        specifier: ^4.7.0
-        version: 4.21.0
-      typescript:
-        specifier: ^5.3.3
-        version: 5.9.3
-
   plugins/stream:
     dependencies:
+      '@mediaproc/core':
+        specifier: ^1.11.0
+        version: 1.11.0
+      boxen:
+        specifier: ^8.0.1
+        version: 8.0.1
       chalk:
-        specifier: ^5.3.0
+        specifier: ^5.6.2
         version: 5.6.2
       commander:
         specifier: ^14.0.2
         version: 14.0.3
+      execa:
+        specifier: ^9.6.1
+        version: 9.6.1
+      ora:
+        specifier: ^9.1.0
+        version: 9.1.0
+      shaka-player:
+        specifier: ^4.16.14
+        version: 4.16.15
     devDependencies:
-      tsx:
-        specifier: ^4.7.0
-        version: 4.21.0
+      '@types/node':
+        specifier: ^25.0.10
+        version: 25.2.0
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@25.2.0)(typescript@5.9.3)
       typescript:
-        specifier: ^5.3.3
+        specifier: ^5.9.3
         version: 5.9.3
 
   plugins/video:
     dependencies:
       '@mediaproc/core':
-        specifier: ^1.2.2
-        version: 1.10.1
+        specifier: ^1.11.0
+        version: 1.11.0
+      boxen:
+        specifier: ^8.0.1
+        version: 8.0.1
       chalk:
-        specifier: ^5.3.0
+        specifier: ^5.6.2
         version: 5.6.2
       commander:
         specifier: ^14.0.2
         version: 14.0.3
+      execa:
+        specifier: ^9.6.1
+        version: 9.6.1
       ora:
-        specifier: ^9.0.0
+        specifier: ^9.1.0
         version: 9.1.0
     devDependencies:
       '@types/node':
-        specifier: ^25.0.9
+        specifier: ^25.0.10
         version: 25.2.0
-      tsx:
-        specifier: ^4.7.0
-        version: 4.21.0
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@25.2.0)(typescript@5.9.3)
       typescript:
-        specifier: ^5.3.3
+        specifier: ^5.9.3
         version: 5.9.3
 
 packages:
@@ -669,11 +777,12 @@ packages:
   '@lottiefiles/dotlottie-web@0.61.0':
     resolution: {integrity: sha512-1QwcDchh/TXTvP9zXUHA5oJOdhEdUrn6U7gAiQ1AXEUrcK6PTU6v5D3byP76BK56fQjoY2WQ2A4pYDCCvoVRqw==}
 
-  '@mediaproc/core@1.10.1':
-    resolution: {integrity: sha512-CCsljdAteJtPMMu60y1Mpn2ruR+HGlbWPV+e5MfC2m9m4nD/TflLbqxZSLpkwbEsXIgKk5mLkFJLB6Zldu3+fA==}
-
   '@mediaproc/core@1.11.0':
     resolution: {integrity: sha512-O2HSGzPOhTCDJMHlbAYoprhSXHVO6wnfd+TbgkULha/f9vz3K7sdBv+IdkzSa1BqDpmhojOj06Srz1RlX/i3TQ==}
+
+  '@mediaproc/image@1.4.4':
+    resolution: {integrity: sha512-u/c9XDidf8OtJOTehnHss620e9iE9SXxz8myaZ6Li6gXFQRgvYG0xFlfIxcPfvEYuSeqQFWq9Gyuya98l1LS4A==}
+    engines: {node: '>=18.0.0'}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -2214,9 +2323,9 @@ snapshots:
 
   '@lottiefiles/dotlottie-web@0.61.0': {}
 
-  '@mediaproc/core@1.10.1': {}
-
   '@mediaproc/core@1.11.0': {}
+
+  '@mediaproc/image@1.4.4': {}
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
@@ -2744,6 +2853,7 @@ snapshots:
   get-tsconfig@4.13.1:
     dependencies:
       resolve-pkg-maps: 1.0.0
+    optional: true
 
   ghostscript4js@3.2.3:
     dependencies:
@@ -3033,7 +3143,8 @@ snapshots:
 
   regenerator-runtime@0.13.11: {}
 
-  resolve-pkg-maps@1.0.0: {}
+  resolve-pkg-maps@1.0.0:
+    optional: true
 
   restore-cursor@5.1.0:
     dependencies:
@@ -3274,6 +3385,7 @@ snapshots:
       get-tsconfig: 4.13.1
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   type-fest@4.41.0: {}
 
