@@ -9,16 +9,18 @@ import { mergeCommand } from './commands/merge.js';
 import { metadataCommand } from './commands/metadata.js';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import { readFileSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const pkgUrl = path.join(__dirname, '../package.json');
+const pkgPath = path.join(__dirname, '../package.json');
 let currentVersion = 'unknown';
 try {
-  const pkg = await import(pkgUrl, { assert: { type: 'json' } });
-  currentVersion = pkg.default.version as string;
+  const pkgContent = readFileSync(pkgPath, 'utf-8');
+  const pkg = JSON.parse(pkgContent);
+  currentVersion = pkg.version;
 } catch (e) {
-  // fallback or log error if needed
+  console.warn('Failed to read package version:', e);
 }
 
 
