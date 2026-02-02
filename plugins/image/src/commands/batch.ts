@@ -25,7 +25,7 @@ export function batchCommand(imageCmd: Command): void {
   imageCmd
     .command('batch [directory]')
     .description('Process multiple images in batch with any operation')
-    .requiredOption('--operation <operation>', 'Operation: resize, convert, optimize, grayscale, etc.')
+    .option('--operation <operation>', 'Operation: resize, convert, optimize, grayscale, etc.')
     .option('-o, --output <directory>', 'Output directory (default: ./output)')
     .option('-p, --pattern <glob>', 'File pattern (default: *.{jpg,jpeg,png,webp,gif})')
     .option('-r, --recursive', 'Process subdirectories recursively')
@@ -38,7 +38,7 @@ export function batchCommand(imageCmd: Command): void {
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for batch command')
     .action(async (directory: string | undefined, options: BatchOptions) => {
-      if (options.help || !directory) {
+      if (options.help || !directory || !options.operation) {
         createStandardHelp({
           pluginName: 'image',
           commandName: 'batch',
