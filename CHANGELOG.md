@@ -44,12 +44,14 @@ First stable release of MediaProc — a modular, cross-platform media processing
 ### Core Features
 
 #### Plugin System
+
 - ✅ Dynamic plugin loading and registration
 - ✅ Standalone plugin execution support
 - ✅ Plugin version management
 - ✅ Consistent command interface across all plugins
 
 #### Image Plugin (47 commands)
+
 - ✅ Basic operations: resize, crop, rotate, flip, convert
 - ✅ Filters: blur, sharpen, grayscale, sepia, tint, negate
 - ✅ Advanced: affine, boolean, convolve, threshold
@@ -59,10 +61,12 @@ First stable release of MediaProc — a modular, cross-platform media processing
 - ✅ Metadata: view, export, remove
 
 #### Video Plugin (8 commands)
+
 - ✅ compress, transcode, trim, resize
 - ✅ merge, extract, metadata, info
 
 #### Audio Plugin (6 commands)
+
 - ✅ convert, normalize, trim
 - ✅ merge, extract, metadata
 
@@ -87,6 +91,7 @@ First stable release of MediaProc — a modular, cross-platform media processing
 ### What's Next
 
 v1.0 focuses on **stability and foundation**. Future releases will add:
+
 - Document processing plugin
 - Workflow automation features
 - Plugin marketplace
