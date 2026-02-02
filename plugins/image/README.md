@@ -1,6 +1,6 @@
 # 📸 MediaProc Image Plugin
 
-Professional image processing CLI powered by [Sharp](https://sharp.pixelplumbing.com/). Fast, efficient, and feature-rich image manipulation toolkit with **51 comprehensive commands**.
+Professional image processing CLI powered by [Sharp](https://sharp.pixelplumbing.com/). Fast, efficient, and feature-rich image manipulation toolkit with **47 comprehensive commands**.
 
 ## 📑 Table of Contents
 
