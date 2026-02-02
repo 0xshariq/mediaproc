@@ -66,6 +66,40 @@ If you need:
 
 you can reach out via GitHub Discussions or email me at [khanshariq92213@gmail.com](mailto:khanshariq92213@gmail.com).
 
+## Announcement
+
+**Current (v1.0.0) - Stable Release:**
+
+- ✅ Core CLI with plugin system
+- ✅ Image Plugin (47 commands)
+- ✅ Video Plugin (8 commands)
+- ✅ Audio Plugin (6 commands)
+- ✅ Advanced --explain flag (human, details, json)
+- ✅ Improved validation and reliability
+- ✅ Cleaner core structure
+
+**Q1 2026:**
+
+- 🚧 Document Plugin
+- 🚧 Comprehensive testing suite
+- 🚧 CI/CD pipeline
+- 🚧 Metadata Plugin
+
+**Q2 2026:**
+
+- 📋 Animation Plugin
+- 📋 Metadata Plugin enhancements
+- 📋 Plugin Marketplace beta
+
+**Q3-Q4 2026:**
+
+- 📋 3D Plugin
+- 📋 Stream Plugin
+- 📋 AI Plugin
+- 📋 Workflow automation features
+
+See [Upcoming Features](docs/upcoming-features.md) for details.
+
 ## Quick Start
 
 ```bash
@@ -322,39 +356,6 @@ See [Plugin Integration Guide](docs/plugin-integration-guide.md) for complete do
 - [Security Policy](SECURITY.md) - Security and vulnerability reporting
 
 **📚 Full Documentation Website:** [https://docs-mediaproc.vercel.app](https://docs-mediaproc.vercel.app)
-
-## Roadmap
-
-**Current (v1.0.0) - Stable Release:**
-
-- ✅ Core CLI with plugin system
-- ✅ Image Plugin (47 commands)
-- ✅ Video Plugin (8 commands)
-- ✅ Audio Plugin (6 commands)
-- ✅ Advanced --explain flag (human, details, json)
-- ✅ Improved validation and reliability
-- ✅ Cleaner core structure
-
-**Q1 2026:**
-
-- 🚧 Document Plugin
-- 🚧 Comprehensive testing suite
-- 🚧 CI/CD pipeline
-
-**Q2 2026:**
-
-- 📋 Animation Plugin
-- 📋 Metadata Plugin enhancements
-- 📋 Plugin Marketplace beta
-
-**Q3-Q4 2026:**
-
-- 📋 3D Plugin
-- 📋 Stream Plugin
-- 📋 AI Plugin
-- 📋 Workflow automation features
-
-See [Upcoming Features](docs/upcoming-features.md) for details.
 
 ## Contributing
 
