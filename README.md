@@ -321,9 +321,6 @@ pnpm install
 # Build CLI
 pnpm build
 
-# Test
-pnpm test
-
 # Run locally
 node dist/cli.js
 ```
