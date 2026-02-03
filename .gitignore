@@ -43,8 +43,7 @@ internal-docs/
 web/
 
 # Input / Output Folders for testing
-output/
-input/
+testing/
 
 # Plugin MarketPlace for future (will publish as a separate repo)
 plugin-marketplace/
