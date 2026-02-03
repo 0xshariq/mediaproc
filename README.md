@@ -296,13 +296,20 @@ mediaproc audio extract video.mp4 --format flac
 
 ```
 mediaproc/
-├── src/              # Core CLI source
-├── plugins/          # Official plugins
-│   ├── image/       # Image processing
-│   ├── video/       # Video processing
-│   └── audio/       # Audio processing
-├── docs/            # Documentation
-└── web/             # Documentation website
+├── engine/            # Orbyt - Automation Engine Framework (Separate from Mediaproc in future)
+├── cli/               # Core CLI source
+├── core/              # Core package of MediaProc
+├── plugins/           # Official plugins
+│   ├── 3d/            # 3d processing
+│   ├── ai/            # AI processing
+│   └── animation/     # Animation processing
+│   └── audio/         # Audio processing
+│   └── document/      # Document processing
+│   └── image/         # Image processing
+│   └── metadata/      # Metadata processing
+│   └── pipeline/      # Pipeline processing
+│   └── stream/        # Stream processing
+│   └── video/         # Video processing
 ```
 
 ### Build & Test
@@ -313,9 +320,6 @@ pnpm install
 
 # Build CLI
 pnpm build
-
-# Build all plugins
-pnpm build:all
 
 # Test
 pnpm test
