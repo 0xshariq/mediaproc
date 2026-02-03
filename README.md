@@ -310,6 +310,7 @@ mediaproc/
 │   └── pipeline/      # Pipeline processing
 │   └── stream/        # Stream processing
 │   └── video/         # Video processing
+└──  docs/              # Documentation
 ```
 
 ### Build & Test
