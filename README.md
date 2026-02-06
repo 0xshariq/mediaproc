@@ -296,7 +296,6 @@ mediaproc audio extract video.mp4 --format flac
 
 ```
 mediaproc/
-├── engine/            # Orbyt - Automation Engine Framework (Will Separate from Mediaproc in future)
 ├── cli/               # Core CLI source
 ├── core/              # Core package of MediaProc
 ├── plugins/           # Official plugins
