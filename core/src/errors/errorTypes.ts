@@ -1,37 +1,26 @@
 /* ============================================================
- * MediaProc Error System (v1.0-ready)
+ * MediaProc Error System
+ *
+ * Uses BaseError, ErrorType, ErrorSeverity, ExitCodes, and
+ * MediaProcErrorCodes from @dev-ecosystem/core.
+ * ErrorSource is mediaproc-local (no ecosystem equivalent).
  * ============================================================
  */
 
-import { EXIT_CODES } from "./exitCodes.js";
+import {
+  BaseError,
+  ErrorType,
+  ErrorSeverity,
+  ExitCodes,
+  MediaProcErrorCodes,
+} from '@dev-ecosystem/core';
 
-/* -------------------- Error Type -------------------- */
-export enum ErrorType {
-  UserInput = 'UserInput',
-  Validation = 'Validation',
-  Config = 'Config',
-  Unsupported = 'Unsupported',
-  NotImplemented = 'NotImplemented',
+// Re-export ecosystem types so @mediaproc/core consumers don't need
+// to import from @dev-ecosystem/core for basic error handling.
+export { ErrorType, ErrorSeverity, ExitCodes, MediaProcErrorCodes };
+export type { MediaProcErrorCode } from '@dev-ecosystem/core';
 
-  FileSystem = 'FileSystem',
-  Tool = 'Tool',
-  Dependency = 'Dependency',
-
-  Plugin = 'Plugin',
-  Internal = 'Internal',
-
-  Cancelled = 'Cancelled',
-}
-
-/* -------------------- Error Severity -------------------- */
-export enum ErrorSeverity {
-  Info = 'Info',
-  Warning = 'Warning',
-  Error = 'Error',
-  Fatal = 'Fatal',
-}
-
-/* -------------------- Error Source -------------------- */
+/* -------------------- Error Source (mediaproc-local) -------------------- */
 export enum ErrorSource {
   User = 'User',
   MediaProc = 'MediaProc',
@@ -40,217 +29,174 @@ export enum ErrorSource {
   System = 'System',
 }
 
-/* -------------------- Base Error -------------------- */
-export class MediaProcError extends Error {
-  readonly type: ErrorType;
-  readonly exitCode: number;
-  readonly severity: ErrorSeverity;
-  readonly source: ErrorSource;
-  readonly retryable?: boolean;
-  readonly details?: unknown;
-  readonly hint?: string;
+/* -------------------- MediaProcError (abstract base) -------------------- */
+// Extends ecosystem BaseError and adds hint, details, source fields via context.
+// All concrete classes declare their code/exitCode/type/severity as readonly fields.
+export abstract class MediaProcError extends BaseError {
+  override readonly component = 'mediaproc';
 
-  constructor(options: {
-    message: string;
-    type: ErrorType;
-    exitCode: number;
-    severity?: ErrorSeverity;
-    source?: ErrorSource;
-    retryable?: boolean;
-    details?: unknown;
-    hint?: string;
-  }) {
-    super(options.message);
-    this.name = 'MediaProcError';
+  /** Optional user-facing hint stored in context */
+  get hint(): string | undefined {
+    return this.context?.['hint'] as string | undefined;
+  }
 
-    this.type = options.type;
-    this.exitCode = options.exitCode;
-    this.severity = options.severity ?? ErrorSeverity.Error;
-    this.source = options.source ?? ErrorSource.MediaProc;
-    this.retryable = options.retryable;
-    this.details = options.details;
-    this.hint = options.hint;
+  /** Optional error details stored in context */
+  get details(): unknown {
+    return this.context?.['details'];
+  }
 
-    Error.captureStackTrace?.(this, MediaProcError);
+  /** Origin of the error stored in context */
+  get source(): ErrorSource {
+    return (this.context?.['source'] as ErrorSource) ?? ErrorSource.MediaProc;
   }
 }
 
 /* -------------------- User / Validation -------------------- */
 export class UserInputError extends MediaProcError {
+  readonly type = ErrorType.USER;
+  readonly code = MediaProcErrorCodes.GENERAL_INPUT_INVALID;
+  readonly exitCode = ExitCodes.INVALID_INPUT;
+  override readonly severity = ErrorSeverity.MEDIUM;
+
   constructor(message: string, details?: unknown, hint?: string) {
-    super({
-      message,
-      type: ErrorType.UserInput,
-      exitCode: EXIT_CODES.USER_INPUT,
-      severity: ErrorSeverity.Warning,
-      source: ErrorSource.User,
-      details,
-      hint,
-    });
+    super(message, { details, hint, source: ErrorSource.User });
     this.name = 'UserInputError';
   }
 }
 
 export class ValidationError extends MediaProcError {
+  readonly type = ErrorType.USER;
+  readonly code = MediaProcErrorCodes.GENERAL_VALIDATION_FAILED;
+  readonly exitCode = ExitCodes.VALIDATION_FAILED;
+  override readonly severity = ErrorSeverity.MEDIUM;
+
   constructor(message: string, details?: unknown, hint?: string) {
-    super({
-      message,
-      type: ErrorType.Validation,
-      exitCode: EXIT_CODES.VALIDATION,
-      severity: ErrorSeverity.Warning,
-      source: ErrorSource.User,
-      details,
-      hint,
-    });
+    super(message, { details, hint, source: ErrorSource.User });
     this.name = 'ValidationError';
   }
 }
 
 export class ConfigError extends MediaProcError {
+  readonly type = ErrorType.CONFIG;
+  readonly code = MediaProcErrorCodes.GENERAL_CONFIG_INVALID;
+  readonly exitCode = ExitCodes.INVALID_CONFIG;
+  override readonly severity = ErrorSeverity.HIGH;
+
   constructor(message: string, details?: unknown, hint?: string) {
-    super({
-      message,
-      type: ErrorType.Config,
-      exitCode: EXIT_CODES.CONFIG,
-      severity: ErrorSeverity.Error,
-      source: ErrorSource.User,
-      details,
-      hint,
-    });
+    super(message, { details, hint, source: ErrorSource.User });
     this.name = 'ConfigError';
   }
 }
 
 export class UnsupportedError extends MediaProcError {
+  readonly type = ErrorType.USER;
+  readonly code = MediaProcErrorCodes.GENERAL_UNSUPPORTED;
+  readonly exitCode = ExitCodes.INVALID_FORMAT;
+  override readonly severity = ErrorSeverity.HIGH;
+
   constructor(message: string, details?: unknown, hint?: string) {
-    super({
-      message,
-      type: ErrorType.Unsupported,
-      exitCode: EXIT_CODES.UNSUPPORTED,
-      severity: ErrorSeverity.Error,
-      source: ErrorSource.User,
-      details,
-      hint,
-    });
+    super(message, { details, hint, source: ErrorSource.User });
     this.name = 'UnsupportedError';
   }
 }
 
 export class NotImplementedError extends MediaProcError {
+  readonly type = ErrorType.INTERNAL;
+  readonly code = MediaProcErrorCodes.GENERAL_NOT_IMPLEMENTED;
+  readonly exitCode = ExitCodes.BUG_DETECTED;
+  override readonly severity = ErrorSeverity.MEDIUM;
+
   constructor(message = 'This feature is not implemented yet', details?: unknown) {
-    super({
-      message,
-      type: ErrorType.NotImplemented,
-      exitCode: EXIT_CODES.NOT_IMPLEMENTED,
-      severity: ErrorSeverity.Info,
-      source: ErrorSource.MediaProc,
-      details,
-    });
+    super(message, { details, source: ErrorSource.MediaProc });
     this.name = 'NotImplementedError';
   }
 }
 
 /* -------------------- File System -------------------- */
 export class FileSystemError extends MediaProcError {
-  constructor(message: string, details?: unknown, retryable = false) {
-    super({
-      message,
-      type: ErrorType.FileSystem,
-      exitCode: EXIT_CODES.FS_ERROR,
-      severity: ErrorSeverity.Error,
-      source: ErrorSource.System,
-      retryable,
-      details,
-    });
+  readonly type = ErrorType.SYSTEM;
+  readonly code = MediaProcErrorCodes.GENERAL_FILESYSTEM_ERROR;
+  readonly exitCode = ExitCodes.FILESYSTEM_ERROR;
+  override readonly severity = ErrorSeverity.HIGH;
+
+  constructor(message: string, details?: unknown) {
+    super(message, { details, source: ErrorSource.System });
     this.name = 'FileSystemError';
   }
 }
 
 /* -------------------- External Tools -------------------- */
 export class ToolError extends MediaProcError {
-  constructor(message: string, details?: unknown, retryable = false) {
-    super({
-      message,
-      type: ErrorType.Tool,
-      exitCode: EXIT_CODES.TOOL_ERROR,
-      severity: ErrorSeverity.Fatal,
-      source: ErrorSource.ExternalTool,
-      retryable,
-      details,
-    });
+  readonly type = ErrorType.EXECUTION;
+  readonly code = MediaProcErrorCodes.GENERAL_TOOL_ERROR;
+  readonly exitCode = ExitCodes.ADAPTER_FAILED;
+  override readonly severity = ErrorSeverity.CRITICAL;
+
+  constructor(message: string, details?: unknown) {
+    super(message, { details, source: ErrorSource.ExternalTool });
     this.name = 'ToolError';
   }
 }
 
 export class DependencyError extends MediaProcError {
+  readonly type = ErrorType.CONFIG;
+  readonly code = MediaProcErrorCodes.GENERAL_DEPENDENCY_MISSING;
+  readonly exitCode = ExitCodes.MISSING_DEPENDENCY;
+  override readonly severity = ErrorSeverity.CRITICAL;
+
   constructor(message: string, details?: unknown, hint?: string) {
-    super({
-      message,
-      type: ErrorType.Dependency,
-      exitCode: EXIT_CODES.DEPENDENCY_MISSING,
-      severity: ErrorSeverity.Fatal,
-      source: ErrorSource.ExternalTool,
-      details,
-      hint,
-    });
+    super(message, { details, hint, source: ErrorSource.ExternalTool });
     this.name = 'DependencyError';
   }
 }
 
 /* -------------------- Plugin -------------------- */
 export class PluginError extends MediaProcError {
+  readonly type = ErrorType.EXECUTION;
+  readonly code = MediaProcErrorCodes.GENERAL_PLUGIN_ERROR;
+  readonly exitCode = ExitCodes.PLUGIN_FAILED;
+  override readonly severity = ErrorSeverity.HIGH;
+
   constructor(message: string, details?: unknown) {
-    super({
-      message,
-      type: ErrorType.Plugin,
-      exitCode: EXIT_CODES.PLUGIN_ERROR,
-      severity: ErrorSeverity.Error,
-      source: ErrorSource.Plugin,
-      details,
-    });
+    super(message, { details, source: ErrorSource.Plugin });
     this.name = 'PluginError';
   }
 }
 
 export class PluginNotFoundError extends MediaProcError {
+  readonly type = ErrorType.EXECUTION;
+  readonly code = MediaProcErrorCodes.GENERAL_PLUGIN_NOT_FOUND;
+  readonly exitCode = ExitCodes.PLUGIN_FAILED;
+  override readonly severity = ErrorSeverity.CRITICAL;
+
   constructor(message: string, details?: unknown) {
-    super({
-      message,
-      type: ErrorType.Plugin,
-      exitCode: EXIT_CODES.PLUGIN_NOT_FOUND,
-      severity: ErrorSeverity.Fatal,
-      source: ErrorSource.Plugin,
-      details,
-    });
+    super(message, { details, source: ErrorSource.Plugin });
     this.name = 'PluginNotFoundError';
   }
 }
 
 /* -------------------- Cancelled -------------------- */
 export class CancelledError extends MediaProcError {
+  readonly type = ErrorType.EXECUTION;
+  readonly code = MediaProcErrorCodes.GENERAL_CANCELLED;
+  readonly exitCode = ExitCodes.WORKFLOW_FAILED;
+  override readonly severity = ErrorSeverity.LOW;
+
   constructor(message = 'Operation cancelled by user') {
-    super({
-      message,
-      type: ErrorType.Cancelled,
-      exitCode: EXIT_CODES.INTERRUPTED,
-      severity: ErrorSeverity.Info,
-      source: ErrorSource.User,
-    });
+    super(message, { source: ErrorSource.User });
     this.name = 'CancelledError';
   }
 }
 
 /* -------------------- Internal -------------------- */
 export class InternalError extends MediaProcError {
+  readonly type = ErrorType.INTERNAL;
+  readonly code = MediaProcErrorCodes.GENERAL_INTERNAL_ERROR;
+  readonly exitCode = ExitCodes.INTERNAL_ERROR;
+  override readonly severity = ErrorSeverity.CRITICAL;
+
   constructor(message: string, details?: unknown) {
-    super({
-      message,
-      type: ErrorType.Internal,
-      exitCode: EXIT_CODES.INTERNAL,
-      severity: ErrorSeverity.Fatal,
-      source: ErrorSource.MediaProc,
-      details,
-    });
+    super(message, { details, source: ErrorSource.MediaProc });
     this.name = 'InternalError';
   }
 }

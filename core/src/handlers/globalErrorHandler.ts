@@ -2,7 +2,7 @@ import {
   MediaProcError,
   ErrorSeverity,
   isMediaProcError,
-  EXIT_CODES,
+  ExitCodes,
 } from '../errors/index.js';
 
 type ErrorHandlerOptions = {
@@ -20,13 +20,13 @@ export class GlobalErrorHandler {
 
     // Unknown error fallback (bug)
     this.printUnknownError(err, debug);
-    process.exit(EXIT_CODES.INTERNAL);
+    process.exit(ExitCodes.INTERNAL_ERROR);
   }
 
   private static printMediaProcError(err: MediaProcError, debug: boolean) {
     const prefix =
-      err.severity === ErrorSeverity.Warning ? 'warn:' :
-      err.severity === ErrorSeverity.Info ? 'info:' :
+      err.severity === ErrorSeverity.LOW    ? 'info:'  :
+      err.severity === ErrorSeverity.MEDIUM ? 'warn:'  :
       'error:';
 
     console.error(`${prefix} ${err.message}`);
@@ -38,6 +38,7 @@ export class GlobalErrorHandler {
     if (debug) {
       console.error('');
       console.error('--- debug ---');
+      console.error(`code: ${err.code}`);
       console.error(`type: ${err.type}`);
       console.error(`source: ${err.source}`);
       console.error(`severity: ${err.severity}`);

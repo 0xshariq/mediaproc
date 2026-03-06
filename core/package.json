@@ -39,5 +39,12 @@
     "type": "git",
     "url": "git+https://github.com/0xshariq/mediaproc.git",
     "directory": "core"
+  },
+  "dependencies": {
+    "@dev-ecosystem/core": "^0.4.4"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.3",
+    "typescript": "^5.9.3"
   }
 }
