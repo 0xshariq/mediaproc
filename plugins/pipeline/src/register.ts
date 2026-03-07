@@ -1,6 +1,7 @@
 import type { Command } from 'commander';
 import { runPipelineCommand } from './commands/run.js';
 import { validatePipelineCommand } from './commands/validate.js';
+import { explainPipelineCommand } from './commands/explain.js';
 
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -24,4 +25,5 @@ export function register(program: Command): void {
   const cmd = program.command('pipeline').description('Media processing pipelines').version(version);
   runPipelineCommand(cmd);
   validatePipelineCommand(cmd);
+  explainPipelineCommand(cmd);
 }
