@@ -24,9 +24,23 @@ import { explainPreActionHook } from '@mediaproc/core';
 const program = new Command();
 const pluginManager = new PluginManager();
 
+import { fileURLToPath } from 'url';
+import path from 'path';
+import { readFileSync } from 'fs';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const pkgPath = path.join(__dirname, '../package.json');
+let currentVersion = 'unknown';
+try {
+  const pkgContent = readFileSync(pkgPath, 'utf-8');
+  const pkg = JSON.parse(pkgContent);
+  currentVersion = pkg.version;
+} catch (e) {
+  console.warn('Failed to read package version:', e);
+}
 // Get version from core branding utility
-const version = '0.8.5';
+const version = currentVersion;
 
 /**
  * Auto-load installed plugins
@@ -34,7 +48,7 @@ const version = '0.8.5';
 async function autoLoadPlugins(): Promise<void> {
   const officialPlugins = pluginManager.getOfficialPlugins();
   const loadResults = { success: 0, failed: 0 };
-  
+
   for (const pluginName of officialPlugins) {
     try {
       // Check if plugin is actually installed first
@@ -47,7 +61,7 @@ async function autoLoadPlugins(): Promise<void> {
       loadResults.failed++;
     }
   }
-  
+
   // Optional: Log stats in debug mode
   if (process.env.DEBUG === 'mediaproc') {
     console.log(`[DEBUG] Loaded ${loadResults.success} plugins, ${loadResults.failed} unavailable`);
@@ -63,7 +77,7 @@ export async function cli(): Promise<void> {
 
   // Add hooks before adding commands
   program.hook('preAction', explainPreActionHook);
-  
+
   // Show CLI branding after all commands
   program.hook('postAction', () => {
     showBranding();

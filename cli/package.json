@@ -1,10 +1,13 @@
 {
   "name": "@mediaproc/cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Universal media processing CLI with plugin architecture",
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/cli.js",
+  "types": "./dist/cli.d.ts",
+  "bin": {
+    "mediaproc": "./dist/cli.js"
+  },
   "files": [
     "dist",
     "README.md",
