@@ -4,7 +4,6 @@ import type { Command } from 'commander';
 import { WorkflowLoader } from '@orbytautomation/engine';
 import { createFormatter, type FormatterType } from '../formatters/createFormatter.js';
 import { MediaProcWorkflowValidator } from '../validators/MediaProcWorkflowValidator.js';
-import { createOrbytEngine } from '../utils/orbyt.js';
 
 export function validatePipelineCommand(cmd: Command): void {
   cmd
@@ -43,9 +42,12 @@ async function validatePipeline(
       process.exit(1);
     }
 
-    // ── Step 2: Load + orbyt schema/security validation ─────────────────────
+    // ── Step 2: Load + full orbyt schema/security validation ──────────────────
+    // WorkflowLoader.validate() takes a file path and does parse + validate in one pass.
+    // Using engine.validate(parsedWorkflow) would re-run the schema checker on the
+    // already-parsed object, causing false "Unknown field" errors.
     formatter.showInfo(`Loading ${file}...`);
-    const workflow = await WorkflowLoader.fromFile(resolvedPath);
+    const workflow = await WorkflowLoader.validate(resolvedPath);
     formatter.showInfo(`Loaded: ${workflow.name || file}`);
 
     // ── Step 3: MediaProc-specific checks (full error list) ─────────────────
@@ -59,10 +61,6 @@ async function validatePipeline(
       }
       process.exit(1);
     }
-
-    // ── Step 4: Orbyt engine structural validation ───────────────────────────
-    const engine = createOrbytEngine('silent');
-    await engine.validate(workflow);
 
     // ── Summary ─────────────────────────────────────────────────────────────
     formatter.showInfo('✔ Workflow is valid and ready to run');
