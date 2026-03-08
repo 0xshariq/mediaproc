@@ -1,11 +1,14 @@
-import { execa } from 'execa';
 import {
   BaseAdapter,
   AdapterResultBuilder,
+  CLIAdapter,
   type AdapterContext,
   type AdapterResult,
-} from '@dev-ecosystem/core';
+} from '@orbytautomation/engine';
 import { parseMediaProcAction, MediaProcActionParseError } from '../core/MediaProcActionResolver.js';
+
+// Shared CLIAdapter instance — handles spawn, timeout, stdout/stderr, and result building
+const _cli = new CLIAdapter();
 
 /**
  * MediaProc Adapter
@@ -77,65 +80,14 @@ export class MediaProcAdapter extends BaseAdapter {
     // --- Build CLI args -------------------------------------------------------
     const args = this._buildArgs(plugin, command, input);
 
-    context.log(`[mediaproc] ${['mediaproc', ...args].join(' ')}`);
-
-    // --- Execute --------------------------------------------------------------
-    try {
-      const result = await execa('mediaproc', args, {
-        cwd: context.cwd ?? process.cwd(),
-        env: { ...process.env, ...(context.env ?? {}) },
-        reject: false, // we handle non-zero ourselves
-        timeout: context.timeout,
-        ...(context.signal ? { signal: context.signal } : {}),
-      });
-
-      const duration = Date.now() - startTime;
-      const builder = new AdapterResultBuilder<{
-        stdout: string;
-        stderr: string;
-        exitCode: number;
-        command: string;
-      }>()
-        .duration(duration)
-        .log(`Executed: mediaproc ${args.join(' ')}`);
-
-      if (result.stderr) {
-        builder.log(`stderr: ${result.stderr}`);
-      }
-
-      if (result.exitCode === 0) {
-        builder
-          .success({
-            stdout: result.stdout,
-            stderr: result.stderr,
-            exitCode: result.exitCode,
-            command: `mediaproc ${args.join(' ')}`,
-          })
-          .effect('mediaproc:executed');
-      } else {
-        builder.failure({
-          message: `mediaproc exited with code ${result.exitCode}`,
-          code: String(result.exitCode),
-          details: {
-            stdout: result.stdout,
-            stderr: result.stderr,
-            command: `mediaproc ${args.join(' ')}`,
-          },
-        });
-        if (result.stderr) {
-          builder.warning(result.stderr);
-        }
-      }
-
-      return builder.build();
-    } catch (err: any) {
-      const duration = Date.now() - startTime;
-      return new AdapterResultBuilder()
-        .duration(duration)
-        .failure({ message: err.message, stack: err.stack })
-        .log(`Adapter error: ${err.message}`)
-        .build();
-    }
+    // --- Execute via built-in CLIAdapter -------------------------------------
+    return _cli.execute('cli.run', {
+      command: 'mediaproc',
+      args,
+      cwd: context.cwd,
+      timeout: context.timeout,
+      throwOnError: false,
+    }, context);
   }
 
   // ---------------------------------------------------------------------------

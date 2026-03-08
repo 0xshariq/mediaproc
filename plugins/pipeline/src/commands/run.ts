@@ -87,8 +87,19 @@ async function runPipeline(
     // Bridge engine events → formatter
     wireEngineEvents(engine, formatter);
 
+    // Collect declared input defaults so ${inputs.x} resolves even when the
+    // user hasn't passed --var x=... on the command line.
+    const inputDefaults: Record<string, any> = {};
+    const rawInputs = (workflow as any).inputs ?? {};
+    for (const [key, def] of Object.entries(rawInputs)) {
+      if (def && typeof def === 'object' && 'default' in (def as any)) {
+        inputDefaults[key] = (def as any).default;
+      }
+    }
+    const mergedVariables = { ...inputDefaults, ...parseVars(options.var) };
+
     const result: WorkflowResult = await engine.run(resolvedPath, {
-      variables: parseVars(options.var),
+      variables: mergedVariables,
       continueOnError: options.continueOnError,
     });
 
