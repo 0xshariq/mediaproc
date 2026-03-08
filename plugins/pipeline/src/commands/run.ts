@@ -87,7 +87,7 @@ async function runPipeline(
     // Bridge engine events → formatter
     wireEngineEvents(engine, formatter);
 
-    const result: WorkflowResult = await engine.run(workflow, {
+    const result: WorkflowResult = await engine.run(resolvedPath, {
       variables: parseVars(options.var),
       continueOnError: options.continueOnError,
     });
