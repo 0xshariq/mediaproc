@@ -12,6 +12,7 @@ import {
   type StepStartedEvent,
   type StepCompletedEvent,
   type StepFailedEvent,
+  type StepRetryingEvent,
 } from '../types/CliEvent.js';
 import { createOrbytEngine } from '../utils/orbyt.js';
 
@@ -82,7 +83,9 @@ async function runPipeline(
     }
 
     // ── Step 4: Execute ─────────────────────────────────────────────────────
-    const engine = createOrbytEngine(options.verbose ? 'debug' : 'info');
+    const engine = createOrbytEngine(
+      options.verbose ? 'debug' : options.silent ? 'silent' : 'info'
+    );
 
     // Bridge engine events → formatter
     wireEngineEvents(engine, formatter);
@@ -182,6 +185,19 @@ function wireEngineEvents(engine: OrbytEngine, formatter: ReturnType<typeof crea
       stepName: event.stepName || event.stepId,
       error: event.error || new Error('Step failed'),
       duration: event.durationMs || 0,
+    };
+    formatter.onEvent(e);
+  });
+
+  bus.on('step.retrying', (event: any) => {
+    const e: StepRetryingEvent = {
+      type: CliEventType.STEP_RETRYING,
+      timestamp: new Date(event.timestamp),
+      stepId: event.stepId,
+      stepName: event.stepName || event.stepId,
+      attempt: event.attempt || 1,
+      maxAttempts: event.maxAttempts || 1,
+      nextDelay: event.delayMs || 0,
     };
     formatter.onEvent(e);
   });
