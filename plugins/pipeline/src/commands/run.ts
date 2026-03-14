@@ -101,7 +101,7 @@ async function runPipeline(
     }
     const mergedVariables = { ...inputDefaults, ...parseVars(options.var) };
 
-    const result: WorkflowResult = await engine.run(resolvedPath, {
+    const result: WorkflowResult = await engine.run(workflow, {
       variables: mergedVariables,
       continueOnError: options.continueOnError,
     });

@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { LoggerManager } from '@orbytautomation/engine';
-import { LogLevel } from '@dev-ecosystem/core';
 import { version } from './register.js';
 import { showPluginBranding } from '@mediaproc/core';
 import { runPipelineCommand } from './commands/run.js';
@@ -9,18 +7,9 @@ import { validatePipelineCommand } from './commands/validate.js';
 import { explainPipelineCommand } from './commands/explain.js';
 
 async function main(): Promise<void> {
-  // Initialize LoggerManager early so CliLogger is usable before the engine starts
-  if (!LoggerManager.isReady()) {
-    LoggerManager.initialize({
-      level: LogLevel.FATAL,
-      format: 'text',
-      colors: true,
-      timestamp: true,
-      source: 'MediaProcPipeline',
-      structuredEvents: false,
-      category: 'system' as any,
-    });
-  }
+  // LoggerManager is initialized by OrbytEngine at the correct log level.
+  // A premature FATAL-level init here would silence all engine logs by winning
+  // the singleton race before the engine's own initialize() call runs.
 
   const program = new Command();
   program.name('mediaproc-pipeline').description('Standalone mode').version(version);
