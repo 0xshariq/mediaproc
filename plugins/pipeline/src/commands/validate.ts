@@ -4,6 +4,7 @@ import type { Command } from 'commander';
 import { WorkflowLoader } from '@orbytautomation/engine';
 import { createFormatter, type FormatterType } from '../formatters/createFormatter.js';
 import { MediaProcWorkflowValidator } from '../validators/MediaProcWorkflowValidator.js';
+import { createOrbytEngine } from '../utils/orbyt.js';
 
 export function validatePipelineCommand(cmd: Command): void {
   cmd
@@ -25,6 +26,8 @@ async function validatePipeline(
     noColor?: boolean;
   },
 ): Promise<void> {
+  createOrbytEngine(options.verbose ? 'debug' : options.silent ? 'silent' : 'info');
+
   let format = (options.format || 'human') as FormatterType;
   if (options.verbose && format === 'human') format = 'verbose';
 

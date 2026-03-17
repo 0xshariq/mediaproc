@@ -6,8 +6,8 @@
  *
  * Checks:
  *  1. Action string — must follow mediaproc.<plugin>.<command> format
- *  2. Input/output paths — delegated to validatePaths() from @mediaproc/core
- *     (input must exist with supported media files; output writability checked if present)
+ *  2. Input path only — delegated to validatePaths() from @mediaproc/core
+ *     (output path checks are intentionally skipped in this validator)
  *
  * Plugin presence and command availability are NOT checked here — the mediaproc
  * CLI handles plugin lifecycle (install, load, update) via `mediaproc add/remove/update`.
@@ -18,7 +18,7 @@
  */
 
 import type { ParsedWorkflow } from '@orbytautomation/engine';
-import { validatePaths, fileExists } from '@mediaproc/core';
+import { validatePaths } from '@mediaproc/core';
 import { isMediaProcAction, parseMediaProcAction, MediaProcActionParseError } from '../core/MediaProcActionResolver.js';
 
 // ---------------------------------------------------------------------------
@@ -28,8 +28,7 @@ import { isMediaProcAction, parseMediaProcAction, MediaProcActionParseError } fr
 export type ValidationErrorKind =
     | 'action-parse'
     | 'input-not-found'
-    | 'input-no-files'
-    | 'output-not-writable';
+    | 'input-no-files';
 
 export interface WorkflowValidationError {
     kind: ValidationErrorKind;
@@ -38,10 +37,26 @@ export interface WorkflowValidationError {
     hint?: string;
 }
 
-// ---------------------------------------------------------------------------
-// Validator
-// ---------------------------------------------------------------------------
+const TEMPLATE_MARKERS = ['${', '{{'];
 
+/**
+ * MediaProc Workflow Validator
+ *
+ * Runs mediaproc-specific validation checks on a parsed workflow
+ * AFTER WorkflowLoader.fromFile() has completed (so orbyt syntax + schema are clean).
+ *
+ * Checks:
+ *  1. Action string — must follow mediaproc.<plugin>.<command> format
+ *  2. Input path only — delegated to validatePaths() from @mediaproc/core
+ *     (output path checks are intentionally skipped in this validator)
+ *
+ * Plugin presence and command availability are NOT checked here — the mediaproc
+ * CLI handles plugin lifecycle (install, load, update) via `mediaproc add/remove/update`.
+ *
+ * Usage:
+ *   const errors = MediaProcWorkflowValidator.validate(workflow);
+ *   MediaProcWorkflowValidator.validateOrThrow(workflow); // throws on first error
+ */
 export class MediaProcWorkflowValidator {
     /**
      * Validate all mediaproc steps in a parsed workflow.
@@ -68,8 +83,8 @@ export class MediaProcWorkflowValidator {
                 continue; // nothing else to check if we can't parse
             }
 
-            // --- 2 & 3. Path validation -------------------------------------------
-            const pathErrors = this._validatePaths(step.id, step.input);
+            // --- 2. Input path validation -----------------------------------------
+            const pathErrors = this.validateInputPath(step.id, step.input as Record<string, unknown> | undefined);
             errors.push(...pathErrors);
         }
 
@@ -99,52 +114,75 @@ export class MediaProcWorkflowValidator {
     // Private helpers
     // ---------------------------------------------------------------------------
 
-    private static _validatePaths(
+    private static validateInputPath(
         stepId: string,
-        input: Record<string, any>,
+        input: Record<string, unknown> | undefined,
     ): WorkflowValidationError[] {
         const errors: WorkflowValidationError[] = [];
 
-        const inputValue: string | undefined =
-            typeof input?.input === 'string' ? input.input : undefined;
-        const outputValue: string | undefined =
-            typeof input?.output === 'string' ? input.output : undefined;
+        const inputValue = this.readInputPath(input);
 
         // Skip validation entirely if input is missing or is a template expression
-        if (!inputValue || inputValue.includes('${')) return errors;
+        // (runtime variables are resolved later by the execution context).
+        if (!inputValue || this.isTemplateExpression(inputValue)) return errors;
 
-        // Pass undefined for output when it's a template or not specified —
-        // output dirs that don't exist yet are fine (validatePaths / resolveOutputPaths create them).
-        const safeOutput = outputValue && !outputValue.includes('${')
-            ? outputValue
-            : undefined;
+        // Validate input path only. Output path checks are intentionally excluded
+        // because command-level path handling resolves output creation/writability.
+        let pathErrors: string[] = [];
+        try {
+            ({ errors: pathErrors } = validatePaths(inputValue, undefined));
+        } catch (error) {
+            errors.push({
+                kind: 'input-not-found',
+                stepId,
+                message: `Input validation failed for "${inputValue}": ${error instanceof Error ? error.message : String(error)}`,
+                hint: 'Ensure the input path is valid and accessible.',
+            });
+            return errors;
+        }
 
-        const { errors: pathErrors } = validatePaths(inputValue, safeOutput);
+        const uniqueErrors = this.unique(pathErrors);
 
-        for (const msg of pathErrors) {
-            if (msg.includes('not writable') || msg.includes('Cannot specify a file output')) {
-                errors.push({
-                    kind: 'output-not-writable',
-                    stepId,
-                    message: msg,
-                    hint: 'Check filesystem permissions for the output location.',
-                });
-            } else {
-                // "No valid files found" — input path missing or has no supported media files
-                const isFile = fileExists(inputValue);
-                errors.push({
-                    kind: isFile ? 'input-no-files' : 'input-not-found',
-                    stepId,
-                    message: isFile
-                        ? `No supported media files found in: "${inputValue}"`
-                        : `Input path does not exist or contains no media: "${inputValue}"`,
-                    hint: isFile
-                        ? 'Ensure the directory contains image, video, or audio files.'
-                        : 'Ensure the file or directory exists before running the workflow.',
-                });
-            }
+        for (const msg of uniqueErrors) {
+            const kind = this.classifyPathError(msg);
+
+            errors.push({
+                kind,
+                stepId,
+                message: `Input validation failed for "${inputValue}": ${msg}`,
+                hint: kind === 'input-not-found'
+                    ? 'Ensure the input file or directory exists and is readable.'
+                    : 'Ensure the input directory contains supported media files.',
+            });
         }
 
         return errors;
+    }
+
+    private static readInputPath(input: Record<string, unknown> | undefined): string | undefined {
+        const value = input?.input;
+        return typeof value === 'string' ? value : undefined;
+    }
+
+    private static isTemplateExpression(value: string): boolean {
+        return TEMPLATE_MARKERS.some((marker) => value.includes(marker));
+    }
+
+    private static classifyPathError(message: string): ValidationErrorKind {
+        const normalized = message.toLowerCase();
+        if (
+            normalized.includes('not found') ||
+            normalized.includes('does not exist') ||
+            normalized.includes('enoent') ||
+            normalized.includes('no such file')
+        ) {
+            return 'input-not-found';
+        }
+
+        return 'input-no-files';
+    }
+
+    private static unique(values: string[]): string[] {
+        return Array.from(new Set(values));
     }
 }

@@ -24,6 +24,8 @@ async function explainPipeline(
     file: string,
     options: CliExplainOptions,
 ): Promise<void> {
+    const engine = createOrbytEngine('silent');
+
     // Determine explain formatter
     let format = (options.format || 'human') as ExplainFormatterType;
     if (options.verbose && format === 'human') format = 'verbose';
@@ -53,7 +55,6 @@ async function explainPipeline(
         // ── Step 4: Get execution explanation from engine ───────────────────────
         // Engine is created silent so its internal logs don't leak into
         // the formatted plan output — the formatter handles all display.
-        const engine = createOrbytEngine('silent');
         const explanation = await engine.explain(workflow);
 
         // ── Step 5: Cycle check ─────────────────────────────────────────────────
