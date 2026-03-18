@@ -41,7 +41,7 @@
     "directory": "core"
   },
   "dependencies": {
-    "@dev-ecosystem/core": "^0.5.0"
+    "@dev-ecosystem/core": "^0.5.1"
   },
   "devDependencies": {
     "@types/node": "^25.3.3",

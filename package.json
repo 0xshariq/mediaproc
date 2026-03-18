@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "@orbytautomation/engine": "^0.8.4",
-    "@dev-ecosystem/core": "^0.4.4",
+    "@dev-ecosystem/core": "^0.5.1",
     "@gltf-transform/cli": "^4.3.0",
     "@gltf-transform/core": "^4.3.0",
     "@lottiefiles/dotlottie-web": "^0.66.2",
