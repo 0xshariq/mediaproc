@@ -273,6 +273,12 @@ mediaproc audio merge intro.mp3 main.mp3 outro.mp3 --output complete.mp3
 mediaproc audio extract video.mp4 --format flac
 ```
 
+### Automation Processing
+```bash
+# V
+
+```
+
 ## CLI Commands
 
 ### Plugin Management
