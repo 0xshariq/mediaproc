@@ -77,6 +77,7 @@ you can reach out via GitHub Discussions or email me at [khanshariq92213@gmail.c
 - ✅ Advanced --explain flag (human, details, json)
 - ✅ Improved validation and reliability
 - ✅ Cleaner core structure
+- ✅ Animation Plugin (using my own orbyt engine , see [Orbyt Engine](https://github.com/0xshariq/orbyt))
 
 **Q1 2026:**
 
@@ -87,7 +88,6 @@ you can reach out via GitHub Discussions or email me at [khanshariq92213@gmail.c
 
 **Q2 2026:**
 
-- 📋 Animation Plugin
 - 📋 Metadata Plugin enhancements
 - 📋 Plugin Marketplace beta
 
@@ -173,6 +173,21 @@ mediaproc audio extract video.mp4 --format mp3
 **Formats:** MP3, AAC, WAV, FLAC, OGG, Opus
 
 [Full Audio Plugin Documentation →](plugins/audio/README.md)
+
+#### Automation/Pipeline Plugin (3 commands)
+
+```bash
+mediaproc pipeline explain test-resize.yaml
+mediaproc pipeline run test-resize.yaml
+mediaproc pipeline validate test-resize.yaml
+```
+
+**Commands:** run, validate, explain
+
+**Formats:** YAML, JSON
+
+[Full Video Plugin Documentation →](plugins/pipeline/README.md)
+
 
 ### Coming Soon
 
