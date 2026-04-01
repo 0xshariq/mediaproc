@@ -1,8 +1,9 @@
 import { Command } from 'commander';
-import { exec } from 'child_process';
+import { exec } from 'node:child_process';
 import { promisify } from 'util';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import * as os from 'node:os';
 
 const execAsync = promisify(exec);
 
@@ -137,7 +138,6 @@ async function checkFFmpeg(): Promise<DiagnosticResult> {
 
 async function checkSharp(): Promise<DiagnosticResult> {
   try {
-    require('sharp');
     return {
       name: 'Sharp (Image Processing)',
       status: 'pass',
@@ -196,9 +196,9 @@ async function checkPlugins(): Promise<DiagnosticResult> {
 }
 
 async function checkSystemResources(): Promise<DiagnosticResult> {
-  const totalMem = require('os').totalmem();
-  const freeMem = require('os').freemem();
-  const cpus = require('os').cpus().length;
+  const totalMem = os.totalmem();
+  const freeMem = os.freemem();
+  const cpus = os.cpus().length;
 
   const totalGB = (totalMem / 1024 / 1024 / 1024).toFixed(1);
   const freeGB = (freeMem / 1024 / 1024 / 1024).toFixed(1);

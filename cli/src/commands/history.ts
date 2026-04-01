@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { HistoryManager } from '../utils/history-manager.js';
+import * as fs from 'node:fs';
 
 const historyManager = new HistoryManager();
 
@@ -22,7 +23,7 @@ export const historyCommand = new Command()
     if (options.export) {
       const summary = historyManager.summarizeHistory(history);
       const exportFile = 'history-summary.json';
-      require('fs').writeFileSync(exportFile, JSON.stringify(summary, null, 2));
+      fs.writeFileSync(exportFile, JSON.stringify(summary, null, 2));
       console.log(`\n✓ History summary exported to ${exportFile}`);
       console.log('\nTip: You can help improve MediaProc by sharing anonymized usage insights.');
       console.log('Your data is never sent automatically.');
