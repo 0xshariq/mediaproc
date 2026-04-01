@@ -132,7 +132,7 @@ mediaproc image resize photo.jpg --width 1920
 mediaproc image convert *.png --format webp
 mediaproc image compress image.jpg --quality 85
 mediaproc image blur photo.jpg --sigma 10
-mediaproc image watermark photo.jpg --text "Copyright 2026"
+mediaproc image watermark photo.jpg --watermark "Copyright 2026"
 ```
 
 **Commands:** resize, crop, rotate, flip, convert, compress, optimize, blur, sharpen, grayscale, tint, watermark, thumbnail, and 34 more...
@@ -217,7 +217,7 @@ mediaproc image convert *.jpg --format webp --quality 85
 mediaproc image thumbnail photo.jpg --size 256 --output thumb.jpg
 
 # Add watermark
-mediaproc image watermark photo.jpg --text "© 2026" --position southeast
+mediaproc image watermark photo.jpg --watermark "© 2026" --position southeast
 
 # Optimize for web
 mediaproc image optimize image.jpg --quality 80

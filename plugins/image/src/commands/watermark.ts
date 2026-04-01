@@ -9,6 +9,7 @@ import { createSharpInstance, sharp } from '../utils/sharp.js';
 import path from 'path';
 
 interface WatermarkOptions extends ImageOptions {
+  watermark?: string;
   position?: string;
   opacity?: number;
   scale?: number;
@@ -20,9 +21,10 @@ interface WatermarkOptions extends ImageOptions {
 
 export function watermarkCommand(imageCmd: Command): void {
   imageCmd
-    .command('watermark [input] [watermark]')
+    .command('watermark [input]')
     .description('Add image or text watermark to image')
     .option('-o, --output <path>', 'Output file path')
+    .option('-w, --watermark <value>', 'Text or image path to use as watermark')
     .option('--position <position>', 'Position: center, top-left, top-right, bottom-left, bottom-right', 'bottom-right')
     .option('--opacity <opacity>', 'Watermark opacity (0-1, default: 0.5)', parseFloat, 0.5)
     .option('--scale <scale>', 'Scale: for images (0.1-1 of width, default: 0.2), for text (multiplier, default: 1.0)', parseFloat)
@@ -34,7 +36,7 @@ export function watermarkCommand(imageCmd: Command): void {
     .option('-v, --verbose', 'Verbose output')
     .option('--explain [mode]', 'Show a detailed explanation of what this command will do, including technical and human-readable output. Modes: human, details, json. Adds context like timestamp, user, and platform.')
     .option('--help', 'Display help for watermark command')
-    .action(async (input: string | undefined, watermark: string | undefined, options: WatermarkOptions) => {
+    .action(async (input: string | undefined, options: WatermarkOptions) => {
       if (options.help || !input) {
         createStandardHelp({
           pluginName: 'image',
@@ -42,13 +44,14 @@ export function watermarkCommand(imageCmd: Command): void {
           emoji: '©️',
           description: 'Add image or text watermark to images for copyright protection, branding, or attribution. Automatically detects if watermark is a file or text.',
           usage: [
-            'watermark <input> <watermark>',
-            'watermark <input> logo.png --position center',
-            'watermark <input> "Powered by MediaProc" --font-size 64',
-            'watermark <input> "© 2026" --position bottom-right --opacity 0.7'
+            'watermark <input> -w <watermark>',
+            'watermark <input> -w logo.png --position center',
+            'watermark <input> -w "Powered by MediaProc" --font-size 64',
+            'watermark <input> -w "© 2026" --position bottom-right --opacity 0.7'
           ],
           options: [
             { flag: '-o, --output <path>', description: 'Output file path (default: <input>-watermarked.<ext>)' },
+            { flag: '-w, --watermark <value>', description: 'Text or image path to use as watermark' },
             { flag: '--position <position>', description: 'Position: center, top-left, top-right, bottom-left, bottom-right (default: bottom-right)' },
             { flag: '--opacity <opacity>', description: 'Watermark opacity 0-1 (default: 0.5)' },
             { flag: '--scale <scale>', description: 'Scale factor - Image: 0.1-1 of image width (default: 0.2), Text: size multiplier (default: 1.0)' },
@@ -61,11 +64,11 @@ export function watermarkCommand(imageCmd: Command): void {
             { flag: '-v, --verbose', description: 'Show detailed output' }
           ],
           examples: [
-            { command: 'watermark photo.jpg logo.png', description: 'Add image watermark from file' },
-            { command: 'watermark image.jpg "© 2026 Company"', description: 'Add text watermark' },
-            { command: 'watermark pic.jpg "Powered by MediaProc" --scale 1.5', description: 'Larger text watermark (1.5x)' },
-            { command: 'watermark photo.jpg brand.png --scale 0.3 --position top-right', description: 'Larger image watermark (30% of width)' },
-            { command: 'watermark *.jpg "DRAFT" --font-color red --scale 2', description: 'Batch large text watermark in red' }
+            { command: 'watermark photo.jpg -w logo.png', description: 'Add image watermark from file' },
+            { command: 'watermark image.jpg -w "© 2026 Company"', description: 'Add text watermark' },
+            { command: 'watermark pic.jpg -w "Powered by MediaProc" --scale 1.5', description: 'Larger text watermark (1.5x)' },
+            { command: 'watermark photo.jpg -w brand.png --scale 0.3 --position top-right', description: 'Larger image watermark (30% of width)' },
+            { command: 'watermark *.jpg -w "DRAFT" --font-color red --scale 2', description: 'Batch large text watermark in red' }
           ],
           additionalSections: [
             {
@@ -96,8 +99,10 @@ export function watermarkCommand(imageCmd: Command): void {
         process.exit(0);
       }
 
-      if (!input || !watermark) {
-        console.error(chalk.red('Error: both input and watermark arguments are required'));
+      const watermarkValue = options.watermark?.trim();
+
+      if (!input || !watermarkValue) {
+        console.error(chalk.red('Error: input and watermark are required (use -w, --watermark <value>)'));
         process.exit(1);
       }
 
@@ -105,13 +110,13 @@ export function watermarkCommand(imageCmd: Command): void {
 
       try {
         // Detect if watermark is a file or text
-        const isWatermarkFile = fs.existsSync(watermark);
+        const isWatermarkFile = fs.existsSync(watermarkValue);
         const watermarkType = isWatermarkFile ? 'image' : 'text';
 
         if (options.verbose) {
           spinner.info(chalk.blue(`Watermark type: ${watermarkType}`));
           if (!isWatermarkFile) {
-            spinner.info(chalk.dim(`Text: "${watermark}"`));
+            spinner.info(chalk.dim(`Text: "${watermarkValue}"`));
           }
         }
 
@@ -142,7 +147,7 @@ export function watermarkCommand(imageCmd: Command): void {
           spinner.info(chalk.blue('Configuration:'));
           console.log(chalk.dim(`  Found ${inputFiles.length} file(s)`));
           console.log(chalk.dim(`  Watermark type: ${watermarkType}`));
-          console.log(chalk.dim(`  Watermark: ${watermark}`));
+          console.log(chalk.dim(`  Watermark: ${watermarkValue}`));
           console.log(chalk.dim(`  Position: ${options.position || 'bottom-right'}`));
           console.log(chalk.dim(`  Opacity: ${options.opacity || 0.5}`));
           if (watermarkType === 'image') {
@@ -160,7 +165,7 @@ export function watermarkCommand(imageCmd: Command): void {
           spinner.info(chalk.yellow('Dry run mode - no changes will be made'));
           console.log(chalk.green(`✓ Would add ${watermarkType} watermark to ${inputFiles.length} file(s):`));
           inputFiles.forEach(f => console.log(chalk.dim(`  - ${f}`)));
-          console.log(chalk.dim(`  Watermark: ${watermark}`));
+          console.log(chalk.dim(`  Watermark: ${watermarkValue}`));
           if (watermarkType === 'text') {
             console.log(chalk.dim(`  Text watermark with font size: ${options.fontSize || 48}px`));
           }
@@ -182,7 +187,7 @@ export function watermarkCommand(imageCmd: Command): void {
         if (watermarkType === 'image') {
           // For image watermarks, preload the watermark
           // We'll scale it per image based on each image's dimensions
-          watermarkBuffer = await createSharpInstance(watermark).toBuffer();
+          watermarkBuffer = await createSharpInstance(watermarkValue).toBuffer();
         }
         // For text watermarks, we create them dynamically per image
 
@@ -229,7 +234,7 @@ export function watermarkCommand(imageCmd: Command): void {
               const fontFamily = options.fontFamily || 'Arial';
 
               // Estimate text dimensions
-              const textWidth = watermark.length * fontSize * 0.6;
+              const textWidth = watermarkValue.length * fontSize * 0.6;
               const textHeight = fontSize * 1.5;
               const padding = 20;
 
@@ -242,7 +247,7 @@ export function watermarkCommand(imageCmd: Command): void {
                     font-size="${fontSize}" 
                     fill="${fontColor}"
                     font-weight="bold"
-                  >${watermark}</text>
+                  >${watermarkValue}</text>
                 </svg>
               `;
 
