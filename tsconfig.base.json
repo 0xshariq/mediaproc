@@ -27,10 +27,6 @@
     "src/__tests__/",
     "src/**/*.test.ts",
     "docs/",
-    "plugins/",
-    "plugin-marketplace/",
-    "internal-docs/",
-    "web/",
-    "testing/"
+    "plugins/"
   ]
 }
